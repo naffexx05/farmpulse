@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}My Farm — FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-6">
+
+  <!-- Header -->
+  <header class="flex items-start justify-between gap-4">
+    <div>
+      <h1 class="font-display text-3xl font-semibold text-cream">My Farm</h1>
+      <p class="mt-1 text-sm text-cream/60">
+        The facts about your farm — land, resources, and crop preferences.
+      </p>
+    </div>
+    <a href="{% url 'farms:farm_edit' %}" class="fp-btn-ghost">
+  <i data-lucide="pencil" class="w-4 h-4"></i> Edit
+</a>
+  </header>
+
+  {% if farms %}
+    {% for farm in farms %}
+      <article class="fp-glass p-6 space-y-6">
+
+        <!-- Farm identity -->
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 class="font-display text-xl font-semibold text-cream">{{ farm.name }}</h2>
+            <p class="mt-1 text-sm text-cream/60 inline-flex items-center gap-1.5">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+              {{ farm.location_description }}
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span class="fp-badge-water">
+              <i data-lucide="droplets" class="w-3 h-3"></i>
+              {{ farm.get_irrigation_type_display }}
+            </span>
+            {% if farm.soil_type == 'unknown' %}
+              <span class="fp-badge-medium" title="Soil type not recorded">
+                <i data-lucide="help-circle" class="w-3 h-3"></i> Soil unknown
+              </span>
+            {% else %}
+              <span class="fp-badge-low">
+                <i data-lucide="sprout" class="w-3 h-3"></i>
+                {{ farm.get_soil_type_display }}
+              </span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Key metrics -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+
+          <div class="fp-card p-4">
+            <div class="fp-label">Total land</div>
+            <div class="font-display text-2xl font-semibold text-cream">
+              {{ farm.total_land_ha }}<span class="text-sm font-normal text-muted"> ha</span>
+            </div>
+          </div>
+
+          <div class="fp-card p-4">
+            <div class="fp-label">Cultivated</div>
+            {% if farm.cultivated_land_ha %}
+              <div class="font-display text-2xl font-semibold text-cream">
+                {{ farm.cultivated_land_ha }}<span class="text-sm font-normal text-muted"> ha</span>
+              </div>
+            {% else %}
+              <div class="font-display text-2xl font-semibold text-cream/40">—</div>
+            {% endif %}
+          </div>
+
+          <div class="fp-card p-4">
+            <div class="fp-label">Seasonal budget</div>
+            {% if farm.seasonal_budget_mwk %}
+              <div class="font-display text-2xl font-semibold text-cream">
+                {{ farm.seasonal_budget_mwk|floatformat:0|intcomma }}<span class="text-sm font-normal text-muted"> MWK</span>
+              </div>
+            {% else %}
+              <div class="font-display text-2xl font-semibold text-cream/40">—</div>
+            {% endif %}
+          </div>
+
+          <div class="fp-card p-4">
+            <div class="fp-label">Labour</div>
+            {% if farm.available_labour_persons %}
+              <div class="font-display text-2xl font-semibold text-cream">
+                {{ farm.available_labour_persons }}<span class="text-sm font-normal text-muted"> people</span>
+              </div>
+            {% else %}
+              <div class="font-display text-2xl font-semibold text-cream/40">—</div>
+            {% endif %}
+          </div>
+
+        </div>
+
+        <!-- Preferred crops -->
+        {% if farm.preferred_crops.exists %}
+          <div>
+            <h3 class="fp-label">Preferred crops</h3>
+            <div class="flex flex-wrap gap-2 mt-1.5">
+              {% for crop in farm.preferred_crops.all %}
+                <span class="fp-badge-low">
+                  <i data-lucide="leaf" class="w-3 h-3"></i> {{ crop.name }}
+                </span>
+              {% endfor %}
+            </div>
+          </div>
+        {% else %}
+          <div>
+            <h3 class="fp-label">Preferred crops</h3>
+            <p class="text-sm text-cream/50 mt-1.5">No preferred crops recorded yet.</p>
+          </div>
+        {% endif %}
+
+      </article>
+    {% endfor %}
+
+  {% else %}
+    <!-- Empty state -->
+    <div class="fp-glass p-10 text-center">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-forest-700 mb-4">
+        <i data-lucide="map-pin" class="w-6 h-6 text-leaf"></i>
+      </div>
+      <h2 class="font-display text-lg font-semibold text-cream">No farm registered yet</h2>
+      <p class="mt-2 text-sm text-cream/60 max-w-md mx-auto">
+        FarmPulse uses your farm's details to produce season plans and recommendations.
+        Add your farm to get started.
+      </p>
+      <a href="{% url 'farms:farm_edit' %}" class="fp-btn-primary mt-6">
+  <i data-lucide="plus" class="w-4 h-4"></i> Add a farm
+</a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

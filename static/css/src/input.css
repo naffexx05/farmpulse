@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    @apply antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  body {
+    background-image:
+      radial-gradient(ellipse at top left, rgba(27,96,66,0.28), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(143,203,98,0.06), transparent 50%);
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background-color: rgba(143, 203, 98, 0.35);
+    color: #F1F5EC;
+  }
+}
+
+@layer components {
+  .fp-glass {
+    @apply bg-forest-800/50 border border-white/10 rounded-2xl;
+  }
+
+  .fp-card {
+    @apply bg-forest-800 border border-white/10 rounded-2xl;
+  }
+
+  .fp-btn {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold
+           transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-leaf/50;
+  }
+  .fp-btn-primary { @apply fp-btn bg-leaf text-forest-900 hover:bg-leaf-soft; }
+  .fp-btn-ghost   { @apply fp-btn border border-white/15 text-cream/90 hover:bg-white/5; }
+  .fp-btn-danger  { @apply fp-btn bg-risk-high text-forest-900 hover:bg-risk-high/85; }
+
+  .fp-nav-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-cream/75
+           hover:text-cream hover:bg-white/5 transition-colors;
+  }
+  .fp-nav-item-active {
+    @apply bg-forest-700 text-cream border border-white/10;
+  }
+
+  .fp-badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium;
+  }
+  .fp-badge-low    { @apply fp-badge bg-risk-low/15    text-risk-low    border border-risk-low/30; }
+  .fp-badge-medium { @apply fp-badge bg-risk-medium/15 text-risk-medium border border-risk-medium/30; }
+  .fp-badge-high   { @apply fp-badge bg-risk-high/15   text-risk-high   border border-risk-high/30; }
+  .fp-badge-water  { @apply fp-badge bg-water/15       text-water-soft  border border-water/30; }
+
+  .fp-input {
+    @apply w-full px-3.5 py-2.5 rounded-xl bg-forest-800/60 border border-white/10
+           text-cream placeholder:text-cream/40 text-sm
+           focus:outline-none focus:border-leaf/60 focus:ring-2 focus:ring-leaf/25;
+  }
+
+  .fp-label {
+    @apply block text-xs font-medium text-cream/70 mb-1.5 uppercase tracking-wider;
+  }
+
+  .fp-demo-pill {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px]
+           font-semibold uppercase tracking-wider
+           bg-risk-medium/20 text-risk-medium border border-risk-medium/40;
+  }
+}

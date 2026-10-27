@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block title %}{% if farm %}Edit farm{% else %}Add a farm{% endif %} — FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+
+  <header class="mb-6">
+    <a href="{% url 'farms:my_farm' %}" class="text-sm text-cream/60 hover:text-cream inline-flex items-center gap-1.5 mb-2">
+      <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Back to My Farm
+    </a>
+    <h1 class="font-display text-3xl font-semibold text-cream">
+      {% if farm %}Edit farm{% else %}Add a farm{% endif %}
+    </h1>
+    <p class="mt-1 text-sm text-cream/60">
+      These details shape the plans FarmPulse can produce for you.
+    </p>
+  </header>
+
+  {% if form.non_field_errors %}
+    <div class="mb-4 rounded-xl border border-risk-high/30 bg-risk-high/15 p-3 text-sm text-risk-high">
+      {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post" class="space-y-6" novalidate>
+    {% csrf_token %}
+
+    <section class="fp-glass p-6 space-y-4">
+      <h2 class="font-display text-lg font-semibold">Farm identity</h2>
+
+      <div>
+        <label for="{{ form.name.id_for_label }}" class="fp-label">Farm name</label>
+        {{ form.name }}
+        {% if form.name.errors %}<p class="mt-1 text-xs text-risk-high">{{ form.name.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div>
+        <label for="{{ form.location_description.id_for_label }}" class="fp-label">Location</label>
+        {{ form.location_description }}
+        {% if form.location_description.errors %}<p class="mt-1 text-xs text-risk-high">{{ form.location_description.errors.0 }}</p>{% endif %}
+      </div>
+    </section>
+
+    <section class="fp-glass p-6 space-y-4">
+      <h2 class="font-display text-lg font-semibold">Land</h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="{{ form.total_land_ha.id_for_label }}" class="fp-label">Total land (ha)</label>
+          {{ form.total_land_ha }}
+          {% if form.total_land_ha.errors %}<p class="mt-1 text-xs text-risk-high">{{ form.total_land_ha.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label for="{{ form.cultivated_land_ha.id_for_label }}" class="fp-label">Cultivated (ha)</label>
+          {{ form.cultivated_land_ha }}
+          {% if form.cultivated_land_ha.errors %}<p class="mt-1 text-xs text-risk-high">{{ form.cultivated_land_ha.errors.0 }}</p>{% endif %}
+        </div>
+      </div>
+    </section>
+
+    <section class="fp-glass p-6 space-y-4">
+      <h2 class="font-display text-lg font-semibold">Water &amp; irrigation</h2>
+
+      <div>
+        <label for="{{ form.irrigation_type.id_for_label }}" class="fp-label">Irrigation type</label>
+        {{ form.irrigation_type }}
+      </div>
+
+      <div>
+        <label for="{{ form.water_notes.id_for_label }}" class="fp-label">Water notes (optional)</label>
+        {{ form.water_notes }}
+      </div>
+    </section>
+
+    <section class="fp-glass p-6 space-y-4">
+      <h2 class="font-display text-lg font-semibold">Soil</h2>
+
+      <div>
+        <label for="{{ form.soil_type.id_for_label }}" class="fp-label">Soil type</label>
+        {{ form.soil_type }}
+      </div>
+
+      <div>
+        <label for="{{ form.soil_notes.id_for_label }}" class="fp-label">Soil notes (optional)</label>
+        {{ form.soil_notes }}
+      </div>
+    </section>
+
+    <section class="fp-glass p-6 space-y-4">
+      <h2 class="font-display text-lg font-semibold">Resources</h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="{{ form.seasonal_budget_mwk.id_for_label }}" class="fp-label">Seasonal budget (MWK)</label>
+          {{ form.seasonal_budget_mwk }}
+          {% if form.seasonal_budget_mwk.errors %}<p class="mt-1 text-xs text-risk-high">{{ form.seasonal_budget_mwk.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label for="{{ form.available_labour_persons.id_for_label }}" class="fp-label">Available labour (people)</label>
+          {{ form.available_labour_persons }}
+          {% if form.available_labour_persons.errors %}<p class="mt-1 text-xs text-risk-high">{{ form.available_labour_persons.errors.0 }}</p>{% endif %}
+        </div>
+      </div>
+
+      <div>
+        <label for="{{ form.labour_notes.id_for_label }}" class="fp-label">Labour notes (optional)</label>
+        {{ form.labour_notes }}
+      </div>
+    </section>
+
+    <section class="fp-glass p-6 space-y-4">
+      <h2 class="font-display text-lg font-semibold">Preferred crops</h2>
+      <p class="text-sm text-cream/60">
+        Tick crops you're interested in growing. You can choose none.
+      </p>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        {% for checkbox in form.preferred_crops %}
+          <label class="flex items-center gap-2 p-2.5 rounded-xl bg-forest-800/60 border border-white/10 hover:border-leaf/40 cursor-pointer transition-colors">
+            {{ checkbox.tag }}
+            <span class="text-sm text-cream">{{ checkbox.choice_label }}</span>
+          </label>
+        {% endfor %}
+      </div>
+
+      {% if form.preferred_crops.errors %}
+        <p class="text-xs text-risk-high">{{ form.preferred_crops.errors.0 }}</p>
+      {% endif %}
+    </section>
+
+    <div class="flex flex-wrap items-center justify-end gap-3 pt-2">
+      <a href="{% url 'farms:my_farm' %}" class="fp-btn-ghost">Cancel</a>
+      <button type="submit" class="fp-btn-primary">
+        <i data-lucide="check" class="w-4 h-4"></i>
+        {% if farm %}Save changes{% else %}Create farm{% endif %}
+      </button>
+    </div>
+
+  </form>
+
+</div>
+{% endblock %}

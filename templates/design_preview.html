@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% block title %}Design System — FarmPulse{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-8 pb-16">
+
+  <header>
+    <h1 class="font-display text-3xl font-semibold text-cream">Design system preview</h1>
+    <p class="mt-2 text-cream/60 text-sm max-w-2xl">
+      Every FarmPulse screen uses these tokens. This page is the single reference — if a screen
+      looks inconsistent with this page, the screen is wrong. Dev-only; removed before deploy.
+    </p>
+  </header>
+
+  <!-- Palette -->
+  <section class="fp-glass p-6">
+    <h2 class="font-display text-lg font-semibold mb-4">Palette</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+      <div class="rounded-xl overflow-hidden border border-white/10">
+        <div class="h-20 flex items-end justify-between px-3 pb-2 bg-forest-950 text-cream">
+          <span class="text-xs font-medium">Forest 950</span>
+          <span class="text-[10px] opacity-70 font-mono">#041B14</span>
+        </div>
+      </div>
+      <div class="rounded-xl overflow-hidden border border-white/10">
+        <div class="h-20 flex items-end justify-between px-3 pb-2 bg-forest-900 text-cream">
+          <span class="text-xs font-medium">Forest 900</span>
+          <span class="text-[10px] opacity-70 font-mono">#062B20</span>
+        </div>
+      </div>
+      <div class="rounded-xl overflow-hidden border border-white/10">
+        <div class="h-20 flex items-end justify-between px-3 pb-2 bg-forest-800 text-cream">
+          <span class="text-xs font-medium">Forest 800</span>
+          <span class="text-[10px] opacity-70 font-mono">#0A3325</span>
+        </div>
+      </div>
+      <div class="rounded-xl overflow-hidden border border-white/10">
+        <div class="h-20 flex items-end justify-between px-3 pb-2 bg-forest-700 text-cream">
+          <span class="text-xs font-medium">Forest 700</span>
+          <span class="text-[10px] opacity-70 font-mono">#104632</span>
+        </div>
+      </div>
+      <div class="rounded-xl overflow-hidden border border-white/10">
+        <div class="h-20 flex items-end justify-between px-3 pb-2 bg-leaf text-forest-900">
+          <span class="text-xs font-medium">Leaf</span>
+          <span class="text-[10px] opacity-70 font-mono">#8FCB62</span>
+        </div>
+      </div>
+      <div class="rounded-xl overflow-hidden border border-white/10">
+        <div class="h-20 flex items-end justify-between px-3 pb-2 bg-leaf-soft text-forest-900">
+          <span class="text-xs font-medium">Lime soft</span>
+          <span class="text-[10px] opacity-70 font-mono">#C5E78B</span>
+        </div>
+      </div>
+      <div class="rounded-xl overflow-hidden border border-white/10">
+        <div class="h-20 flex items-end justify-between px-3 pb-2 bg-cream text-forest-900">
+          <span class="text-xs font-medium">Cream</span>
+          <span class="text-[10px] opacity-70 font-mono">#F1F5EC</span>
+        </div>
+      </div>
+      <div class="rounded-xl overflow-hidden border border-white/10">
+        <div class="h-20 flex items-end justify-between px-3 pb-2 bg-muted text-forest-900">
+          <span class="text-xs font-medium">Muted</span>
+          <span class="text-[10px] opacity-70 font-mono">#A8BDB0</span>
+        </div>
+      </div>
+      <div class="rounded-xl overflow-hidden border border-white/10">
+        <div class="h-20 flex items-end justify-between px-3 pb-2 bg-risk-medium text-forest-900">
+          <span class="text-xs font-medium">Risk medium</span>
+          <span class="text-[10px] opacity-70 font-mono">#F2B441</span>
+        </div>
+      </div>
+      <div class="rounded-xl overflow-hidden border border-white/10">
+        <div class="h-20 flex items-end justify-between px-3 pb-2 bg-risk-high text-forest-900">
+          <span class="text-xs font-medium">Risk high</span>
+          <span class="text-[10px] opacity-70 font-mono">#E76A6A</span>
+        </div>
+      </div>
+      <div class="rounded-xl overflow-hidden border border-white/10">
+        <div class="h-20 flex items-end justify-between px-3 pb-2 bg-water text-forest-900">
+          <span class="text-xs font-medium">Water</span>
+          <span class="text-[10px] opacity-70 font-mono">#4FB7D9</span>
+        </div>
+      </div>
+      <div class="rounded-xl overflow-hidden border border-white/10">
+        <div class="h-20 flex items-end justify-between px-3 pb-2 bg-water-soft text-forest-900">
+          <span class="text-xs font-medium">Water soft</span>
+          <span class="text-[10px] opacity-70 font-mono">#BDE4F1</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Typography -->
+  <section class="fp-glass p-6">
+    <h2 class="font-display text-lg font-semibold mb-4">Typography</h2>
+    <div class="space-y-3">
+      <p class="font-display text-4xl font-semibold">H1 — Plus Jakarta Sans, 36px</p>
+      <p class="font-display text-2xl font-semibold">H2 — Plus Jakarta Sans, 24px</p>
+      <p class="font-display text-lg font-semibold">H3 — Plus Jakarta Sans, 18px</p>
+      <p class="font-sans text-base">Body — Inter, 16px. Used for paragraphs and reading text.</p>
+      <p class="font-sans text-sm text-cream/70">Small / helper — Inter, 14px, muted.</p>
+      <p class="font-sans text-[11px] uppercase tracking-widest text-muted">CAPTION / LABEL — UPPERCASE</p>
+    </div>
+  </section>
+
+  <!-- Buttons -->
+  <section class="fp-glass p-6">
+    <h2 class="font-display text-lg font-semibold mb-4">Buttons</h2>
+    <div class="flex flex-wrap gap-3">
+      <button class="fp-btn-primary"><i data-lucide="plus" class="w-4 h-4"></i> Primary</button>
+      <button class="fp-btn-ghost"><i data-lucide="download" class="w-4 h-4"></i> Ghost</button>
+      <button class="fp-btn-danger"><i data-lucide="trash-2" class="w-4 h-4"></i> Danger</button>
+      <button class="fp-btn-primary" disabled style="opacity:.4;cursor:not-allowed">Disabled</button>
+    </div>
+  </section>
+
+  <!-- Badges -->
+  <section class="fp-glass p-6">
+    <h2 class="font-display text-lg font-semibold mb-4">Risk &amp; data badges</h2>
+    <div class="flex flex-wrap gap-3">
+      <span class="fp-badge-low"><i data-lucide="check-circle-2" class="w-3 h-3"></i> Low risk</span>
+      <span class="fp-badge-medium"><i data-lucide="alert-triangle" class="w-3 h-3"></i> Medium risk</span>
+      <span class="fp-badge-high"><i data-lucide="alert-octagon" class="w-3 h-3"></i> High risk</span>
+      <span class="fp-badge-water"><i data-lucide="droplets" class="w-3 h-3"></i> Water data</span>
+      <span class="fp-demo-pill"><i data-lucide="flask-conical" class="w-3 h-3"></i> Demo data</span>
+    </div>
+  </section>
+
+  <!-- Cards -->
+  <section class="grid md:grid-cols-2 gap-4">
+    <div class="fp-glass p-6">
+      <h3 class="font-display font-semibold mb-2">Glass card</h3>
+      <p class="text-sm text-cream/70">Translucent panel — the default for most content.</p>
+    </div>
+    <div class="fp-card p-6">
+      <h3 class="font-display font-semibold mb-2">Solid card</h3>
+      <p class="text-sm text-cream/70">Opaque panel — used when glass would be visually noisy.</p>
+    </div>
+  </section>
+
+  <!-- Forms -->
+  <section class="fp-glass p-6">
+    <h2 class="font-display text-lg font-semibold mb-4">Form inputs</h2>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <label class="fp-label">Farm name</label>
+        <input class="fp-input" placeholder="e.g. Chikondi Farm">
+      </div>
+      <div>
+        <label class="fp-label">Land size (ha)</label>
+        <input class="fp-input" type="number" placeholder="2.5">
+      </div>
+    </div>
+  </section>
+
+  <!-- Table -->
+  <section class="fp-glass p-0 overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-forest-800/60 text-cream/60 uppercase text-[11px] tracking-wider">
+        <tr>
+          <th class="text-left px-4 py-3">Plan</th>
+          <th class="text-right px-4 py-3">Cost (MWK)</th>
+          <th class="text-right px-4 py-3">Revenue (MWK)</th>
+          <th class="text-right px-4 py-3">Margin</th>
+          <th class="text-left px-4 py-3">Risk</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-white/5">
+        <tr>
+          <td class="px-4 py-3">Maize + Groundnuts</td>
+          <td class="px-4 py-3 text-right font-mono">485,000</td>
+          <td class="px-4 py-3 text-right font-mono">820,000</td>
+          <td class="px-4 py-3 text-right font-mono text-leaf-soft">335,000</td>
+          <td class="px-4 py-3"><span class="fp-badge-low">Low</span></td>
+        </tr>
+        <tr>
+          <td class="px-4 py-3">Maize only</td>
+          <td class="px-4 py-3 text-right font-mono">310,000</td>
+          <td class="px-4 py-3 text-right font-mono">610,000</td>
+          <td class="px-4 py-3 text-right font-mono text-leaf-soft">300,000</td>
+          <td class="px-4 py-3"><span class="fp-badge-high">High</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+</div>
+{% endblock %}
