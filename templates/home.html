@@ -1,43 +1,628 @@
 {% extends 'base.html' %}
-{% block title %}FarmPulse Malawi — Home{% endblock %}
+{% load humanize %}
+
+{% block title %}Overview & Agricultural Dashboard · FarmPulse Malawi{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
+<div class="space-y-8 max-w-7xl mx-auto">
 
-  <div class="rounded-3xl border border-white/10 bg-forest-800 p-8 sm:p-10 shadow-2xl">
+  <!-- ========================================================================= -->
+  <!-- Phase 8.1: Hero Banner -->
+  <!-- ========================================================================= -->
+  <div class="relative rounded-3xl overflow-hidden border border-white/10 bg-forest-900 shadow-2xl">
+    <!-- Background Image with Gradient Overlay -->
+    <div class="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-25"
+         style="background-image: url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1600&q=80');">
+    </div>
+    <div class="absolute inset-0 bg-gradient-to-r from-forest-950 via-forest-900/95 to-forest-850/80"></div>
 
-    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full
-                bg-risk-medium/20 text-risk-medium text-xs font-semibold uppercase tracking-wider
-                border border-risk-medium/40 mb-6">
-      <i data-lucide="flask-conical" class="w-3 h-3"></i> Demo data
+    <div class="relative p-6 sm:p-10 lg:p-12 z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+      <div class="space-y-3 max-w-2xl">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-leaf/20 text-leaf border border-leaf/30 shadow-sm">
+            <i data-lucide="sprout" class="w-3.5 h-3.5"></i> FarmPulse Agricultural Intelligence
+          </span>
+          <span class="text-xs text-cream/60">
+            {% if farm %}{{ farm.location_description }}{% else %}{{ profile.preferred_district }}, Malawi{% endif %}
+          </span>
+        </div>
+
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-cream tracking-tight leading-tight">
+          Good morning, {{ request.user.first_name|default:request.user.username }}.
+        </h1>
+
+        <p class="text-sm sm:text-base text-cream/75 leading-relaxed">
+          {% if farm %}
+            Monitoring <strong class="text-leaf font-semibold">{{ farm.name }}</strong> ({{ farm.total_land_ha|floatformat:1 }} ha).
+            {% if current_season %}
+              Current season: <span class="text-cream font-medium">{{ current_season.name }}</span>.
+            {% else %}
+              Ready for seasonal planning.
+            {% endif %}
+          {% else %}
+            Welcome to FarmPulse. Start by setting up your farm profile to simulate seasonal outcomes.
+          {% endif %}
+        </p>
+      </div>
+
+      <!-- Quick Action Badges -->
+      <div class="flex flex-wrap md:flex-col gap-2 shrink-0">
+        <a href="{% url 'planner:planner_input' %}" class="fp-btn-primary inline-flex items-center gap-2 text-xs py-2.5 px-4">
+          <i data-lucide="compass" class="w-4 h-4"></i> Generate Crop Plan
+        </a>
+        <a href="{% url 'planner:scenario_simulator' %}" class="fp-btn-outline inline-flex items-center gap-2 text-xs py-2 px-3 border-amber-400/40 text-amber-300 hover:bg-amber-400/10">
+          <i data-lucide="gamepad-2" class="w-4 h-4 text-amber-400"></i> Scenario Simulator Arena 🎮
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- Phase 8.8: Quick Actions Bar -->
+  <!-- ========================================================================= -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <a href="{% url 'planner:planner_input' %}" class="fp-card p-3.5 flex items-center gap-3 hover:border-leaf/50 transition-all group">
+      <div class="w-9 h-9 rounded-xl bg-leaf/15 text-leaf flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+        <i data-lucide="leaf" class="w-4 h-4"></i>
+      </div>
+      <div class="overflow-hidden">
+        <div class="text-xs font-bold text-cream truncate">Create Crop Plan</div>
+        <div class="text-[10px] text-muted truncate">3 Allocation Strategies</div>
+      </div>
+    </a>
+
+    <a href="{% url 'climate:dashboard' %}" class="fp-card p-3.5 flex items-center gap-3 hover:border-water/50 transition-all group">
+      <div class="w-9 h-9 rounded-xl bg-water/15 text-water flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+        <i data-lucide="cloud-sun" class="w-4 h-4"></i>
+      </div>
+      <div class="overflow-hidden">
+        <div class="text-xs font-bold text-cream truncate">Analyse Climate</div>
+        <div class="text-[10px] text-muted truncate">Rainfall & Heat Risk</div>
+      </div>
+    </a>
+
+    <a href="{% url 'market:dashboard' %}" class="fp-card p-3.5 flex items-center gap-3 hover:border-amber-400/50 transition-all group">
+      <div class="w-9 h-9 rounded-xl bg-amber-400/15 text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+        <i data-lucide="trending-up" class="w-4 h-4"></i>
+      </div>
+      <div class="overflow-hidden">
+        <div class="text-xs font-bold text-cream truncate">Market Prices</div>
+        <div class="text-[10px] text-muted truncate">Farmgate vs Wholesale</div>
+      </div>
+    </a>
+
+    <a href="{% url 'farms:farm_history' %}" class="fp-card p-3.5 flex items-center gap-3 hover:border-cream/30 transition-all group">
+      <div class="w-9 h-9 rounded-xl bg-white/10 text-cream flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+        <i data-lucide="history" class="w-4 h-4"></i>
+      </div>
+      <div class="overflow-hidden">
+        <div class="text-xs font-bold text-cream truncate">Farm History</div>
+        <div class="text-[10px] text-muted truncate">Yields & Gross Margins</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- Phase 8.2: Farm Summary Cards (Links to My Farm) -->
+  <!-- ========================================================================= -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+    <!-- Total & Cultivated Land -->
+    <a href="{% url 'farms:my_farm' %}" class="fp-card p-4 hover:border-leaf/40 transition-colors block">
+      <div class="flex items-center justify-between text-muted text-xs mb-1">
+        <span class="font-semibold uppercase tracking-wider">Enterprise Land</span>
+        <i data-lucide="map-pin" class="w-4 h-4 text-leaf"></i>
+      </div>
+      <div class="text-2xl font-bold text-cream">
+        {% if farm %}{{ farm.total_land_ha|floatformat:1 }} ha{% else %}—{% endif %}
+      </div>
+      <div class="text-[11px] text-muted mt-1 flex items-center justify-between">
+        <span>Cultivated: {% if farm and farm.cultivated_land_ha %}{{ farm.cultivated_land_ha|floatformat:1 }} ha{% else %}—{% endif %}</span>
+        <span class="text-leaf text-[10px]">View Farm →</span>
+      </div>
+    </a>
+
+    <!-- Seasonal Budget -->
+    <a href="{% url 'farms:my_farm' %}" class="fp-card p-4 hover:border-leaf/40 transition-colors block">
+      <div class="flex items-center justify-between text-muted text-xs mb-1">
+        <span class="font-semibold uppercase tracking-wider">Operating Budget</span>
+        <i data-lucide="wallet" class="w-4 h-4 text-leaf"></i>
+      </div>
+      <div class="text-2xl font-bold text-cream">
+        {% if farm and farm.seasonal_budget_mwk %}
+          MWK {{ farm.seasonal_budget_mwk|floatformat:0|intcomma }}
+        {% else %}
+          —
+        {% endif %}
+      </div>
+      <div class="text-[11px] text-muted mt-1 flex items-center justify-between">
+        <span>Allocated for Season</span>
+        <span class="text-leaf text-[10px]">Adjust →</span>
+      </div>
+    </a>
+
+    <!-- Available Labour -->
+    <a href="{% url 'farms:my_farm' %}" class="fp-card p-4 hover:border-leaf/40 transition-colors block">
+      <div class="flex items-center justify-between text-muted text-xs mb-1">
+        <span class="font-semibold uppercase tracking-wider">Available Labour</span>
+        <i data-lucide="users" class="w-4 h-4 text-leaf"></i>
+      </div>
+      <div class="text-2xl font-bold text-cream">
+        {% if farm and farm.available_labour_persons %}{{ farm.available_labour_persons }} persons{% else %}—{% endif %}
+      </div>
+      <div class="text-[11px] text-muted mt-1 flex items-center justify-between">
+        <span>Family & Seasonal</span>
+        <span class="text-leaf text-[10px]">Details →</span>
+      </div>
+    </a>
+
+    <!-- Irrigation & Water Source -->
+    <a href="{% url 'farms:my_farm' %}" class="fp-card p-4 hover:border-leaf/40 transition-colors block">
+      <div class="flex items-center justify-between text-muted text-xs mb-1">
+        <span class="font-semibold uppercase tracking-wider">Water & Soil</span>
+        <i data-lucide="droplet" class="w-4 h-4 text-water"></i>
+      </div>
+      <div class="text-xl font-bold text-cream capitalize">
+        {% if farm %}{{ farm.get_irrigation_type_display }}{% else %}—{% endif %}
+      </div>
+      <div class="text-[11px] text-muted mt-1 flex items-center justify-between">
+        <span>{% if farm %}{{ farm.get_soil_type_display }}{% else %}Unknown soil{% endif %}</span>
+        <span class="text-water text-[10px]">Edit →</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- Phase 8.3 & 8.4: Climate Risk Overview & Recent Performance -->
+  <!-- ========================================================================= -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Climate Risk Overview Card -->
+    <div class="fp-card p-6 flex flex-col justify-between space-y-4 lg:col-span-1 border-white/10">
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400"></i>
+            <h3 class="text-sm font-bold text-cream">Climate Risk Overview</h3>
+          </div>
+          <span class="text-xs text-leaf font-medium">{{ district.name|default:"Lilongwe" }}</span>
+        </div>
+        <p class="text-xs text-muted mb-4">
+          Risk classification computed from {{ climate_risks.historical_years }}-year historical agro-climatic records.
+        </p>
+
+        <!-- 3 Risk Indicators -->
+        <div class="space-y-3">
+          
+          <!-- Heat Risk -->
+          <div class="p-3 rounded-xl bg-forest-700/60 border border-white/5 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-rose-500/15 text-rose-400 flex items-center justify-center">
+                <i data-lucide="flame" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-cream">Heat-Event Risk</div>
+                <div class="text-[10px] text-muted">{{ climate_risks.heat_risk.detail|default:"Historical threshold" }}</div>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-xs font-bold
+              {% if climate_risks.heat_risk.level == 'High' %}bg-rose-500/20 text-rose-300 border border-rose-500/30
+              {% elif climate_risks.heat_risk.level == 'Medium' %}bg-amber-500/20 text-amber-300 border border-amber-500/30
+              {% elif climate_risks.heat_risk.level == 'Low' %}bg-emerald-500/20 text-emerald-300 border border-emerald-500/30
+              {% else %}bg-zinc-500/20 text-zinc-300 border border-zinc-500/30{% endif %}">
+              {{ climate_risks.heat_risk.level }}
+            </span>
+          </div>
+
+          <!-- Rainfall Variability -->
+          <div class="p-3 rounded-xl bg-forest-700/60 border border-white/5 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-water/15 text-water flex items-center justify-center">
+                <i data-lucide="cloud-rain" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-cream">Rainfall Variability</div>
+                <div class="text-[10px] text-muted">{{ climate_risks.rainfall_risk.detail|default:"Annual CV%" }}</div>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-xs font-bold
+              {% if climate_risks.rainfall_risk.level == 'High' %}bg-rose-500/20 text-rose-300 border border-rose-500/30
+              {% elif climate_risks.rainfall_risk.level == 'Medium' %}bg-amber-500/20 text-amber-300 border border-amber-500/30
+              {% elif climate_risks.rainfall_risk.level == 'Low' %}bg-emerald-500/20 text-emerald-300 border border-emerald-500/30
+              {% else %}bg-zinc-500/20 text-zinc-300 border border-zinc-500/30{% endif %}">
+              {{ climate_risks.rainfall_risk.level }}
+            </span>
+          </div>
+
+          <!-- Dry Spell Risk -->
+          <div class="p-3 rounded-xl bg-forest-700/60 border border-white/5 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-amber-400/15 text-amber-400 flex items-center justify-center">
+                <i data-lucide="sun" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-cream">Dry-Spell Probability</div>
+                <div class="text-[10px] text-muted">{{ climate_risks.dry_spell_risk.detail|default:"Mid-season events" }}</div>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-xs font-bold
+              {% if climate_risks.dry_spell_risk.level == 'High' %}bg-rose-500/20 text-rose-300 border border-rose-500/30
+              {% elif climate_risks.dry_spell_risk.level == 'Medium' %}bg-amber-500/20 text-amber-300 border border-amber-500/30
+              {% elif climate_risks.dry_spell_risk.level == 'Low' %}bg-emerald-500/20 text-emerald-300 border border-emerald-500/30
+              {% else %}bg-zinc-500/20 text-zinc-300 border border-zinc-500/30{% endif %}">
+              {{ climate_risks.dry_spell_risk.level }}
+            </span>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="pt-2 border-t border-white/5">
+        <a href="{% url 'climate:dashboard' %}" class="text-xs text-leaf font-semibold hover:underline inline-flex items-center gap-1">
+          Open Climate Intelligence Explorer <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
     </div>
 
-    <h1 class="font-display text-3xl sm:text-4xl font-semibold text-cream leading-tight">
-      Good morning, Thandiwe.
-    </h1>
-
-    <p class="mt-3 text-muted text-base leading-relaxed">
-      The dashboard is coming next. For now, review the
-      <a href="/dev/design-preview/" class="text-leaf underline underline-offset-4 hover:text-leaf-soft">design system preview</a>
-      — that's the visual reference every FarmPulse screen will follow.
-    </p>
-
-    <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
-      <div class="rounded-2xl bg-forest-700 p-4 border border-white/10">
-        <div class="text-xs uppercase tracking-wider text-muted mb-1">Low risk</div>
-        <div class="text-leaf font-semibold">Maize</div>
+    <!-- Recent Farm Performance (4 Observed Metric Cards) -->
+    <div class="fp-card p-6 lg:col-span-2 space-y-4">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div>
+          <h3 class="text-sm font-bold text-cream">Recent Farm Performance</h3>
+          <p class="text-xs text-muted">
+            Observed outcomes from {% if current_season %}{{ current_season.name }}{% else %}farm records{% endif %}.
+          </p>
+        </div>
+        <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-leaf bg-leaf/10 px-2 py-0.5 rounded">
+          <i data-lucide="check" class="w-3 h-3"></i> Historical Observation
+        </span>
       </div>
-      <div class="rounded-2xl bg-forest-700 p-4 border border-white/10">
-        <div class="text-xs uppercase tracking-wider text-muted mb-1">Medium risk</div>
-        <div class="text-risk-medium font-semibold">Groundnuts</div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+
+        <div class="p-3.5 rounded-2xl bg-forest-700/50 border border-white/5 space-y-1">
+          <span class="text-[10px] font-semibold text-muted uppercase tracking-wider block">Harvested Yield</span>
+          <div class="text-xl font-bold text-cream">
+            {{ recent_perf.yield|floatformat:0|intcomma }} kg
+          </div>
+          <span class="text-[10px] text-muted block">{{ recent_perf.area|floatformat:1 }} ha cultivated</span>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-forest-700/50 border border-white/5 space-y-1">
+          <span class="text-[10px] font-semibold text-muted uppercase tracking-wider block">Gross Margin</span>
+          <div class="text-xl font-bold {% if recent_perf.margin >= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}">
+            MWK {{ recent_perf.margin|floatformat:0|intcomma }}
+          </div>
+          <span class="text-[10px] text-muted block">Realized return</span>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-forest-700/50 border border-white/5 space-y-1">
+          <span class="text-[10px] font-semibold text-muted uppercase tracking-wider block">Production Cost</span>
+          <div class="text-xl font-bold text-cream">
+            MWK {{ recent_perf.cost|floatformat:0|intcomma }}
+          </div>
+          <span class="text-[10px] text-muted block">Observed expenditure</span>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-forest-700/50 border border-white/5 space-y-1">
+          <span class="text-[10px] font-semibold text-muted uppercase tracking-wider block">Total Revenue</span>
+          <div class="text-xl font-bold text-cream">
+            MWK {{ recent_perf.revenue|floatformat:0|intcomma }}
+          </div>
+          <span class="text-[10px] text-muted block">Harvest sales</span>
+        </div>
+
       </div>
-      <div class="rounded-2xl bg-forest-700 p-4 border border-white/10">
-        <div class="text-xs uppercase tracking-wider text-muted mb-1">Water</div>
-        <div class="text-water font-semibold">Irrigated</div>
+
+      <div class="pt-2 flex items-center justify-between text-xs">
+        <span class="text-muted">
+          {{ recent_perf.plantings_count }} crop planting{{ recent_perf.plantings_count|pluralize }} recorded in this cycle.
+        </span>
+        <a href="{% url 'farms:season_review_index' %}" class="text-leaf font-semibold hover:underline inline-flex items-center gap-1">
+          Review Season Outcomes <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
       </div>
     </div>
 
   </div>
 
+  <!-- ========================================================================= -->
+  <!-- Phase 8.6: Seasonal Climate Summary Chart with 3 Tabs -->
+  <!-- ========================================================================= -->
+  <div class="fp-card p-6 space-y-4">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-white/10 pb-4">
+      <div>
+        <h3 class="text-sm font-bold text-cream flex items-center gap-2">
+          <i data-lucide="line-chart" class="w-4 h-4 text-leaf"></i> Seasonal Agro-Climatic Profile: {{ district.name|default:"Lilongwe" }}
+        </h3>
+        <p class="text-xs text-muted">
+          Monthly climate distribution for {{ district.name }} ({{ chart_year }} Historical Baseline).
+        </p>
+      </div>
+
+      <!-- Chart Tabs -->
+      <div class="flex rounded-xl bg-forest-900/80 p-1 border border-white/10 text-xs font-semibold">
+        <button type="button" onclick="switchChartTab('rainfall')" id="tab-btn-rainfall"
+                class="px-3 py-1.5 rounded-lg bg-leaf text-forest-900 transition-colors">
+          Rainfall (mm)
+        </button>
+        <button type="button" onclick="switchChartTab('temperature')" id="tab-btn-temperature"
+                class="px-3 py-1.5 rounded-lg text-cream/70 hover:text-cream transition-colors">
+          Temperature (°C)
+        </button>
+        <button type="button" onclick="switchChartTab('heat')" id="tab-btn-heat"
+                class="px-3 py-1.5 rounded-lg text-cream/70 hover:text-cream transition-colors">
+          Heat Events
+        </button>
+      </div>
+    </div>
+
+    <!-- Chart Container -->
+    <div class="h-64 sm:h-72 relative">
+      <canvas id="overviewClimateChart"></canvas>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- Phase 8.5 & 8.7: Saved Plans & Active Crop Comparison -->
+  <!-- ========================================================================= -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Saved Plans List -->
+    <div class="fp-card p-6 space-y-4 lg:col-span-1">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <h3 class="text-sm font-bold text-cream flex items-center gap-2">
+          <i data-lucide="bookmark" class="w-4 h-4 text-leaf"></i> Saved Crop Plans
+        </h3>
+        <a href="{% url 'planner:plan_list' %}" class="text-xs text-leaf hover:underline">All Plans →</a>
+      </div>
+
+      {% if saved_plans %}
+        <div class="space-y-2.5">
+          {% for pl in saved_plans %}
+            <a href="{% url 'planner:plan_detail' pl.id %}" class="block p-3 rounded-xl bg-forest-700/40 hover:bg-forest-700/80 border border-white/5 transition-colors">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-bold text-cream truncate max-w-[160px]">{{ pl.name }}</span>
+                <span class="text-[10px] px-2 py-0.5 rounded font-semibold capitalize
+                  {% if pl.strategy_type == 'balanced' %}bg-leaf/20 text-leaf
+                  {% elif pl.strategy_type == 'return_focused' %}bg-amber-400/20 text-amber-300
+                  {% else %}bg-water/20 text-water{% endif %}">
+                  {{ pl.strategy_type }}
+                </span>
+              </div>
+              <div class="flex items-center justify-between text-[11px] text-muted">
+                <span>{{ pl.total_land_ha|floatformat:1 }} ha</span>
+                <span class="font-bold text-emerald-400">MWK {{ pl.total_expected_margin_mwk|floatformat:0|intcomma }}</span>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center py-8 text-xs text-muted space-y-2">
+          <i data-lucide="clipboard-list" class="w-8 h-8 mx-auto text-cream/30"></i>
+          <p>No saved plans yet. Generate strategic allocation plans tailored to your land and budget.</p>
+          <a href="{% url 'planner:planner_input' %}" class="fp-btn-primary inline-flex items-center gap-1.5 text-xs py-1.5 px-3">
+            Create First Plan
+          </a>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Active Crop Plan Comparison Table -->
+    <div class="fp-card p-6 space-y-4 lg:col-span-2 overflow-x-auto">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div>
+          <h3 class="text-sm font-bold text-cream flex items-center gap-2">
+            <i data-lucide="layers" class="w-4 h-4 text-leaf"></i> Active Portfolio: {% if active_plan %}{{ active_plan.name }}{% else %}Baseline Allocations{% endif %}
+          </h3>
+          <p class="text-xs text-muted">Star metric: Break-even selling price per kg.</p>
+        </div>
+        {% if active_plan %}
+          <a href="{% url 'planner:plan_detail' active_plan.id %}" class="text-xs text-leaf hover:underline">
+            Inspect Plan →
+          </a>
+        {% endif %}
+      </div>
+
+      {% if plan_items %}
+        <table class="w-full text-xs text-left">
+          <thead class="text-muted border-b border-white/10 bg-forest-900/40">
+            <tr>
+              <th class="py-2.5 px-3 font-semibold">Crop</th>
+              <th class="py-2.5 px-2 text-right font-semibold">Area (ha)</th>
+              <th class="py-2.5 px-2 text-right font-semibold">Est. Cost</th>
+              <th class="py-2.5 px-2 text-right font-semibold">Est. Revenue</th>
+              <th class="py-2.5 px-2 text-right font-semibold">Gross Margin</th>
+              <th class="py-2.5 px-3 text-right font-semibold text-amber-300">Break-Even / kg</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5">
+            {% for item in plan_items %}
+              <tr class="hover:bg-white/5">
+                <td class="py-2.5 px-3 font-semibold text-cream">{{ item.crop.name }}</td>
+                <td class="py-2.5 px-2 text-right text-cream/90">{{ item.area_ha|floatformat:1 }}</td>
+                <td class="py-2.5 px-2 text-right text-cream/80">MWK {{ item.expected_total_cost_mwk|floatformat:0|intcomma }}</td>
+                <td class="py-2.5 px-2 text-right text-cream/80">MWK {{ item.expected_revenue_mwk|floatformat:0|intcomma }}</td>
+                <td class="py-2.5 px-2 text-right font-bold text-emerald-400">MWK {{ item.expected_gross_margin_mwk|floatformat:0|intcomma }}</td>
+                <td class="py-2.5 px-3 text-right font-mono font-bold text-amber-300">
+                  MWK {{ item.break_even_price_mwk_per_kg|floatformat:1 }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="text-center py-8 text-xs text-muted">
+          <p>No active plan items to display. Formulate a plan in Crop Planner to see breakdown.</p>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- Phase 8.9: Bottom Advisory Panel ("Better records improve plans") -->
+  <!-- ========================================================================= -->
+  <div class="rounded-3xl border border-leaf/30 bg-gradient-to-r from-forest-850 via-forest-800 to-forest-850 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl">
+    <div class="flex items-start gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-leaf/20 text-leaf border border-leaf/30 flex items-center justify-center shrink-0">
+        <i data-lucide="sparkles" class="w-6 h-6"></i>
+      </div>
+      <div class="space-y-1">
+        <h4 class="text-base font-bold text-cream">Better historical records build higher-confidence plans</h4>
+        <p class="text-xs text-cream/70 max-w-2xl leading-relaxed">
+          FarmPulse refines yield estimates, gross margins, and break-even calculations as you record verified planting observations.
+          Keep your soil types, seasonal expenses, and harvested yields updated.
+        </p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3 shrink-0">
+      <a href="{% url 'farms:farm_edit' %}" class="fp-btn-primary inline-flex items-center gap-2 text-xs py-2.5 px-4">
+        <i data-lucide="edit-3" class="w-4 h-4"></i> Update Farm Profile
+      </a>
+      <a href="{% url 'farms:planting_create' %}" class="fp-btn-outline inline-flex items-center gap-2 text-xs py-2.5 px-4">
+        <i data-lucide="plus" class="w-4 h-4"></i> Log Planting
+      </a>
+    </div>
+  </div>
+
 </div>
+
+<!-- Chart Switcher Script -->
+<script>
+  let climateChartInstance = null;
+  const climateRawData = {{ chart_data_json|safe }};
+
+  function switchChartTab(mode) {
+    const btnRain = document.getElementById('tab-btn-rainfall');
+    const btnTemp = document.getElementById('tab-btn-temperature');
+    const btnHeat = document.getElementById('tab-btn-heat');
+
+    // Reset styles
+    [btnRain, btnTemp, btnHeat].forEach(btn => {
+      btn.className = "px-3 py-1.5 rounded-lg text-cream/70 hover:text-cream transition-colors";
+    });
+
+    if (mode === 'rainfall') {
+      btnRain.className = "px-3 py-1.5 rounded-lg bg-leaf text-forest-900 font-semibold transition-colors";
+      renderRainfallChart();
+    } else if (mode === 'temperature') {
+      btnTemp.className = "px-3 py-1.5 rounded-lg bg-leaf text-forest-900 font-semibold transition-colors";
+      renderTempChart();
+    } else if (mode === 'heat') {
+      btnHeat.className = "px-3 py-1.5 rounded-lg bg-leaf text-forest-900 font-semibold transition-colors";
+      renderHeatChart();
+    }
+  }
+
+  function renderRainfallChart() {
+    if (climateChartInstance) climateChartInstance.destroy();
+    const ctx = document.getElementById('overviewClimateChart');
+    climateChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: climateRawData.months,
+        datasets: [{
+          label: 'Rainfall (mm)',
+          data: climateRawData.rainfall,
+          backgroundColor: '#38bdf8',
+          borderRadius: 4,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (c) => c.raw + ' mm'
+            }
+          }
+        },
+        scales: {
+          y: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#9ca3af', font: { size: 10 } } },
+          x: { grid: { display: false }, ticks: { color: '#9ca3af', font: { size: 10 } } }
+        }
+      }
+    });
+  }
+
+  function renderTempChart() {
+    if (climateChartInstance) climateChartInstance.destroy();
+    const ctx = document.getElementById('overviewClimateChart');
+    climateChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: climateRawData.months,
+        datasets: [
+          {
+            label: 'Max Temp (°C)',
+            data: climateRawData.temp_max,
+            borderColor: '#f97316',
+            backgroundColor: 'rgba(249, 115, 22, 0.1)',
+            tension: 0.3,
+            fill: true
+          },
+          {
+            label: 'Min Temp (°C)',
+            data: climateRawData.temp_min,
+            borderColor: '#38bdf8',
+            tension: 0.3,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 10, color: '#e5e7eb', font: { size: 10 } } },
+          tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + c.raw + ' °C' } }
+        },
+        scales: {
+          y: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#9ca3af', font: { size: 10 } } },
+          x: { grid: { display: false }, ticks: { color: '#9ca3af', font: { size: 10 } } }
+        }
+      }
+    });
+  }
+
+  function renderHeatChart() {
+    if (climateChartInstance) climateChartInstance.destroy();
+    const ctx = document.getElementById('overviewClimateChart');
+    climateChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: climateRawData.months,
+        datasets: [{
+          label: 'Heat-Event Days (>32°C)',
+          data: climateRawData.heat_days,
+          backgroundColor: '#ef4444',
+          borderRadius: 4,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: (c) => c.raw + ' heat days' } }
+        },
+        scales: {
+          y: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { stepSize: 1, color: '#9ca3af', font: { size: 10 } } },
+          x: { grid: { display: false }, ticks: { color: '#9ca3af', font: { size: 10 } } }
+        }
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderRainfallChart();
+  });
+</script>
 {% endblock %}

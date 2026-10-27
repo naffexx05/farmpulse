@@ -58,8 +58,12 @@
     <a href="{% url 'planner:plan_list' %}" class="fp-nav-item {% if active_nav == 'plans' %}fp-nav-item-active{% endif %}">
       <i data-lucide="bookmark" class="w-4 h-4"></i> My Plans
     </a>
-    <a href="#" class="fp-nav-item"><i data-lucide="clipboard-check" class="w-4 h-4"></i> Season Review</a>
-    <a href="#" class="fp-nav-item"><i data-lucide="settings" class="w-4 h-4"></i> Settings</a>
+    <a href="{% url 'farms:season_review_index' %}" class="fp-nav-item {% if active_nav == 'season_review' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="clipboard-check" class="w-4 h-4"></i> Season Review
+    </a>
+    <a href="{% url 'settings_index' %}" class="fp-nav-item {% if active_nav == 'settings' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="settings" class="w-4 h-4"></i> Settings
+    </a>
   </nav>
 
   <!-- Dev link -->

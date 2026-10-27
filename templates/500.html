@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Server Error (500) · FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="min-h-[60vh] flex items-center justify-center p-4">
+  <div class="fp-card max-w-lg p-8 sm:p-12 text-center space-y-4">
+    <div class="w-16 h-16 rounded-full bg-rose-500/15 text-rose-500 flex items-center justify-center mx-auto">
+      <i data-lucide="alert-octagon" class="w-8 h-8"></i>
+    </div>
+    <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold bg-rose-100 text-rose-800">
+      HTTP 500 · Computational Anomaly
+    </span>
+    <h1 class="text-2xl font-bold text-earth-heading">Internal Agricultural Engine Fault</h1>
+    <p class="text-xs text-earth-muted leading-relaxed">
+      An unexpected condition occurred while calculating agricultural projections or querying historical telemetry. Our agronomic systems team has been notified.
+    </p>
+    <div class="pt-4 flex items-center justify-center gap-3">
+      <a href="{% url 'home' %}" class="fp-btn-primary text-xs inline-flex items-center gap-2">
+        <i data-lucide="home" class="w-3.5 h-3.5"></i> Return to Overview
+      </a>
+      <a href="{% url 'farms:farm_history' %}" class="fp-btn-outline text-xs inline-flex items-center gap-2">
+        <i data-lucide="history" class="w-3.5 h-3.5"></i> Farm History
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

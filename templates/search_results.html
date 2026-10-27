@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Search Results: "{{ query }}" · FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div>
+    <div class="flex items-center gap-2">
+      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-leaf/10 text-leaf">
+        Search Intelligence
+      </span>
+      <span class="text-xs text-earth-muted">Unified Registry</span>
+    </div>
+    <h1 class="text-2xl font-bold text-earth-heading mt-1">
+      Search Results {% if query %}for "{{ query }}"{% endif %}
+    </h1>
+    <p class="text-sm text-earth-muted mt-1">
+      Found {{ total_count }} matching record{{ total_count|pluralize }} across crops, plans, plantings, and districts.
+    </p>
+  </div>
+
+  {% if not query or total_count == 0 %}
+    <div class="fp-card p-12 text-center max-w-md mx-auto">
+      <div class="w-12 h-12 rounded-full bg-leaf/10 text-leaf flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="search" class="w-6 h-6"></i>
+      </div>
+      <h3 class="text-lg font-semibold text-earth-heading">
+        {% if query %}No Results Found{% else %}Enter a search term{% endif %}
+      </h3>
+      <p class="text-sm text-earth-muted mt-1">
+        {% if query %}
+          No matching agricultural records matched "{{ query }}". Try searching for crop names like "Maize", "Groundnuts", or districts like "Lilongwe".
+        {% else %}
+          Search across crops, seasonal plans, farm plantings, and district climate records.
+        {% endif %}
+      </p>
+    </div>
+  {% else %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      <!-- Crops Matches -->
+      {% if results.crops %}
+        <div class="fp-card p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-earth-border/40 pb-3">
+            <h3 class="text-sm font-bold text-earth-heading flex items-center gap-2">
+              <i data-lucide="sprout" class="w-4 h-4 text-leaf"></i> Crops ({{ results.crops|length }})
+            </h3>
+            <a href="{% url 'market:dashboard' %}" class="text-xs text-leaf hover:underline">View Market Prices →</a>
+          </div>
+          <div class="divide-y divide-earth-border/40">
+            {% for crop in results.crops %}
+              <div class="py-2.5 flex items-center justify-between text-xs">
+                <div>
+                  <span class="font-semibold text-earth-heading text-sm">{{ crop.name }}</span>
+                  <span class="text-earth-muted block text-[11px]">{{ crop.scientific_name|default:"Malawi Staple / Cash Crop" }}</span>
+                </div>
+                <span class="capitalize px-2 py-0.5 rounded bg-earth-subtle text-earth-text font-medium text-[11px]">
+                  {{ crop.get_category_display }}
+                </span>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Plans Matches -->
+      {% if results.plans %}
+        <div class="fp-card p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-earth-border/40 pb-3">
+            <h3 class="text-sm font-bold text-earth-heading flex items-center gap-2">
+              <i data-lucide="bookmark" class="w-4 h-4 text-leaf"></i> Saved Plans ({{ results.plans|length }})
+            </h3>
+            <a href="{% url 'planner:plan_list' %}" class="text-xs text-leaf hover:underline">All Plans →</a>
+          </div>
+          <div class="divide-y divide-earth-border/40">
+            {% for plan in results.plans %}
+              <div class="py-2.5 flex items-center justify-between text-xs">
+                <div>
+                  <a href="{% url 'planner:plan_detail' plan.id %}" class="font-semibold text-earth-heading hover:text-leaf text-sm">
+                    {{ plan.name }}
+                  </a>
+                  <span class="text-earth-muted block text-[11px]">
+                    {{ plan.total_land_ha|floatformat:1 }} ha · Strategy: {{ plan.get_strategy_type_display }}
+                  </span>
+                </div>
+                <span class="font-bold text-emerald-700">
+                  MWK {{ plan.total_expected_margin_mwk|floatformat:0|intcomma }}
+                </span>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Historical Plantings Matches -->
+      {% if results.plantings %}
+        <div class="fp-card p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-earth-border/40 pb-3">
+            <h3 class="text-sm font-bold text-earth-heading flex items-center gap-2">
+              <i data-lucide="history" class="w-4 h-4 text-leaf"></i> Farm History Plantings ({{ results.plantings|length }})
+            </h3>
+            <a href="{% url 'farms:farm_history' %}" class="text-xs text-leaf hover:underline">Farm History →</a>
+          </div>
+          <div class="divide-y divide-earth-border/40">
+            {% for p in results.plantings %}
+              <div class="py-2.5 flex items-center justify-between text-xs">
+                <div>
+                  <span class="font-semibold text-earth-heading text-sm">{{ p.crop.name }}</span>
+                  <span class="text-earth-muted block text-[11px]">
+                    {{ p.season.name }} · {{ p.area_ha|floatformat:1 }} ha
+                  </span>
+                </div>
+                <div class="text-right">
+                  {% if p.yield_kg %}
+                    <span class="font-semibold text-earth-heading">{{ p.yield_kg|floatformat:0|intcomma }} kg</span>
+                  {% else %}
+                    <span class="text-earth-muted">—</span>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Districts Matches -->
+      {% if results.districts %}
+        <div class="fp-card p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-earth-border/40 pb-3">
+            <h3 class="text-sm font-bold text-earth-heading flex items-center gap-2">
+              <i data-lucide="cloud-sun" class="w-4 h-4 text-leaf"></i> Climate Districts ({{ results.districts|length }})
+            </h3>
+            <a href="{% url 'climate:dashboard' %}" class="text-xs text-leaf hover:underline">Climate Intelligence →</a>
+          </div>
+          <div class="divide-y divide-earth-border/40">
+            {% for d in results.districts %}
+              <div class="py-2.5 flex items-center justify-between text-xs">
+                <div>
+                  <span class="font-semibold text-earth-heading text-sm">{{ d.name }}</span>
+                  <span class="text-earth-muted block text-[11px]">{{ d.get_region_display }} Region · {{ d.elevation_m }} m.a.s.l</span>
+                </div>
+                <a href="{% url 'climate:dashboard' %}?district={{ d.id }}" class="fp-btn-outline text-[11px] !py-1 !px-2.5">
+                  View Weather
+                </a>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+    </div>
+
+  {% endif %}
+
+</div>
+{% endblock %}
