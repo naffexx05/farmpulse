@@ -1,0 +1,714 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Climate Intelligence — {{ active_district.name }} — FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-8">
+
+  <!-- Header & District Switcher -->
+  <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-2">
+        <h1 class="font-display text-3xl font-semibold text-cream">Climate Intelligence</h1>
+        <span class="fp-demo-pill">Synthetic Demo Baseline</span>
+      </div>
+      <p class="mt-1 text-sm text-cream/60">
+        20-year historical observations (2005–2024), seasonal outlooks, and agro-climatic hazard models.
+      </p>
+    </div>
+
+    <!-- District Switcher & Attribution Link -->
+    <div class="flex items-center gap-3">
+      <div class="relative min-w-[200px]">
+        <label for="district-selector" class="sr-only">Select District</label>
+        <select
+          id="district-selector"
+          class="fp-input !py-2 !pr-8 font-medium cursor-pointer"
+          onchange="window.location.href='?district=' + this.value"
+        >
+          {% for d in districts %}
+            <option value="{{ d.slug }}" {% if d.slug == active_district.slug %}selected{% endif %}>
+              {{ d.name }} ({{ d.get_region_display }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <button
+        type="button"
+        onclick="toggleSourceDrawer()"
+        class="fp-btn-ghost !px-3 !py-2 text-xs flex items-center gap-1.5"
+        title="View dataset attribution and methodology"
+      >
+        <i data-lucide="info" class="w-4 h-4 text-leaf"></i> Data Provenance
+      </button>
+    </div>
+  </header>
+
+  <!-- Strict Requirement: Data Horizon Legend Band -->
+  <section class="p-3.5 rounded-2xl bg-forest-950/80 border border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
+    <div class="flex flex-wrap items-center gap-4 sm:gap-6">
+      <span class="text-cream/50 uppercase tracking-wider font-semibold text-[10px]">Data Bands:</span>
+      <span class="inline-flex items-center gap-2 text-cream">
+        <span class="w-3 h-3 rounded-full bg-leaf border border-leaf/40"></span>
+        <span><strong>Historical Observations</strong> (2005–2024 Observed)</span>
+      </span>
+      <span class="inline-flex items-center gap-2 text-water-soft">
+        <span class="w-3 h-1.5 rounded-full bg-water border border-water/40 border-dashed"></span>
+        <span><strong>2024/25 Official Outlook</strong> (DCCMS Advisory)</span>
+      </span>
+      <span class="inline-flex items-center gap-2 text-risk-medium">
+        <span class="w-3 h-1.5 rounded-full bg-risk-medium/50 border border-risk-medium"></span>
+        <span><strong>Illustrative Scenario</strong> (+1.5°C &amp; -18% Rain)</span>
+      </span>
+    </div>
+    <div class="text-[11px] text-cream/40 italic">
+      District Elevation: {{ active_district.elevation_m }}m &bull; {{ active_district.latitude|floatformat:2 }}°, {{ active_district.longitude|floatformat:2 }}°
+    </div>
+  </section>
+
+  <!-- Phase 3.6 Risk Scoring Indicators -->
+  <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+    <!-- Card 1: Composite Risk -->
+    <div class="fp-card p-5 space-y-2 border-l-4 {% if risk.composite.level == 'High' %}border-l-risk-high{% elif risk.composite.level == 'Medium' %}border-l-risk-medium{% elif risk.composite.level == 'Low' %}border-l-risk-low{% else %}border-l-muted{% endif %}">
+      <div class="fp-label flex items-center justify-between">
+        <span>Overall Climate Risk</span>
+        <i data-lucide="shield-alert" class="w-4 h-4 text-cream/60"></i>
+      </div>
+      <div class="flex items-baseline gap-2">
+        <span class="{{ risk.composite.badge_class }}">
+          {{ risk.composite.level }}
+        </span>
+        {% if risk.composite.score is not None %}
+          <span class="text-xs text-muted font-mono">{{ risk.composite.score }}/100</span>
+        {% endif %}
+      </div>
+      <p class="text-xs text-cream/70 line-clamp-3">
+        {{ risk.composite.explanation }}
+      </p>
+    </div>
+
+    <!-- Card 2: Rainfall Variability / Drought -->
+    <div class="fp-card p-5 space-y-2">
+      <div class="fp-label flex items-center justify-between">
+        <span>Drought &amp; Rainfall Hazard</span>
+        <i data-lucide="cloud-rain" class="w-4 h-4 text-water"></i>
+      </div>
+      <div class="flex items-baseline gap-2">
+        <span class="{{ risk.rainfall.badge_class }}">
+          {{ risk.rainfall.level }}
+        </span>
+        {% if risk.rainfall.mean_seasonal_mm %}
+          <span class="text-xs text-cream/80 font-mono">{{ risk.rainfall.mean_seasonal_mm|floatformat:0 }} mm avg</span>
+        {% endif %}
+      </div>
+      <p class="text-xs text-cream/70 line-clamp-3">
+        {{ risk.rainfall.explanation }}
+      </p>
+    </div>
+
+    <!-- Card 3: Mid-Season Dry Spells -->
+    <div class="fp-card p-5 space-y-2">
+      <div class="fp-label flex items-center justify-between">
+        <span>Jan/Feb Dry Spell Risk</span>
+        <i data-lucide="sun-dim" class="w-4 h-4 text-risk-medium"></i>
+      </div>
+      <div class="flex items-baseline gap-2">
+        <span class="{{ risk.dry_spell.badge_class }}">
+          {{ risk.dry_spell.level }}
+        </span>
+        {% if risk.dry_spell.max_consecutive_days %}
+          <span class="text-xs text-cream/80 font-mono">Max {{ risk.dry_spell.max_consecutive_days }} days</span>
+        {% endif %}
+      </div>
+      <p class="text-xs text-cream/70 line-clamp-3">
+        {{ risk.dry_spell.explanation }}
+      </p>
+    </div>
+
+    <!-- Card 4: Heat Wave Stress -->
+    <div class="fp-card p-5 space-y-2">
+      <div class="fp-label flex items-center justify-between">
+        <span>Heat &amp; Thermal Stress</span>
+        <i data-lucide="flame" class="w-4 h-4 text-risk-high"></i>
+      </div>
+      <div class="flex items-baseline gap-2">
+        <span class="{{ risk.heat.badge_class }}">
+          {{ risk.heat.level }}
+        </span>
+        {% if risk.heat.avg_heat_days_per_year is not None %}
+          <span class="text-xs text-cream/80 font-mono">{{ risk.heat.avg_heat_days_per_year }} days/yr</span>
+        {% endif %}
+      </div>
+      <p class="text-xs text-cream/70 line-clamp-3">
+        {{ risk.heat.explanation }}
+      </p>
+    </div>
+
+  </section>
+
+  <!-- Interactive Three-Tabbed Analysis Card -->
+  <section class="fp-glass p-6 space-y-6">
+
+    <!-- Tab Bar -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/5 pb-4">
+      <div>
+        <h2 class="font-display text-xl font-semibold text-cream">
+          {{ active_district.name }} Agro-Climatic Profile
+        </h2>
+        <p class="text-xs text-cream/60">
+          {{ active_district.description }}
+        </p>
+      </div>
+
+      <!-- Tab Buttons -->
+      <div class="flex items-center gap-1.5 p-1 bg-forest-900/80 rounded-xl border border-white/10 text-xs self-start sm:self-auto">
+        <button
+          id="btn-tab-rainfall"
+          onclick="switchClimateTab('rainfall')"
+          class="px-3 py-1.5 rounded-lg font-medium transition-colors bg-forest-700 text-cream flex items-center gap-1.5"
+        >
+          <i data-lucide="cloud-rain" class="w-3.5 h-3.5 text-water"></i> Rainfall &amp; Dry Spells
+        </button>
+        <button
+          id="btn-tab-temp"
+          onclick="switchClimateTab('temp')"
+          class="px-3 py-1.5 rounded-lg font-medium transition-colors text-cream/70 hover:text-cream flex items-center gap-1.5"
+        >
+          <i data-lucide="thermometer" class="w-3.5 h-3.5 text-risk-medium"></i> Temperature Trends
+        </button>
+        <button
+          id="btn-tab-heat"
+          onclick="switchClimateTab('heat')"
+          class="px-3 py-1.5 rounded-lg font-medium transition-colors text-cream/70 hover:text-cream flex items-center gap-1.5"
+        >
+          <i data-lucide="flame" class="w-3.5 h-3.5 text-risk-high"></i> Heat Events
+        </button>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 1: RAINFALL (Phase 3.3) -->
+    <!-- ========================================================================= -->
+    <div id="climate-panel-rainfall" class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Chart 1A: 20-Year Annual Precipitation -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-semibold text-cream">20-Year Annual Precipitation (mm)</h3>
+            <span class="text-xs font-mono text-muted">20-yr Mean: {{ mean_annual_rain }} mm</span>
+          </div>
+          <div class="h-64 sm:h-72 w-full p-2 bg-forest-900/40 rounded-xl border border-white/5">
+            <canvas id="annualRainChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 1B: Monthly Seasonal Distribution & Horizon Comparison -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-semibold text-cream">Seasonal Cycle &amp; Horizon Outlook (mm)</h3>
+            <span class="text-xs text-cream/40">Jul &rarr; Jun Agro Cycle</span>
+          </div>
+          <div class="h-64 sm:h-72 w-full p-2 bg-forest-900/40 rounded-xl border border-white/5">
+            <canvas id="seasonalRainChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Dry Spell Table for Core Growing Months -->
+      <div class="space-y-2 pt-2">
+        <h3 class="text-sm font-semibold text-cream">Growing Season Monthly Regimes &amp; Dry Spell Window</h3>
+        <div class="overflow-x-auto rounded-xl border border-white/10">
+          <table class="w-full text-left text-xs font-mono">
+            <thead class="bg-forest-900/90 text-cream/60 uppercase tracking-wider text-[10px]">
+              <tr>
+                <th class="py-2.5 px-4 font-medium">Month</th>
+                <th class="py-2.5 px-4 font-medium font-sans">Crop Stage</th>
+                <th class="py-2.5 px-4 font-medium text-right">Avg Rainfall</th>
+                <th class="py-2.5 px-4 font-medium text-right">Avg Max Dry Spell</th>
+                <th class="py-2.5 px-4 font-medium text-right">Avg Daily Max Temp</th>
+                <th class="py-2.5 px-4 font-medium font-sans">Agro Hazard</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+              {% for row in wet_months_summary %}
+                <tr class="hover:bg-white/[0.02]">
+                  <td class="py-2.5 px-4 font-bold text-cream">{{ row.month }}</td>
+                  <td class="py-2.5 px-4 font-sans text-cream/80">{{ row.status }}</td>
+                  <td class="py-2.5 px-4 text-right text-water-soft">{{ row.rainfall_mm }} mm</td>
+                  <td class="py-2.5 px-4 text-right {% if row.dry_spell_days >= 12 %}text-risk-high font-bold{% elif row.dry_spell_days >= 8 %}text-risk-medium{% else %}text-cream/70{% endif %}">
+                    {{ row.dry_spell_days }} days
+                  </td>
+                  <td class="py-2.5 px-4 text-right text-cream/80">{{ row.max_temp_c }}°C</td>
+                  <td class="py-2.5 px-4 font-sans text-xs">
+                    {% if row.month in 'Jan,Feb' %}
+                      <span class="text-risk-medium">Mid-season dry spells threaten tasseling</span>
+                    {% elif row.month in 'Nov,Dec' %}
+                      <span class="text-leaf">Onset timing variation &amp; false starts</span>
+                    {% else %}
+                      <span class="text-cream/40">Maturity drying &amp; post-harvest drying</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 2: TEMPERATURE (Phase 3.4) -->
+    <!-- ========================================================================= -->
+    <div id="climate-panel-temp" class="space-y-6 hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Chart 2A: 20-Year Temperature Trajectory -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-semibold text-cream">20-Year Temperature Trajectory (°C)</h3>
+            <span class="text-xs text-risk-high">Long-Term Regional Warming</span>
+          </div>
+          <div class="h-64 sm:h-72 w-full p-2 bg-forest-900/40 rounded-xl border border-white/5">
+            <canvas id="tempTrajectoryChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 2B: Monthly Temperature Climatology Profile -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-semibold text-cream">Monthly Temperature Range (°C)</h3>
+            <span class="text-xs text-cream/40">Jan &rarr; Dec</span>
+          </div>
+          <div class="h-64 sm:h-72 w-full p-2 bg-forest-900/40 rounded-xl border border-white/5">
+            <canvas id="tempMonthlyChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="p-4 rounded-xl bg-forest-900/60 border border-white/10 flex items-start gap-3">
+        <i data-lucide="thermometer-sun" class="w-5 h-5 text-risk-medium shrink-0 mt-0.5"></i>
+        <div class="text-xs text-cream/70 space-y-1">
+          <strong class="text-cream font-medium">Pre-Rains Heat Peak (October–November):</strong>
+          In {{ active_district.name }}, maximum daily temperatures peak in October and November immediately prior to the onset of the main rains. During this window, evapotranspiration rates are highest.
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 3: HEAT EVENTS (Phase 3.5) -->
+    <!-- ========================================================================= -->
+    <div id="climate-panel-heat" class="space-y-6 hidden">
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-semibold text-cream">Extreme Heat Days (Annual Frequency)</h3>
+            <p class="text-xs text-cream/50">Days exceeding extreme thermal threshold (≥33°C plateau / ≥35°C lakeshore).</p>
+          </div>
+          <span class="text-xs font-mono text-muted">Historical Average: {{ avg_heat_days }} days/yr</span>
+        </div>
+        <div class="h-64 sm:h-72 w-full p-2 bg-forest-900/40 rounded-xl border border-white/5">
+          <canvas id="heatDaysChart"></canvas>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+        <div class="fp-card p-4 space-y-1">
+          <span class="fp-label">Heat Stress on Maize</span>
+          <p class="text-xs text-cream/70">
+            Temperatures &gt;32°C during anthesis (tasseling and silking) reduce pollen viability and seed set, leading to barren cobs.
+          </p>
+        </div>
+        <div class="fp-card p-4 space-y-1">
+          <span class="fp-label">Heat Stress on Legumes</span>
+          <p class="text-xs text-cream/70">
+            Groundnuts and soybeans abort blossoms when maximum ambient temperature exceeds 34°C, limiting pod development.
+          </p>
+        </div>
+        <div class="fp-card p-4 space-y-1">
+          <span class="fp-label">Irrigation Mitigation</span>
+          <p class="text-xs text-cream/70">
+            Farms with drip or furrow irrigation can moderate canopy microclimates during heat waves, mitigating yield loss by up to 35%.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Phase 3.7 Data Source & Attribution Panel / Modal -->
+  <div
+    id="source-drawer-backdrop"
+    class="fixed inset-0 bg-black/60 z-50 hidden transition-opacity"
+    onclick="toggleSourceDrawer()"
+  ></div>
+
+  <aside
+    id="source-drawer"
+    class="fixed inset-y-0 right-0 z-50 w-full sm:w-[480px] bg-forest-950 border-l border-white/10
+           transform translate-x-full transition-transform duration-200 p-6 flex flex-col justify-between"
+  >
+    <div class="space-y-6 overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <div class="flex items-center gap-2">
+          <i data-lucide="database" class="w-5 h-5 text-leaf"></i>
+          <h2 class="font-display text-lg font-semibold text-cream">Data Provenance &amp; Attribution</h2>
+        </div>
+        <button onclick="toggleSourceDrawer()" class="fp-btn-ghost !p-2" aria-label="Close drawer">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs text-cream/80">
+        <div class="p-3.5 rounded-xl bg-risk-medium/10 border border-risk-medium/30 text-risk-medium">
+          <div class="font-semibold flex items-center gap-1.5 mb-1">
+            <i data-lucide="alert-circle" class="w-4 h-4"></i> Synthetic Calibrated Demonstration Dataset
+          </div>
+          The records presented in this module are synthetically simulated models calibrated to Malawian agro-ecological benchmarks (2005–2024). They serve analytical modeling, scenario planning, and platform demonstration.
+        </div>
+
+        <div class="space-y-3">
+          <h3 class="text-cream font-semibold uppercase tracking-wider text-[11px]">Primary Sources</h3>
+          {% for src in sources %}
+            <div class="fp-card p-3.5 space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="font-medium text-cream">{{ src.name }}</span>
+                {% if src.is_synthetic %}
+                  <span class="fp-badge-medium !text-[10px] !px-2">Synthetic</span>
+                {% else %}
+                  <span class="fp-badge-low !text-[10px] !px-2">Certified</span>
+                {% endif %}
+              </div>
+              <p class="text-cream/60">{{ src.attribution }}</p>
+              {% if src.citation_url %}
+                <a href="{{ src.citation_url }}" target="_blank" rel="noopener noreferrer" class="text-leaf hover:underline inline-flex items-center gap-1">
+                  Reference source <i data-lucide="external-link" class="w-3 h-3"></i>
+                </a>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="space-y-2 pt-2 border-t border-white/10 text-cream/60">
+          <p><strong>Temporal Scope:</strong> 20 Complete Meteorological Years (2005–2024)</p>
+          <p><strong>District Coverage:</strong> Lilongwe, Kasungu, Salima, Blantyre</p>
+          <p><strong>Official Reference:</strong> For official real-time weather advisories, refer to the Department of Climate Change and Meteorological Services (DCCMS), Lilongwe, Malawi.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="pt-4 border-t border-white/10">
+      <button onclick="toggleSourceDrawer()" class="w-full fp-btn-ghost">
+        Close Attribution
+      </button>
+    </div>
+  </aside>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Tab Switching Logic
+  function switchClimateTab(tab) {
+    const tabs = ['rainfall', 'temp', 'heat'];
+    tabs.forEach(t => {
+      const panel = document.getElementById(`climate-panel-${t}`);
+      const btn = document.getElementById(`btn-tab-${t}`);
+      if (t === tab) {
+        panel?.classList.remove('hidden');
+        btn?.classList.add('bg-forest-700', 'text-cream');
+        btn?.classList.remove('text-cream/70');
+      } else {
+        panel?.classList.add('hidden');
+        btn?.classList.remove('bg-forest-700', 'text-cream');
+        btn?.classList.add('text-cream/70');
+      }
+    });
+  }
+
+  // Provenance Drawer Toggle
+  function toggleSourceDrawer() {
+    const drawer = document.getElementById('source-drawer');
+    const backdrop = document.getElementById('source-drawer-backdrop');
+    const isOpen = !drawer.classList.contains('translate-x-full');
+    if (isOpen) {
+      drawer.classList.add('translate-x-full');
+      backdrop.classList.add('hidden');
+    } else {
+      drawer.classList.remove('translate-x-full');
+      backdrop.classList.remove('hidden');
+    }
+  }
+
+  // Initialize Charts with Chart.js
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!window.Chart) return;
+
+    Chart.defaults.color = '#A8BDB0';
+    Chart.defaults.font.family = 'Inter, sans-serif';
+    Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.08)';
+
+    // =========================================================================
+    // 1. Annual Precipitation Chart (Bar + Mean Benchmark Line)
+    // =========================================================================
+    const rainData = {{ chart_rainfall_json|safe }};
+    const annualCtx = document.getElementById('annualRainChart');
+    if (annualCtx && rainData?.annual?.labels?.length > 0) {
+      const bgColors = rainData.annual.drought_flags.map(isDrought =>
+        isDrought ? 'rgba(231, 106, 106, 0.75)' : 'rgba(79, 183, 217, 0.65)'
+      );
+      const borderColors = rainData.annual.drought_flags.map(isDrought =>
+        isDrought ? '#E76A6A' : '#4FB7D9'
+      );
+
+      new Chart(annualCtx, {
+        type: 'bar',
+        data: {
+          labels: rainData.annual.labels,
+          datasets: [
+            {
+              label: 'Annual Rainfall (mm)',
+              data: rainData.annual.rainfall,
+              backgroundColor: bgColors,
+              borderColor: borderColors,
+              borderWidth: 1.2,
+              borderRadius: 4,
+            },
+            {
+              label: '20-Year Mean (' + rainData.annual.mean_benchmark + ' mm)',
+              data: rainData.annual.labels.map(() => rainData.annual.mean_benchmark),
+              type: 'line',
+              borderColor: '#F2B441',
+              borderWidth: 2,
+              borderDash: [5, 5],
+              pointRadius: 0,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'top', labels: { boxWidth: 10, boxHeight: 10 } },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) { return ctx.dataset.label + ': ' + ctx.raw + ' mm'; }
+              }
+            }
+          },
+          scales: {
+            y: { beginAtZero: true, ticks: { callback: v => v + ' mm' } }
+          }
+        }
+      });
+    }
+
+    // =========================================================================
+    // 2. Seasonal Curve & Horizons Comparison (Hist vs Outlook vs Scenario)
+    // =========================================================================
+    const seasonalCtx = document.getElementById('seasonalRainChart');
+    if (seasonalCtx && rainData?.seasonal_cycle?.labels?.length > 0) {
+      new Chart(seasonalCtx, {
+        type: 'line',
+        data: {
+          labels: rainData.seasonal_cycle.labels,
+          datasets: [
+            {
+              label: 'Historical 20-Yr Baseline (Observed)',
+              data: rainData.seasonal_cycle.historical,
+              borderColor: '#8FCB62',
+              backgroundColor: 'rgba(143, 203, 98, 0.15)',
+              pointBackgroundColor: '#8FCB62',
+              fill: true,
+              tension: 0.3,
+              borderWidth: 2.5,
+            },
+            {
+              label: '2024/25 Official Outlook',
+              data: rainData.seasonal_cycle.outlook,
+              borderColor: '#4FB7D9',
+              borderDash: [6, 4],
+              pointBackgroundColor: '#4FB7D9',
+              pointRadius: 4,
+              tension: 0.3,
+              borderWidth: 2,
+            },
+            {
+              label: 'Illustrative Scenario (-18%)',
+              data: rainData.seasonal_cycle.scenario,
+              borderColor: '#F2B441',
+              borderDash: [3, 3],
+              pointBackgroundColor: '#F2B441',
+              pointRadius: 3,
+              tension: 0.3,
+              borderWidth: 1.8,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'top', labels: { boxWidth: 10, boxHeight: 10 } },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) { return ctx.dataset.label + ': ' + ctx.raw + ' mm'; }
+              }
+            }
+          },
+          scales: {
+            y: { beginAtZero: true, ticks: { callback: v => v + ' mm' } }
+          }
+        }
+      });
+    }
+
+    // =========================================================================
+    // 3. Temperature 20-Year Trajectory
+    // =========================================================================
+    const tempData = {{ chart_temp_json|safe }};
+    const tempTrajCtx = document.getElementById('tempTrajectoryChart');
+    if (tempTrajCtx && tempData?.annual_trends?.labels?.length > 0) {
+      new Chart(tempTrajCtx, {
+        type: 'line',
+        data: {
+          labels: tempData.annual_trends.labels,
+          datasets: [
+            {
+              label: 'Mean Daily Max (°C)',
+              data: tempData.annual_trends.max,
+              borderColor: '#E76A6A',
+              backgroundColor: '#E76A6A',
+              pointRadius: 3,
+              tension: 0.2,
+              borderWidth: 2,
+            },
+            {
+              label: 'Mean Temperature (°C)',
+              data: tempData.annual_trends.mean,
+              borderColor: '#F2B441',
+              backgroundColor: '#F2B441',
+              pointRadius: 3,
+              tension: 0.2,
+              borderWidth: 2,
+            },
+            {
+              label: 'Mean Daily Min (°C)',
+              data: tempData.annual_trends.min,
+              borderColor: '#4FB7D9',
+              backgroundColor: '#4FB7D9',
+              pointRadius: 3,
+              tension: 0.2,
+              borderWidth: 2,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'top', labels: { boxWidth: 10, boxHeight: 10 } }
+          },
+          scales: {
+            y: { ticks: { callback: v => v + ' °C' } }
+          }
+        }
+      });
+    }
+
+    // =========================================================================
+    // 4. Monthly Temperature Profile
+    // =========================================================================
+    const tempMonthCtx = document.getElementById('tempMonthlyChart');
+    if (tempMonthCtx && tempData?.monthly_profile?.labels?.length > 0) {
+      new Chart(tempMonthCtx, {
+        type: 'line',
+        data: {
+          labels: tempData.monthly_profile.labels,
+          datasets: [
+            {
+              label: 'Avg Max (°C)',
+              data: tempData.monthly_profile.max,
+              borderColor: '#E76A6A',
+              pointRadius: 4,
+              borderWidth: 2,
+            },
+            {
+              label: 'Avg Mean (°C)',
+              data: tempData.monthly_profile.mean,
+              borderColor: '#F2B441',
+              pointRadius: 3,
+              borderWidth: 1.5,
+            },
+            {
+              label: 'Avg Min (°C)',
+              data: tempData.monthly_profile.min,
+              borderColor: '#4FB7D9',
+              pointRadius: 4,
+              borderWidth: 2,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'top', labels: { boxWidth: 10, boxHeight: 10 } }
+          },
+          scales: {
+            y: { ticks: { callback: v => v + ' °C' } }
+          }
+        }
+      });
+    }
+
+    // =========================================================================
+    // 5. Heat Days Annual Frequency Chart
+    // =========================================================================
+    const heatData = {{ chart_heat_json|safe }};
+    const heatCtx = document.getElementById('heatDaysChart');
+    if (heatCtx && heatData?.labels?.length > 0) {
+      new Chart(heatCtx, {
+        type: 'bar',
+        data: {
+          labels: heatData.labels,
+          datasets: [
+            {
+              label: 'Extreme Heat Days',
+              data: heatData.heat_days,
+              backgroundColor: 'rgba(231, 106, 106, 0.65)',
+              borderColor: '#E76A6A',
+              borderWidth: 1.2,
+              borderRadius: 4,
+            },
+            {
+              label: 'Mean (' + heatData.average_benchmark + ' days/yr)',
+              data: heatData.labels.map(() => heatData.average_benchmark),
+              type: 'line',
+              borderColor: '#F2B441',
+              borderWidth: 2,
+              borderDash: [5, 5],
+              pointRadius: 0,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'top', labels: { boxWidth: 10, boxHeight: 10 } }
+          },
+          scales: {
+            y: { beginAtZero: true, ticks: { callback: v => v + ' days' } }
+          }
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

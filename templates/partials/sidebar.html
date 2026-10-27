@@ -43,7 +43,9 @@
     <a href="{% url 'farms:farm_history' %}" class="fp-nav-item {% if active_nav == 'farm_history' %}fp-nav-item-active{% endif %}">
       <i data-lucide="history" class="w-4 h-4"></i> Farm History
     </a>
-    <a href="#" class="fp-nav-item"><i data-lucide="cloud-sun" class="w-4 h-4"></i> Climate Intelligence</a>
+    <a href="{% url 'climate:dashboard' %}" class="fp-nav-item {% if active_nav == 'climate' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="cloud-sun" class="w-4 h-4"></i> Climate Intelligence
+    </a>
     <a href="#" class="fp-nav-item"><i data-lucide="trending-up" class="w-4 h-4"></i> Market Intelligence</a>
     <a href="#" class="fp-nav-item"><i data-lucide="leaf" class="w-4 h-4"></i> Crop Planner</a>
     <a href="#" class="fp-nav-item"><i data-lucide="sliders-horizontal" class="w-4 h-4"></i> Scenario Simulator</a>
