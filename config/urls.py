@@ -27,4 +27,5 @@ urlpatterns = [
     path('', include('climate.urls')),
     path('', include('market.urls')),
     path('', include('planner.urls')),
+    path('', include('innovation.urls')),
 ]

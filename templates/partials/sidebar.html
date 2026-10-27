@@ -61,6 +61,27 @@
     <a href="{% url 'farms:season_review_index' %}" class="fp-nav-item {% if active_nav == 'season_review' %}fp-nav-item-active{% endif %}">
       <i data-lucide="clipboard-check" class="w-4 h-4"></i> Season Review
     </a>
+
+    <!-- Innovation Lab Showcase -->
+    <div class="pt-3 pb-1 px-1">
+      <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-leaf/80 px-2 mb-1">
+        <span>Innovation Lab</span>
+        <span class="bg-leaf/20 text-leaf px-1.5 py-0.5 rounded text-[9px] font-semibold">Flagship</span>
+      </div>
+    </div>
+    <a href="{% url 'innovation:satellite_twin' %}" class="fp-nav-item {% if active_nav == 'satellite_twin' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="satellite" class="w-4 h-4 text-sky-400"></i> Satellite Field Twin
+    </a>
+    <a href="{% url 'innovation:ussd_simulator' %}" class="fp-nav-item {% if active_nav == 'ussd_simulator' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="phone" class="w-4 h-4 text-emerald-400"></i> USSD *384# Terminal
+    </a>
+    <a href="{% url 'innovation:parametric_insurance' %}" class="fp-nav-item {% if active_nav == 'parametric_insurance' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i> Parametric Insurance
+    </a>
+    <a href="{% url 'innovation:mlimi_advisor' %}" class="fp-nav-item {% if active_nav == 'mlimi_advisor' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="bot" class="w-4 h-4 text-purple-400"></i> Mlimi AI (Chichewa)
+    </a>
+
     <a href="{% url 'settings_index' %}" class="fp-nav-item {% if active_nav == 'settings' %}fp-nav-item-active{% endif %}">
       <i data-lucide="settings" class="w-4 h-4"></i> Settings
     </a>

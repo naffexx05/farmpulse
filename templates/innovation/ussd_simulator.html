@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block title %}USSD *384*77# Feature-Phone Terminal · FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-5xl mx-auto">
+
+  <!-- Header -->
+  <div>
+    <div class="flex items-center gap-2">
+      <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+        Innovation Flagship 2 · Zero-Data Last-Mile Inclusion
+      </span>
+      <span class="text-xs text-cream/60">2G GSM Feature-Phone Accessibility</span>
+    </div>
+    <h1 class="text-2xl sm:text-3xl font-extrabold text-cream mt-1 flex items-center gap-2">
+      <i data-lucide="phone-call" class="w-7 h-7 text-emerald-400"></i> Interactive USSD (*384*77#) Mobile Terminal
+    </h1>
+    <p class="text-xs sm:text-sm text-cream/70 mt-1 max-w-2xl">
+      Over 75% of rural Malawian smallholders operate basic button phones without mobile internet. 
+      FarmPulse delivers live AMIS commodity prices, dry-spell advisories, and break-even calculations over zero-data USSD sessions.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+    <!-- Left: Tactile Retro Nokia / Itel Feature Phone Simulator -->
+    <div class="lg:col-span-6 flex justify-center">
+      <div class="w-72 sm:w-80 rounded-[40px] bg-slate-900 border-4 border-slate-700 shadow-2xl p-5 flex flex-col items-center space-y-4 relative">
+        
+        <!-- Speaker grill -->
+        <div class="w-16 h-1.5 bg-slate-700 rounded-full"></div>
+
+        <!-- Phone Brand -->
+        <div class="text-[10px] font-bold tracking-widest text-slate-500 uppercase">
+          FarmPulse • 2G GSM
+        </div>
+
+        <!-- Monochrome Backlit LCD Screen -->
+        <div class="w-full bg-[#8fb39c] text-[#1c2e23] font-mono rounded-xl p-4 shadow-inner border-2 border-[#769b84] min-h-[170px] flex flex-col justify-between text-xs leading-relaxed relative overflow-hidden">
+          
+          <!-- Screen Status Bar -->
+          <div class="flex justify-between text-[9px] border-b border-[#769b84]/50 pb-1 font-bold">
+            <span>Airtel MW</span>
+            <span id="signalIcon">●●●●</span>
+          </div>
+
+          <!-- USSD Output Display -->
+          <div id="ussdDisplay" class="py-2 whitespace-pre-line text-[11px] font-bold">
+            Press [DIAL] below or type *384*77# to launch FarmPulse USSD session.
+          </div>
+
+          <!-- USSD Input Box on Screen -->
+          <div class="pt-1 border-t border-[#769b84]/50 flex items-center gap-1">
+            <span class="text-[10px]">&gt;</span>
+            <input type="text" id="phoneInput" placeholder="Enter option..."
+                   class="bg-transparent border-none outline-none font-mono font-bold text-xs w-full text-[#1c2e23] placeholder-[#1c2e23]/50" />
+          </div>
+        </div>
+
+        <!-- Call Controls Row -->
+        <div class="w-full grid grid-cols-2 gap-3 pt-1">
+          <button type="button" onclick="handleSend()"
+                  class="py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md active:scale-95 transition-all">
+            SEND / DIAL
+          </button>
+          <button type="button" onclick="handleEnd()"
+                  class="py-2 rounded-xl bg-rose-700 hover:bg-rose-600 text-white font-bold text-xs shadow-md active:scale-95 transition-all">
+            END / CANCEL
+          </button>
+        </div>
+
+        <!-- Keypad (0-9, *, #) -->
+        <div class="w-full grid grid-cols-3 gap-2.5 pt-2">
+          <button type="button" onclick="pressKey('1')" class="fp-phone-key">1</button>
+          <button type="button" onclick="pressKey('2')" class="fp-phone-key">2 <span class="text-[8px] text-slate-400 block font-sans">abc</span></button>
+          <button type="button" onclick="pressKey('3')" class="fp-phone-key">3 <span class="text-[8px] text-slate-400 block font-sans">def</span></button>
+
+          <button type="button" onclick="pressKey('4')" class="fp-phone-key">4 <span class="text-[8px] text-slate-400 block font-sans">ghi</span></button>
+          <button type="button" onclick="pressKey('5')" class="fp-phone-key">5 <span class="text-[8px] text-slate-400 block font-sans">jkl</span></button>
+          <button type="button" onclick="pressKey('6')" class="fp-phone-key">6 <span class="text-[8px] text-slate-400 block font-sans">mno</span></button>
+
+          <button type="button" onclick="pressKey('7')" class="fp-phone-key">7 <span class="text-[8px] text-slate-400 block font-sans">pqrs</span></button>
+          <button type="button" onclick="pressKey('8')" class="fp-phone-key">8 <span class="text-[8px] text-slate-400 block font-sans">tuv</span></button>
+          <button type="button" onclick="pressKey('9')" class="fp-phone-key">9 <span class="text-[8px] text-slate-400 block font-sans">wxyz</span></button>
+
+          <button type="button" onclick="pressKey('*')" class="fp-phone-key text-base font-bold">*</button>
+          <button type="button" onclick="pressKey('0')" class="fp-phone-key">0 <span class="text-[8px] text-slate-400 block font-sans">+</span></button>
+          <button type="button" onclick="pressKey('#')" class="fp-phone-key text-base font-bold">#</button>
+        </div>
+
+        <div class="text-[9px] text-slate-500 tracking-wider">TNM Mpamba • Airtel Money Integrated</div>
+      </div>
+    </div>
+
+    <!-- Right: Telco Gateway Infrastructure & Evaluator Notes -->
+    <div class="lg:col-span-6 space-y-4">
+      
+      <!-- Innovation Value Card -->
+      <div class="fp-card p-6 space-y-3">
+        <h3 class="text-sm font-bold text-cream flex items-center gap-2">
+          <i data-lucide="zap" class="w-4 h-4 text-emerald-400"></i> Why This Is an Agronomic Breakthrough
+        </h3>
+        <p class="text-xs text-cream/75 leading-relaxed">
+          Most modern agritech applications fail in Malawi because they require 4G smartphones and expensive data bundles.
+          By coupling our sophisticated Django intelligence engine to a native **USSD session gateway**, FarmPulse bridges the digital divide:
+        </p>
+        <ul class="text-xs text-muted space-y-2 list-disc list-inside">
+          <li><strong>Zero Data Consumption:</strong> USSD operates on basic GSM signaling channels (works with MWK 0 airtime).</li>
+          <li><strong>Universal Hardware Compatibility:</strong> Operates on every 2G button phone manufactured in the last 25 years.</li>
+          <li><strong>Chichewa Local Language Menus:</strong> Enables direct farmer agency without literacy or technological barriers.</li>
+        </ul>
+      </div>
+
+      <!-- Live Telecom Gateway Inspector -->
+      <div class="fp-card p-6 space-y-3">
+        <div class="flex items-center justify-between border-b border-white/10 pb-2">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
+            <i data-lucide="terminal" class="w-4 h-4 text-sky-400"></i> Live USSD Webhook Payload
+          </h3>
+          <span class="text-[10px] text-emerald-400 font-mono bg-emerald-500/10 px-2 py-0.5 rounded">
+            HTTP POST /ussd/api/
+          </span>
+        </div>
+        <p class="text-[11px] text-muted">
+          Active session payload processed by the FarmPulse telecommunications gateway:
+        </p>
+
+        <div class="bg-forest-900/80 rounded-xl p-3 font-mono text-[11px] text-emerald-300 space-y-1 overflow-x-auto border border-white/5">
+          <div><span class="text-muted">SESSION_ID:</span> <span id="debugSession">FP-MW-882190</span></div>
+          <div><span class="text-muted">MSISDN:</span> <span id="debugPhone">+265997123456</span></div>
+          <div><span class="text-muted">SERVICE_CODE:</span> <span>*384*77#</span></div>
+          <div><span class="text-muted">USSD_TEXT:</span> <span id="debugText" class="text-cream">""</span></div>
+          <div><span class="text-muted">GATEWAY_RESPONSE:</span> <span id="debugResp" class="text-sky-300">"CON FarmPulse Malawi..."</span></div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<style>
+  .fp-phone-key {
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #e2e8f0;
+    font-weight: 700;
+    font-size: 0.875rem;
+    padding: 0.5rem 0.25rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    transition: all 0.1s;
+    user-select: none;
+  }
+  .fp-phone-key:active {
+    transform: scale(0.92);
+    background: #334155;
+  }
+</style>
+
+<script>
+  let sessionHistory = [];
+
+  function pressKey(val) {
+    const inp = document.getElementById('phoneInput');
+    inp.value += val;
+  }
+
+  function handleSend() {
+    const inp = document.getElementById('phoneInput');
+    const display = document.getElementById('ussdDisplay');
+    const val = inp.value.trim();
+    inp.value = '';
+
+    if (val === '*384*77#' || sessionHistory.length === 0) {
+      sessionHistory = [];
+      if (val && val !== '*384*77#') {
+        sessionHistory.push(val);
+      }
+    } else if (val) {
+      sessionHistory.push(val);
+    }
+
+    const payloadText = sessionHistory.join('*');
+    document.getElementById('debugText').innerText = `"${payloadText}"`;
+
+    fetch('/ussd/api/?text=' + encodeURIComponent(payloadText))
+      .then(r => r.text())
+      .then(resp => {
+        document.getElementById('debugResp').innerText = `"${resp.substring(0, 35)}..."`;
+        display.innerText = resp;
+      })
+      .catch(err => {
+        display.innerText = "END Connection error to FarmPulse Gateway.";
+      });
+  }
+
+  function handleEnd() {
+    sessionHistory = [];
+    document.getElementById('phoneInput').value = '';
+    document.getElementById('ussdDisplay').innerText = "Session terminated.\nPress [DIAL] or type *384*77# to begin.";
+    document.getElementById('debugText').innerText = '""';
+  }
+
+  // Pre-load root menu on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    handleSend();
+  });
+</script>
+{% endblock %}

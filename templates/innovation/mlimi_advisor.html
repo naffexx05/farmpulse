@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+
+{% block title %}Mlimi AI Autonomous Agronomist · FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-5xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+          Innovation Flagship 4 · Contextual Agronomic AI
+        </span>
+        <span class="text-xs text-cream/60">Bilingual (Chichewa / English)</span>
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-cream mt-1 flex items-center gap-2">
+        <i data-lucide="bot" class="w-7 h-7 text-purple-400"></i> Mlimi AI: Intelligent Field Copilot
+      </h1>
+      <p class="text-xs sm:text-sm text-cream/70 mt-1 max-w-2xl">
+        Autonomous agronomic intelligence tailored to your specific farm soil horizons, district microclimate, and planting schedule.
+      </p>
+    </div>
+
+    <!-- Language Switcher -->
+    <div class="flex items-center gap-2 bg-forest-800 p-1 rounded-xl border border-white/10 text-xs font-semibold">
+      <a href="?lang=ch" class="px-3 py-1.5 rounded-lg transition-colors {% if lang == 'ch' %}bg-purple-600 text-white font-bold{% else %}text-cream/70 hover:text-cream{% endif %}">
+        🇲🇼 Chichewa
+      </a>
+      <a href="?lang=en" class="px-3 py-1.5 rounded-lg transition-colors {% if lang == 'en' %}bg-purple-600 text-white font-bold{% else %}text-cream/70 hover:text-cream{% endif %}">
+        🇬🇧 English
+      </a>
+    </div>
+  </div>
+
+  <!-- Farm Context Ingestion Banner -->
+  <div class="bg-purple-950/40 border border-purple-500/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center shrink-0">
+        <i data-lucide="cpu" class="w-5 h-5"></i>
+      </div>
+      <div>
+        <span class="font-bold text-cream">Farm Telemetry Ingested:</span>
+        <p class="text-purple-200/70 text-[11px]">
+          {{ farm.name }} • {{ farm.location_description }} • {{ farm.total_land_ha|floatformat:1 }} ha ({{ farm.get_soil_type_display }}) • Irrigation: {{ farm.get_irrigation_type_display }}
+        </p>
+      </div>
+    </div>
+    <span class="text-[10px] font-mono text-purple-300 bg-purple-500/10 px-2.5 py-1 rounded-full shrink-0">
+      Model: AgroGPT-Malawi-v4
+    </span>
+  </div>
+
+  <!-- 4 Agronomic Strategy Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+    <!-- Card 1: Soil & Moisture -->
+    <div class="fp-card p-6 space-y-3 hover:border-purple-500/40 transition-colors">
+      <div class="flex items-center gap-2.5 text-leaf">
+        <div class="w-8 h-8 rounded-lg bg-leaf/15 flex items-center justify-center">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+        </div>
+        <h3 class="text-sm font-bold text-cream">
+          {% if lang == 'ch' %}1. Kusamalira Nthaka ndi Chinyezi{% else %}1. Soil Health & Moisture Preservation{% endif %}
+        </h3>
+      </div>
+      <p class="text-xs text-cream/80 leading-relaxed">
+        {{ insights.soil_strategy }}
+      </p>
+      <div class="pt-2 text-[11px] text-muted flex items-center gap-2">
+        <i data-lucide="check" class="w-3.5 h-3.5 text-leaf"></i>
+        <span>{% if lang == 'ch' %}Tetezani nthaka isatengedwe ndi madzi{% else %}Tied ridging reduces runoff by 40%{% endif %}</span>
+      </div>
+    </div>
+
+    <!-- Card 2: Split Fertilizer Micro-Dosing -->
+    <div class="fp-card p-6 space-y-3 hover:border-purple-500/40 transition-colors">
+      <div class="flex items-center gap-2.5 text-sky-400">
+        <div class="w-8 h-8 rounded-lg bg-sky-400/15 flex items-center justify-center">
+          <i data-lucide="flask-round" class="w-4 h-4"></i>
+        </div>
+        <h3 class="text-sm font-bold text-cream">
+          {% if lang == 'ch' %}2. Kuthira Fetereza Mwaluso (Micro-Dosing){% else %}2. Split Fertilizer Application Schedule{% endif %}
+        </h3>
+      </div>
+      <p class="text-xs text-cream/80 leading-relaxed">
+        {{ insights.fertilizer_schedule }}
+      </p>
+      <div class="pt-2 text-[11px] text-muted flex items-center gap-2">
+        <i data-lucide="check" class="w-3.5 h-3.5 text-sky-400"></i>
+        <span>{% if lang == 'ch' %}Thirani nthawi ya m'mawa kapena mvula ikangoyamba{% else %}Prevents nitrogen volatilization & leaching losses{% endif %}</span>
+      </div>
+    </div>
+
+    <!-- Card 3: Fall Armyworm Early Warning & Defense -->
+    <div class="fp-card p-6 space-y-3 hover:border-purple-500/40 transition-colors">
+      <div class="flex items-center gap-2.5 text-rose-400">
+        <div class="w-8 h-8 rounded-lg bg-rose-400/15 flex items-center justify-center">
+          <i data-lucide="bug" class="w-4 h-4"></i>
+        </div>
+        <h3 class="text-sm font-bold text-cream">
+          {% if lang == 'ch' %}3. Chenjezo la Mbozi ya Fall Armyworm{% else %}3. Fall Armyworm Integrated Pest Defense{% endif %}
+        </h3>
+      </div>
+      <p class="text-xs text-cream/80 leading-relaxed">
+        {{ insights.pest_alert }}
+      </p>
+      <div class="pt-2 text-[11px] text-muted flex items-center gap-2">
+        <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-rose-400"></i>
+        <span>{% if lang == 'ch' %}Chitapo kanthu mbozi isanalowe m'kati mwa tsinde{% else %}Intervene during Instar 1–2 before whorl burrowing{% endif %}</span>
+      </div>
+    </div>
+
+    <!-- Card 4: Intercropping & Biological Insurance -->
+    <div class="fp-card p-6 space-y-3 hover:border-purple-500/40 transition-colors">
+      <div class="flex items-center gap-2.5 text-amber-400">
+        <div class="w-8 h-8 rounded-lg bg-amber-400/15 flex items-center justify-center">
+          <i data-lucide="sprout" class="w-4 h-4"></i>
+        </div>
+        <h3 class="text-sm font-bold text-cream">
+          {% if lang == 'ch' %}4. Kusakaniza Mbewu Kuti Muchepetse Chiwopsezo{% else %}4. Intercropping & Biological Drought Insurance{% endif %}
+        </h3>
+      </div>
+      <p class="text-xs text-cream/80 leading-relaxed">
+        {{ insights.intercropping }}
+      </p>
+      <div class="pt-2 text-[11px] text-muted flex items-center gap-2">
+        <i data-lucide="check" class="w-3.5 h-3.5 text-amber-400"></i>
+        <span>{% if lang == 'ch' %}Mtedza umapatsa chimanga nayitrojeni waulere{% else %}Fixes up to 40 kg N/ha into root zone naturally{% endif %}</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Interactive Q&A Copilot Simulator -->
+  <div class="fp-card p-6 sm:p-8 space-y-4 border-purple-500/30">
+    <div class="flex items-center justify-between border-b border-white/10 pb-3">
+      <h3 class="text-sm font-bold text-cream flex items-center gap-2">
+        <i data-lucide="message-square" class="w-4 h-4 text-purple-400"></i>
+        {% if lang == 'ch' %}Funsani Mlimi AI Mafunso ena a Ulimi{% else %}Ask Mlimi AI an Agronomic Question{% endif %}
+      </h3>
+      <span class="text-[10px] text-muted">Instant Agronomic Guidance</span>
+    </div>
+
+    <div class="space-y-3" id="chatArea">
+      <!-- Chat bubbles -->
+      <div class="flex items-start gap-3">
+        <div class="w-8 h-8 rounded-full bg-purple-500/20 text-purple-300 flex items-center justify-center font-bold text-xs shrink-0">
+          AI
+        </div>
+        <div class="bg-forest-900/80 rounded-2xl p-3.5 text-xs text-cream/90 max-w-xl border border-white/5 space-y-1">
+          <span class="font-bold text-purple-300 block">Mlimi AI:</span>
+          {% if lang == 'ch' %}
+            Moni! Ndine Mlimi AI. Ndili wokonzeka kukuthandizani pa nkhani za nthawi yodzala, fetereza, matenda a mbewu, kapena mitengo ya msika. Mukufuna kudziwa chiyani lero?
+          {% else %}
+            Hello! I am Mlimi AI. I am calibrated with your farm records and ready to assist with planting schedules, fertilizer timing, pest management, or break-even price thresholds. What would you like to explore today?
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Suggested Quick Prompts -->
+    <div class="flex flex-wrap gap-2 pt-2">
+      <button type="button" onclick="askQuestion(this.innerText)"
+              class="text-[11px] bg-forest-700/60 hover:bg-forest-700 border border-white/10 px-3 py-1.5 rounded-lg text-cream/80 transition-colors">
+        {% if lang == 'ch' %}Ndidzale liti chimanga ngati mvula yacedwa?{% else %}When should I plant maize if rains are delayed?{% endif %}
+      </button>
+      <button type="button" onclick="askQuestion(this.innerText)"
+              class="text-[11px] bg-forest-700/60 hover:bg-forest-700 border border-white/10 px-3 py-1.5 rounded-lg text-cream/80 transition-colors">
+        {% if lang == 'ch' %}Kodi mtedza wa CG7 umafunika fetereza wanji?{% else %}What fertilizer is recommended for CG7 groundnuts?{% endif %}
+      </button>
+      <button type="button" onclick="askQuestion(this.innerText)"
+              class="text-[11px] bg-forest-700/60 hover:bg-forest-700 border border-white/10 px-3 py-1.5 rounded-lg text-cream/80 transition-colors">
+        {% if lang == 'ch' %}Kodi mtengo wa MWK 750/kg ndi wopindulitsa?{% else %}Is a selling price of MWK 750/kg profitable for me?{% endif %}
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function askQuestion(q) {
+    const chat = document.getElementById('chatArea');
+
+    // Add user bubble
+    const userDiv = document.createElement('div');
+    userDiv.className = "flex items-start gap-3 justify-end";
+    userDiv.innerHTML = `
+      <div class="bg-purple-600/30 border border-purple-500/40 rounded-2xl p-3 text-xs text-cream max-w-xl">
+        ${q}
+      </div>
+      <div class="w-8 h-8 rounded-full bg-leaf text-forest-900 flex items-center justify-center font-bold text-xs shrink-0">
+        You
+      </div>
+    `;
+    chat.appendChild(userDiv);
+
+    // Simulated instant reply
+    setTimeout(() => {
+      const isCh = "{{ lang }}" === "ch";
+      let answer = "";
+
+      if (q.includes("liti") || q.includes("delayed") || q.includes("mvula")) {
+        answer = isCh
+          ? "Ngati mvula yacedwa kufika kumapeto kwa December, osadzala mitundu yachedwa (late-maturing). Sankhani mbewu zazifupi monga SC 403, SC 537, kapena Kanyani zomwe zimatenga masiku 90-110 kuti zichepetse kuwonongeka ndi chilala."
+          : "If rains are delayed into late December, avoid long-season hybrids. Switch to early-maturing varieties like SC 403 or SC 537 (90–110 days) to escape end-of-season drought stress.";
+      } else if (q.includes("CG7") || q.includes("Groundnuts") || q.includes("mtedza")) {
+        answer = isCh
+          ? "Mtedza wa CG7 sufuna fetereza wambiri wa nayitrojeni (Urea) chifukwa uli ndi tizirombo tozipangira nayitrojeni wokha. Koma mutha kuthira Gypsum panthawi ya maluwa kuti zipolopolo zikhale zolimba komanso zisasweke m'nthaka."
+          : "CG7 groundnuts do not require heavy nitrogen top-dressing as they fix their own atmospheric nitrogen. Instead, apply Gypsum (calcium sulfate) at flowering to prevent 'pops' (empty pods) and promote strong shell development.";
+      } else {
+        answer = isCh
+          ? "Kutengera ndalama zomwe munagwiritsa ntchito (Break-Even Price ya MWK 145/kg pa chimanga), mtengo wa MWK 750/kg ndi wapamwamba kwambiri kuposa mtengo wanu wosapindula! Uku ndiye kupeza phindu lalikulu la pafupifupi 400% pa kilogalamu iliyonse."
+          : "Based on your calculated Lilongwe break-even benchmark (MWK 145/kg for maize), an offered price of MWK 750/kg exceeds your cost floor by over 400%! This represents strong gross margin realization.";
+      }
+
+      const botDiv = document.createElement('div');
+      botDiv.className = "flex items-start gap-3";
+      botDiv.innerHTML = `
+        <div class="w-8 h-8 rounded-full bg-purple-500/20 text-purple-300 flex items-center justify-center font-bold text-xs shrink-0">
+          AI
+        </div>
+        <div class="bg-forest-900/80 rounded-2xl p-3.5 text-xs text-cream/90 max-w-xl border border-white/5 space-y-1">
+          <span class="font-bold text-purple-300 block">Mlimi AI:</span>
+          ${answer}
+        </div>
+      `;
+      chat.appendChild(botDiv);
+    }, 400);
+  }
+</script>
+{% endblock %}

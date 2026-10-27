@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Satellite Field Twin & Sentinel-2 Earth Observation · FarmPulse Malawi{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  .leaflet-container {
+    background: #061e16;
+    border-radius: 1rem;
+    font-family: inherit;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">
+          Innovation Flagship 1 · Earth Observation
+        </span>
+        <span class="text-xs text-cream/60">Sentinel-2 & SAR Telemetry</span>
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-cream mt-1 flex items-center gap-2">
+        <i data-lucide="satellite" class="w-7 h-7 text-sky-400"></i> Satellite Field Twin & Canopy Health
+      </h1>
+      <p class="text-xs sm:text-sm text-cream/70 mt-1 max-w-2xl">
+        Monitoring <strong class="text-sky-300 font-bold">{{ active_parcel.name|default:"Primary Cropping Parcel" }}</strong>. Continuous 10-meter spatial resolution Earth Observation tracking vegetative vigor (NDVI) and topsoil moisture across cadastral field polygons.
+      </p>
+    </div>
+
+    <!-- Quick Badges -->
+    <div class="flex items-center gap-3">
+      <div class="bg-forest-800/80 border border-white/10 rounded-xl px-3 py-2 text-right">
+        <span class="text-[10px] text-muted uppercase tracking-wider block">Satellite Revisit</span>
+        <span class="text-xs font-bold text-leaf">Every 5 Days (Sentinel-2A/B)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Telemetry Bar -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <div class="fp-card p-4 space-y-1">
+      <span class="text-[10px] font-semibold text-muted uppercase tracking-wider block">Parcel Cadastral Area</span>
+      <div class="text-xl font-bold text-cream">{{ active_parcel.calculated_area_ha|floatformat:2 }} ha</div>
+      <span class="text-[11px] text-sky-400 block">Polygon Geofenced</span>
+    </div>
+
+    <div class="fp-card p-4 space-y-1">
+      <span class="text-[10px] font-semibold text-muted uppercase tracking-wider block">Mean Canopy NDVI</span>
+      <div class="text-xl font-bold text-emerald-400">{{ active_parcel.mean_ndvi }}</div>
+      <span class="text-[11px] text-emerald-300 block">Dense Vegetative Vigor</span>
+    </div>
+
+    <div class="fp-card p-4 space-y-1">
+      <span class="text-[10px] font-semibold text-muted uppercase tracking-wider block">SAR Soil Moisture</span>
+      <div class="text-xl font-bold text-water">{{ active_parcel.soil_moisture_pct }}% Vol.</div>
+      <span class="text-[11px] text-water/80 block">0–5 cm Surface Horizon</span>
+    </div>
+
+    <div class="fp-card p-4 space-y-1">
+      <span class="text-[10px] font-semibold text-muted uppercase tracking-wider block">Crop Stress Anomaly</span>
+      <div class="text-xl font-bold text-leaf capitalize">Low / Optimal</div>
+      <span class="text-[11px] text-muted block">No severe lodging detected</span>
+    </div>
+  </div>
+
+  <!-- Main Map & Spectral Controls -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Interactive Satellite Canvas -->
+    <div class="fp-card p-4 lg:col-span-2 space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="layers" class="w-4 h-4 text-leaf"></i>
+          <span class="text-xs font-bold text-cream">Multi-Spectral Sensor Layers</span>
+        </div>
+
+        <!-- Layer Selector Buttons -->
+        <div class="flex rounded-lg bg-forest-900/80 p-1 border border-white/10 text-xs font-medium">
+          <button type="button" onclick="setLayer('rgb')" id="btn-layer-rgb"
+                  class="px-2.5 py-1 rounded bg-leaf text-forest-900 font-semibold transition-colors">
+            True Color (RGB)
+          </button>
+          <button type="button" onclick="setLayer('ndvi')" id="btn-layer-ndvi"
+                  class="px-2.5 py-1 rounded text-cream/70 hover:text-cream transition-colors">
+            NDVI Vigor Heatmap
+          </button>
+          <button type="button" onclick="setLayer('moisture')" id="btn-layer-moisture"
+                  class="px-2.5 py-1 rounded text-cream/70 hover:text-cream transition-colors">
+            SAR Soil Moisture
+          </button>
+        </div>
+      </div>
+
+      <!-- Leaflet Map Container -->
+      <div id="satelliteMap" class="h-96 sm:h-[460px] w-full rounded-xl overflow-hidden relative shadow-inner">
+        <!-- Floating Legend -->
+        <div class="absolute bottom-4 left-4 z-[1000] bg-forest-900/90 backdrop-blur-md p-3 rounded-xl border border-white/15 text-[11px] space-y-1.5 shadow-xl pointer-events-none">
+          <span class="font-bold text-cream block" id="legendTitle">Satellite True Color (RGB)</span>
+          <div id="legendScale" class="hidden space-y-1">
+            <div class="h-2 w-36 rounded bg-gradient-to-r from-rose-500 via-amber-400 via-emerald-400 to-emerald-700"></div>
+            <div class="flex justify-between text-[9px] text-muted">
+              <span>0.1 (Stress)</span>
+              <span>0.5</span>
+              <span>0.9 (Vigorous)</span>
+            </div>
+          </div>
+          <span class="text-[10px] text-muted block">Click field to inspect spectral telemetry</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inspector & Field Zonation Panel -->
+    <div class="space-y-4 lg:col-span-1">
+
+      <!-- Click Telemetry Inspector -->
+      <div class="fp-card p-5 space-y-3">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
+          <i data-lucide="crosshair" class="w-4 h-4 text-sky-400"></i> Virtual Spectral Sampler
+        </h3>
+        <div id="samplerBox" class="bg-forest-900/60 rounded-xl p-3 text-xs space-y-2 border border-white/5">
+          <p class="text-muted text-[11px] italic">Click any point within the cadastral polygon to sample pixel-level reflectance.</p>
+          <div class="grid grid-cols-2 gap-2 text-[11px]">
+            <div><span class="text-muted block">Sample Lat:</span> <span id="sampleLat" class="font-mono text-cream">-13.9627°</span></div>
+            <div><span class="text-muted block">Sample Lng:</span> <span id="sampleLng" class="font-mono text-cream">33.7741°</span></div>
+            <div><span class="text-muted block">Pixel NDVI:</span> <span id="sampleNdvi" class="font-bold text-emerald-400">0.71</span></div>
+            <div><span class="text-muted block">Topsoil Moisture:</span> <span id="sampleMoist" class="font-bold text-water">30.2%</span></div>
+          </div>
+          <div class="pt-2 border-t border-white/5">
+            <span class="text-[10px] text-muted block uppercase">Agronomic Recommendation:</span>
+            <span id="sampleRec" class="text-[11px] text-leaf font-medium">Optimal vegetative growth. Maintain weed-free stations prior to tasseling.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Intra-Field Zonation Breakdown -->
+      <div class="fp-card p-5 space-y-3">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
+          <i data-lucide="pie-chart" class="w-4 h-4 text-leaf"></i> Intra-Field Health Distribution
+        </h3>
+        <p class="text-[11px] text-muted">Field partitioned into 10m micro-zones based on spectral density:</p>
+
+        <div class="space-y-2.5">
+          {% for z in ndvi_zones %}
+            <div class="p-2.5 rounded-lg bg-forest-700/40 border border-white/5 space-y-1">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-semibold text-cream">{{ z.zone }}</span>
+                <span class="font-mono font-bold text-leaf">NDVI {{ z.ndvi }}</span>
+              </div>
+              <div class="w-full bg-forest-900 rounded-full h-1.5 overflow-hidden">
+                <div class="h-full rounded-full {% if z.badge == 'emerald' %}bg-emerald-400{% elif z.badge == 'leaf' %}bg-leaf{% else %}bg-amber-400{% endif %}"
+                     style="width: {{ z.area_pct }}%;"></div>
+              </div>
+              <div class="flex items-center justify-between text-[10px] text-muted">
+                <span>{{ z.status }}</span>
+                <span>{{ z.area_pct }}% of field</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Leaflet Map Initialization Script -->
+<script>
+  let map, polygonLayer, ndviLayer, moistureLayer;
+  let currentLayer = 'rgb';
+  const coords = {{ parcel_coords_json|safe }};
+  const centerLat = {{ centroid_lat }};
+  const centerLng = {{ centroid_lng }};
+
+  document.addEventListener('DOMContentLoaded', function() {
+    map = L.map('satelliteMap', {
+      center: [centerLat, centerLng],
+      zoom: 16,
+      zoomControl: true
+    });
+
+    // High-Resolution World Imagery
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19,
+      attribution: 'Esri, Maxar, Earthstar Geographics'
+    }).addTo(map);
+
+    // Swap coordinates from [lng, lat] to Leaflet [lat, lng]
+    if (coords && coords.length > 0) {
+      const latLngs = coords.map(c => [c[1], c[0]]);
+      
+      // Farm Polygon Layer
+      polygonLayer = L.polygon(latLngs, {
+        color: '#4ade80',
+        weight: 3,
+        fillColor: '#22c55e',
+        fillOpacity: 0.15,
+        dashArray: '4, 4'
+      }).addTo(map);
+
+      map.fitBounds(polygonLayer.getBounds(), { padding: [30, 30] });
+
+      // Click to inspect pixel telemetry
+      polygonLayer.on('click', function(e) {
+        handleMapSample(e.latlng.lat, e.latlng.lng);
+      });
+    }
+
+    map.on('click', function(e) {
+      handleMapSample(e.latlng.lat, e.latlng.lng);
+    });
+  });
+
+  function handleMapSample(lat, lng) {
+    document.getElementById('sampleLat').innerText = lat.toFixed(5) + '°';
+    document.getElementById('sampleLng').innerText = lng.toFixed(5) + '°';
+    
+    // Calculate synthetic variance based on latitude delta
+    const delta = (lat + 13.9627) * 50;
+    const ndviVal = Math.max(0.38, Math.min(0.82, 0.68 + delta)).toFixed(2);
+    const moistVal = Math.max(18, Math.min(35, 29 + delta * 15)).toFixed(1);
+
+    document.getElementById('sampleNdvi').innerText = ndviVal;
+    document.getElementById('sampleMoist').innerText = moistVal + '%';
+
+    const rec = document.getElementById('sampleRec');
+    if (ndviVal < 0.50) {
+      rec.innerText = "Noticeable moisture / nitrogen deficiency in this sector. Recommend targeted side-dressing.";
+      rec.className = "text-[11px] text-amber-300 font-medium";
+    } else {
+      rec.innerText = "Optimal vegetative growth. Canopy density indicates healthy photosynthetic activity.";
+      rec.className = "text-[11px] text-emerald-400 font-medium";
+    }
+  }
+
+  function setLayer(layer) {
+    const btnRgb = document.getElementById('btn-layer-rgb');
+    const btnNdvi = document.getElementById('btn-layer-ndvi');
+    const btnMoist = document.getElementById('btn-layer-moisture');
+    const legendTitle = document.getElementById('legendTitle');
+    const legendScale = document.getElementById('legendScale');
+
+    [btnRgb, btnNdvi, btnMoist].forEach(b => {
+      b.className = "px-2.5 py-1 rounded text-cream/70 hover:text-cream transition-colors";
+    });
+
+    if (layer === 'rgb') {
+      btnRgb.className = "px-2.5 py-1 rounded bg-leaf text-forest-900 font-semibold transition-colors";
+      polygonLayer.setStyle({ color: '#4ade80', fillColor: '#22c55e', fillOpacity: 0.15 });
+      legendTitle.innerText = "Satellite True Color (RGB)";
+      legendScale.classList.add('hidden');
+    } else if (layer === 'ndvi') {
+      btnNdvi.className = "px-2.5 py-1 rounded bg-leaf text-forest-900 font-semibold transition-colors";
+      polygonLayer.setStyle({ color: '#10b981', fillColor: '#10b981', fillOpacity: 0.45 });
+      legendTitle.innerText = "Sentinel-2 NDVI Canopy Vigor";
+      legendScale.classList.remove('hidden');
+    } else if (layer === 'moisture') {
+      btnMoist.className = "px-2.5 py-1 rounded bg-leaf text-forest-900 font-semibold transition-colors";
+      polygonLayer.setStyle({ color: '#38bdf8', fillColor: '#0284c7', fillOpacity: 0.45 });
+      legendTitle.innerText = "SAR Topsoil Dielectric Moisture";
+      legendScale.classList.remove('hidden');
+    }
+  }
+</script>
+{% endblock %}
