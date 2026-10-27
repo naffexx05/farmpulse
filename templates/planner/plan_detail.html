@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}{{ plan.name }} — FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-8">
+
+  <!-- Header -->
+  <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <a href="{% url 'planner:plan_list' %}" class="text-sm text-cream/60 hover:text-cream inline-flex items-center gap-1.5 mb-2">
+        <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Back to My Plans
+      </a>
+      <div class="flex items-center gap-2.5">
+        <h1 class="font-display text-3xl font-semibold text-cream">{{ plan.name }}</h1>
+        <span class="fp-badge-low text-xs">{{ plan.get_strategy_type_display }}</span>
+      </div>
+      <p class="mt-1 text-sm text-cream/60">
+        Created on {{ plan.created_at|date:"d M Y" }} for {{ plan.farm.name }} &bull; {{ plan.total_land_ha }} ha total land.
+      </p>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center gap-2.5">
+      <a href="{% url 'planner:scenario_simulator' %}?plan={{ plan.pk }}" class="fp-btn-primary">
+        🎮 Stress-Test in Simulator
+      </a>
+      <a href="{% url 'planner:plan_delete' plan.pk %}" class="fp-btn-ghost text-risk-high" title="Delete Plan">
+        <i data-lucide="trash-2" class="w-4 h-4"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Summary KPI Cards -->
+  <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="fp-card p-4">
+      <div class="fp-label">Allocated Land</div>
+      <div class="font-display text-2xl font-semibold text-cream">
+        {{ plan.total_land_ha }}<span class="text-xs font-normal text-muted"> ha</span>
+      </div>
+    </div>
+
+    <div class="fp-card p-4">
+      <div class="fp-label">Working Capital Required</div>
+      <div class="font-display text-2xl font-semibold text-cream">
+        {{ plan.total_expected_cost_mwk|floatformat:0|intcomma }}<span class="text-xs font-normal text-muted"> MWK</span>
+      </div>
+    </div>
+
+    <div class="fp-card p-4">
+      <div class="fp-label">Estimated Gross Revenue</div>
+      <div class="font-display text-2xl font-semibold text-cream">
+        {{ plan.total_expected_revenue_mwk|floatformat:0|intcomma }}<span class="text-xs font-normal text-muted"> MWK</span>
+      </div>
+    </div>
+
+    <div class="fp-card p-4">
+      <div class="fp-label">Expected Net Margin</div>
+      <div class="font-display text-2xl font-semibold {% if plan.total_expected_margin_mwk >= 0 %}text-leaf{% else %}text-risk-high{% endif %}">
+        {{ plan.total_expected_margin_mwk|floatformat:0|intcomma }}<span class="text-xs font-normal text-muted"> MWK</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Itemized Crops Table -->
+  <section class="space-y-3">
+    <h2 class="font-display text-lg font-semibold text-cream">Crop Allocations &amp; Break-Even Prices</h2>
+    <div class="overflow-x-auto rounded-xl border border-white/10">
+      <table class="w-full text-left text-xs font-mono">
+        <thead class="bg-forest-900/90 text-[10px] uppercase tracking-wider text-cream/60">
+          <tr>
+            <th class="py-3 px-4 font-sans font-medium">Crop</th>
+            <th class="py-3 px-4 text-right">Area</th>
+            <th class="py-3 px-4 text-right">Est. Yield</th>
+            <th class="py-3 px-4 text-right">Est. Cost</th>
+            <th class="py-3 px-4 text-right">Selling Price</th>
+            <th class="py-3 px-4 text-right">Gross Margin</th>
+            <th class="py-3 px-4 text-right font-bold text-amber-300">Break-Even Price</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+          {% for item in items %}
+            <tr class="hover:bg-white/[0.02]">
+              <td class="py-3.5 px-4 font-sans font-medium text-cream flex items-center gap-1.5">
+                <i data-lucide="leaf" class="w-3.5 h-3.5 text-leaf"></i>
+                {{ item.crop.name }}
+              </td>
+              <td class="py-3.5 px-4 text-right">{{ item.area_ha }} ha</td>
+              <td class="py-3.5 px-4 text-right text-cream/90">{{ item.expected_yield_kg_total|floatformat:0|intcomma }} kg</td>
+              <td class="py-3.5 px-4 text-right text-cream/80">{{ item.expected_total_cost_mwk|floatformat:0|intcomma }} MWK</td>
+              <td class="py-3.5 px-4 text-right text-cream/80">{{ item.expected_selling_price_mwk_per_kg|floatformat:0 }} MWK/kg</td>
+              <td class="py-3.5 px-4 text-right font-semibold {% if item.expected_gross_margin_mwk >= 0 %}text-leaf{% else %}text-risk-high{% endif %}">
+                {{ item.expected_gross_margin_mwk|floatformat:0|intcomma }} MWK
+              </td>
+              <td class="py-3.5 px-4 text-right font-bold text-amber-300 bg-amber-500/5">
+                MWK {{ item.break_even_price_mwk_per_kg|floatformat:0 }}/kg
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Documented Plan Assumptions -->
+  <section class="fp-glass p-6 space-y-4">
+    <div class="flex items-center gap-2 border-b border-white/5 pb-3">
+      <i data-lucide="info" class="w-4 h-4 text-leaf"></i>
+      <h2 class="font-display text-base font-semibold text-cream">Transparent Assumptions Applied</h2>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      {% for a in assumptions %}
+        <div class="p-3 rounded-xl bg-forest-900/60 border border-white/5 space-y-1 text-xs">
+          <div class="text-[10px] text-cream/50 uppercase">{{ a.get_category_display }}</div>
+          <div class="font-semibold text-cream font-mono">{{ a.parameter_name }}: {{ a.value_used }}</div>
+          <div class="text-[11px] text-cream/60">Source: {{ a.source_note }}</div>
+        </div>
+      {% empty %}
+        <p class="text-xs text-cream/50 col-span-3">No specific assumption tags stored.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+</div>
+{% endblock %}

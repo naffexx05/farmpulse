@@ -49,9 +49,15 @@
     <a href="{% url 'market:dashboard' %}" class="fp-nav-item {% if active_nav == 'market' %}fp-nav-item-active{% endif %}">
       <i data-lucide="trending-up" class="w-4 h-4"></i> Market Intelligence
     </a>
-    <a href="#" class="fp-nav-item"><i data-lucide="leaf" class="w-4 h-4"></i> Crop Planner</a>
-    <a href="#" class="fp-nav-item"><i data-lucide="sliders-horizontal" class="w-4 h-4"></i> Scenario Simulator</a>
-    <a href="#" class="fp-nav-item"><i data-lucide="bookmark" class="w-4 h-4"></i> My Plans</a>
+    <a href="{% url 'planner:planner_input' %}" class="fp-nav-item {% if active_nav == 'planner' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="leaf" class="w-4 h-4"></i> Crop Planner
+    </a>
+    <a href="{% url 'planner:scenario_simulator' %}" class="fp-nav-item {% if active_nav == 'scenarios' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="gamepad-2" class="w-4 h-4 text-amber-400"></i> Scenario Simulator 🎮
+    </a>
+    <a href="{% url 'planner:plan_list' %}" class="fp-nav-item {% if active_nav == 'plans' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="bookmark" class="w-4 h-4"></i> My Plans
+    </a>
     <a href="#" class="fp-nav-item"><i data-lucide="clipboard-check" class="w-4 h-4"></i> Season Review</a>
     <a href="#" class="fp-nav-item"><i data-lucide="settings" class="w-4 h-4"></i> Settings</a>
   </nav>

@@ -6,6 +6,7 @@ module.exports = {
     "./farms/**/*.py",
     "./climate/**/*.py",
     "./market/**/*.py",
+    "./planner/**/*.py",
   ],
   theme: {
     extend: {

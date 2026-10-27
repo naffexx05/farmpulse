@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Crop Planner — FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-8">
+
+  <!-- Header -->
+  <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-2">
+        <h1 class="font-display text-3xl font-semibold text-cream">Crop Planner</h1>
+        <span class="fp-demo-pill">Decision Engine</span>
+      </div>
+      <p class="mt-1 text-sm text-cream/60">
+        Generate and compare resource allocations across balanced, return-focused, and risk-conscious strategies.
+      </p>
+    </div>
+    {% if farm %}
+      <div class="flex items-center gap-2">
+        <a href="{% url 'planner:plan_list' %}" class="fp-btn-ghost text-xs">
+          <i data-lucide="bookmark" class="w-4 h-4 text-leaf"></i> Saved Plans
+        </a>
+      </div>
+    {% endif %}
+  </header>
+
+  <!-- Input Form Card -->
+  <section class="fp-glass p-6 space-y-6">
+    <div class="border-b border-white/5 pb-4">
+      <h2 class="font-display text-xl font-semibold text-cream">Plan Parameters for {{ farm.name }}</h2>
+      <p class="text-xs text-cream/60">Enter your seasonal resource constraints and select the candidate crops to consider.</p>
+    </div>
+
+    <form method="get" action="{% url 'planner:planner_input' %}" class="space-y-6">
+      <input type="hidden" name="generate" value="1">
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- Land -->
+        <div>
+          <label for="land-input" class="fp-label">Planned Land (ha)</label>
+          <input
+            id="land-input"
+            type="number"
+            name="land"
+            step="0.01"
+            min="0.1"
+            value="{{ request.GET.land|default:default_land }}"
+            class="fp-input"
+            required
+          >
+          <p class="mt-1 text-[11px] text-cream/40">Total farm land: {{ farm.total_land_ha }} ha</p>
+        </div>
+
+        <!-- Budget -->
+        <div>
+          <label for="budget-input" class="fp-label">Seasonal Working Capital (MWK)</label>
+          <input
+            id="budget-input"
+            type="number"
+            name="budget"
+            step="1000"
+            min="0"
+            value="{{ request.GET.budget|default:default_budget }}"
+            class="fp-input"
+          >
+          <p class="mt-1 text-[11px] text-cream/40">Available seasonal liquidity</p>
+        </div>
+
+        <!-- Labour -->
+        <div>
+          <label for="labour-input" class="fp-label">Available Labour (Persons)</label>
+          <input
+            id="labour-input"
+            type="number"
+            name="labour"
+            min="1"
+            value="{{ request.GET.labour|default:default_labour }}"
+            class="fp-input"
+          >
+          <p class="mt-1 text-[11px] text-cream/40">Full-time household &amp; ganyu workers</p>
+        </div>
+      </div>
+
+      <!-- Crop Selection -->
+      <div class="space-y-2 pt-2">
+        <div class="flex items-center justify-between">
+          <label class="fp-label">Candidate Crops to Include in Allocation</label>
+          <span class="text-[11px] text-leaf">Preferred crops pre-selected</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          {% for c in all_crops %}
+            <label class="flex items-center gap-2.5 p-3 rounded-xl bg-forest-800/60 border border-white/10 hover:border-leaf/40 cursor-pointer transition-colors">
+              <input
+                type="checkbox"
+                name="crops"
+                value="{{ c.slug }}"
+                {% if request.GET.crops %}
+                  {% if c.slug in request.GET.getlist.crops %}checked{% endif %}
+                {% else %}
+                  {% if c.id in preferred_crop_ids or c.slug in 'maize,groundnuts' %}checked{% endif %}
+                {% endif %}
+                class="accent-leaf w-4 h-4 rounded"
+              >
+              <div>
+                <span class="text-sm font-medium text-cream block leading-tight">{{ c.name }}</span>
+                <span class="text-[10px] text-cream/40 uppercase">{{ c.get_category_display }}</span>
+              </div>
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end pt-2">
+        <button type="submit" class="fp-btn-primary">
+          <i data-lucide="sparkles" class="w-4 h-4"></i> Generate Crop Plans
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Generated Plans Results Section -->
+  {% if plans_data %}
+    <section class="space-y-6 pt-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 class="font-display text-2xl font-semibold text-cream">Strategy Comparison</h2>
+          <p class="text-xs text-cream/60">
+            Compare 3 alternative allocations. We highlight explicit agronomic trade-offs instead of claiming a single "best".
+          </p>
+        </div>
+        <div class="text-xs text-cream/50 italic">
+          Based on {{ plans_data.total_land_ha }} ha allocation
+        </div>
+      </div>
+
+      <!-- 3 Strategy Cards -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+        {% for plan in plans_data.plans %}
+          <article class="fp-card border border-white/10 flex flex-col justify-between overflow-hidden relative">
+
+            <!-- Card Header -->
+            <div class="p-5 border-b border-white/10 bg-forest-900/60 space-y-3">
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <span class="{{ plan.badge_class }} mb-1.5">{{ plan.tradeoff_label }}</span>
+                  <h3 class="font-display text-xl font-bold text-cream">{{ plan.title }}</h3>
+                </div>
+              </div>
+              <p class="text-xs text-cream/70">{{ plan.tagline }}</p>
+
+              {% if plan.budget_warning %}
+                <div class="p-2.5 rounded-lg bg-risk-high/15 border border-risk-high/30 text-risk-high text-[11px] flex items-start gap-1.5">
+                  <i data-lucide="alert-triangle" class="w-3.5 h-3.5 shrink-0 mt-0.5"></i>
+                  <span>{{ plan.budget_warning }}</span>
+                </div>
+              {% endif %}
+
+              <!-- Key Figures Summary -->
+              <div class="grid grid-cols-3 gap-2 pt-2 border-t border-white/5 font-mono text-center">
+                <div class="p-2 rounded-lg bg-forest-800/80">
+                  <span class="text-[9px] uppercase tracking-wider text-cream/50 block font-sans">Est. Cost</span>
+                  <span class="text-xs font-semibold text-cream">{{ plan.total_cost_mwk|floatformat:0|intcomma }}</span>
+                </div>
+                <div class="p-2 rounded-lg bg-forest-800/80">
+                  <span class="text-[9px] uppercase tracking-wider text-cream/50 block font-sans">Revenue</span>
+                  <span class="text-xs font-semibold text-cream">{{ plan.total_revenue_mwk|floatformat:0|intcomma }}</span>
+                </div>
+                <div class="p-2 rounded-lg bg-forest-800/80">
+                  <span class="text-[9px] uppercase tracking-wider text-cream/50 block font-sans">Gross Margin</span>
+                  <span class="text-xs font-bold {% if plan.total_margin_mwk >= 0 %}text-leaf{% else %}text-risk-high{% endif %}">
+                    {{ plan.total_margin_mwk|floatformat:0|intcomma }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Crop Breakdown Table -->
+            <div class="p-5 space-y-4 flex-1">
+              <div class="text-xs font-semibold text-cream/80 uppercase tracking-wider text-[10px]">Crop Allocations</div>
+              <div class="space-y-3">
+                {% for item in plan.items %}
+                  <div class="p-3 rounded-xl bg-forest-900/40 border border-white/5 space-y-2">
+                    <div class="flex items-center justify-between">
+                      <span class="font-medium text-cream text-xs flex items-center gap-1.5">
+                        <i data-lucide="sprout" class="w-3 h-3 text-leaf"></i>
+                        {{ item.crop.name }}
+                      </span>
+                      <span class="font-mono text-xs text-cream/90 font-semibold">{{ item.area_ha }} ha</span>
+                    </div>
+
+                    <!-- Financial & Star Metric: Break-Even Price -->
+                    <div class="grid grid-cols-2 gap-2 text-[11px] pt-1 border-t border-white/5 font-mono">
+                      <div>
+                        <span class="text-[9px] text-cream/50 font-sans block">Harvest Yield:</span>
+                        <span class="text-cream">{{ item.yield_total_kg|floatformat:0|intcomma }} kg</span>
+                      </div>
+                      <div class="text-right">
+                        <span class="text-[9px] text-cream/50 font-sans block">Gross Margin:</span>
+                        <span class="font-semibold {% if item.gross_margin_mwk >= 0 %}text-leaf{% else %}text-risk-high{% endif %}">
+                          {{ item.gross_margin_mwk|floatformat:0|intcomma }} MWK
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Star Metric Pill -->
+                    <div class="p-1.5 rounded-lg bg-forest-800/80 border border-white/5 flex items-center justify-between text-[10px]">
+                      <span class="text-cream/60 font-sans">Break-Even Price:</span>
+                      <span class="font-mono font-bold text-amber-300">MWK {{ item.break_even_price_mwk }}/kg</span>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+
+              <!-- Trade-Off Explanation -->
+              <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-[11px] text-cream/70 space-y-1">
+                <span class="font-semibold text-cream block font-sans">Trade-off Considerations:</span>
+                <p>{{ plan.tradeoff_description }}</p>
+              </div>
+            </div>
+
+            <!-- Card Actions -->
+            <div class="p-5 border-t border-white/10 bg-forest-900/60 flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onclick="openAssumptionsModal('{{ plan.strategy_type }}')"
+                class="fp-btn-ghost !px-3 !py-1.5 text-xs"
+              >
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i> Assumptions
+              </button>
+
+              <form method="post" action="{% url 'planner:save_plan' %}">
+                {% csrf_token %}
+                <input type="hidden" name="strategy_type" value="{{ plan.strategy_type }}">
+                <input type="hidden" name="name" value="{{ farm.name }} — {{ plan.title }}">
+                <input type="hidden" name="total_land_ha" value="{{ plan.total_land_ha }}">
+                <input type="hidden" name="total_budget_mwk" value="{{ plans_data.seasonal_budget_mwk|default:'' }}">
+                {% for item in plan.items %}
+                  <input type="hidden" name="crop_slugs" value="{{ item.crop.slug }}">
+                {% endfor %}
+                <button type="submit" class="fp-btn-primary !px-3.5 !py-1.5 text-xs">
+                  <i data-lucide="bookmark-check" class="w-3.5 h-3.5"></i> Save Plan
+                </button>
+              </form>
+            </div>
+
+          </article>
+        {% endfor %}
+      </div>
+
+    </section>
+  {% endif %}
+
+  <!-- Assumptions Modals (One for each plan) -->
+  {% if plans_data %}
+    {% for plan in plans_data.plans %}
+      <div
+        id="assumptions-modal-{{ plan.strategy_type }}"
+        class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4"
+        onclick="if(event.target === this) closeAssumptionsModal('{{ plan.strategy_type }}')"
+      >
+        <div class="fp-card border border-white/20 max-w-lg w-full max-h-[85vh] overflow-y-auto p-6 space-y-5">
+          <div class="flex items-center justify-between border-b border-white/10 pb-3">
+            <div>
+              <span class="text-xs text-leaf font-semibold uppercase">{{ plan.title }}</span>
+              <h3 class="font-display text-lg font-bold text-cream">Underlying Analytical Assumptions</h3>
+            </div>
+            <button onclick="closeAssumptionsModal('{{ plan.strategy_type }}')" class="fp-btn-ghost !p-1.5">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <p class="text-cream/60">
+              FarmPulse maintains full transparency. Every forecast calculation is anchored to verified historical observations or AMIS market benchmarks:
+            </p>
+
+            <div class="space-y-2">
+              {% for a in plan.assumptions %}
+                <div class="p-3 rounded-xl bg-forest-900/60 border border-white/5 space-y-1">
+                  <div class="flex items-center justify-between font-mono">
+                    <span class="text-cream font-medium">{{ a.name }}</span>
+                    <span class="text-leaf font-bold">{{ a.value }}</span>
+                  </div>
+                  <div class="text-[11px] text-cream/50 font-sans">
+                    Source: {{ a.source }}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+
+            <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-[11px] text-cream/50 italic">
+              Break-Even Price Metric Formula: Total Production Cost per Hectare &divide; Estimated Harvested Yield per Hectare.
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-white/10 flex justify-end">
+            <button onclick="closeAssumptionsModal('{{ plan.strategy_type }}')" class="fp-btn-ghost text-xs">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function openAssumptionsModal(strategy) {
+    const modal = document.getElementById(`assumptions-modal-${strategy}`);
+    modal?.classList.remove('hidden');
+  }
+
+  function closeAssumptionsModal(strategy) {
+    const modal = document.getElementById(`assumptions-modal-${strategy}`);
+    modal?.classList.add('hidden');
+  }
+</script>
+{% endblock %}

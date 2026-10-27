@@ -1,0 +1,552 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Scenario Simulator Arena 🎮 — FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-8">
+
+  <!-- Arena Header & Target Plan -->
+  <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-2">
+        <h1 class="font-display text-3xl font-semibold text-cream flex items-center gap-2">
+          <span>Scenario Simulator</span>
+          <span class="text-xs px-2.5 py-1 rounded-full bg-water/20 text-water-soft border border-water/40 uppercase tracking-wider font-mono">
+            Interactive Arena 🎮
+          </span>
+        </h1>
+      </div>
+      <p class="mt-1 text-sm text-cream/60">
+        Stress-test your crop plan against extreme weather events, market crashes, and input cost shocks in real time.
+      </p>
+    </div>
+
+    <!-- Active Plan Indicator -->
+    <div class="flex items-center gap-3">
+      <div class="p-2.5 rounded-xl bg-forest-950/80 border border-white/10 text-xs">
+        <span class="text-cream/50 uppercase tracking-wider text-[10px] block">Testing Plan:</span>
+        <strong class="text-cream font-medium">{{ baseline_plan.title|default:"Active Farm Plan" }}</strong>
+        <span class="text-muted">({{ baseline_plan.total_land_ha }} ha)</span>
+      </div>
+      <a href="{% url 'planner:planner_input' %}" class="fp-btn-ghost text-xs">
+        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Change Plan
+      </a>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- GAME HUD (Heads-Up Display): HEALTH, COIN METER, FOOD SECURITY, GRADE -->
+  <!-- ========================================================================= -->
+  <section class="fp-glass p-6 border-2 border-white/15 relative overflow-hidden shadow-2xl">
+    <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-leaf/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
+
+      <!-- HUD 1: Farm Resilience Health Bar -->
+      <div class="space-y-2 md:col-span-1 border-b md:border-b-0 md:border-r border-white/10 pb-4 md:pb-0 md:pr-4">
+        <div class="flex items-center justify-between text-xs">
+          <span class="fp-label !mb-0 flex items-center gap-1.5">
+            <i data-lucide="shield" class="w-4 h-4 text-leaf"></i> Resilience
+          </span>
+          <span id="hud-resilience-score" class="font-mono font-bold text-cream text-sm">
+            {{ initial_sim.resilience_score }}/100 XP
+          </span>
+        </div>
+
+        <!-- Health Bar -->
+        <div class="w-full bg-forest-900 rounded-full h-3.5 p-0.5 border border-white/15 overflow-hidden">
+          <div
+            id="hud-resilience-bar"
+            class="h-full rounded-full transition-all duration-300 {{ initial_sim.health_color }}"
+            style="width: {{ initial_sim.resilience_score }}%;"
+          ></div>
+        </div>
+
+        <div id="hud-health-status" class="text-xs font-semibold text-leaf">
+          {{ initial_sim.health_status }}
+        </div>
+      </div>
+
+      <!-- HUD 2: Net Profit / Loss Coin Meter -->
+      <div class="space-y-1 md:col-span-1 border-b md:border-b-0 md:border-r border-white/10 pb-4 md:pb-0 md:pr-4">
+        <div class="fp-label flex items-center gap-1.5">
+          <i data-lucide="coins" class="w-4 h-4 text-amber-400"></i> Net Farm Cashflow
+        </div>
+        <div id="hud-margin-val" class="font-display text-2xl lg:text-3xl font-bold text-leaf font-mono">
+          MWK {{ initial_sim.total_sim_margin|floatformat:0|intcomma }}
+        </div>
+        <div id="hud-margin-delta" class="text-xs font-mono text-cream/60">
+          Baseline: MWK {{ baseline_plan.total_margin_mwk|floatformat:0|intcomma }}
+        </div>
+      </div>
+
+      <!-- HUD 3: Family Food Security Gauge -->
+      <div class="space-y-2 md:col-span-1 border-b md:border-b-0 md:border-r border-white/10 pb-4 md:pb-0 md:pr-4">
+        <div class="flex items-center justify-between text-xs">
+          <span class="fp-label !mb-0 flex items-center gap-1.5">
+            <i data-lucide="wheat" class="w-4 h-4 text-water"></i> Food Security
+          </span>
+          <span id="hud-food-pct" class="font-mono font-bold text-water-soft text-sm">
+            {{ initial_sim.food_security_pct }}%
+          </span>
+        </div>
+        <div class="w-full bg-forest-900 rounded-full h-3.5 p-0.5 border border-white/15 overflow-hidden">
+          <div
+            id="hud-food-bar"
+            class="h-full rounded-full bg-water transition-all duration-300"
+            style="width: {{ initial_sim.food_security_pct }}%;"
+          ></div>
+        </div>
+        <div class="text-[11px] text-cream/50">
+          Staple grain reserve requirement
+        </div>
+      </div>
+
+      <!-- HUD 4: Arcade Grade Badge -->
+      <div class="flex items-center justify-around sm:justify-center gap-4 text-center">
+        <div>
+          <span class="fp-label !mb-1 block">Season Grade</span>
+          <div
+            id="hud-grade"
+            class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-forest-950 border-2 border-leaf font-display text-2xl font-black text-leaf shadow-[0_0_20px_rgba(143,203,98,0.3)] transition-all duration-300"
+          >
+            {{ initial_sim.grade }}
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Dynamic Game Reaction Commentary Box -->
+    <div id="hud-commentary-box" class="mt-4 p-3 rounded-xl bg-forest-900/80 border border-white/10 flex items-start gap-2.5 text-xs text-cream/80">
+      <i data-lucide="message-square" class="w-4 h-4 text-leaf shrink-0 mt-0.5"></i>
+      <span id="hud-commentary-text">{{ initial_sim.commentary }}</span>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- PRESET SCENARIO CHALLENGE CARDS (ONE-CLICK SHOCKS) -->
+  <!-- ========================================================================= -->
+  <section class="space-y-3">
+    <div class="flex items-center justify-between">
+      <h2 class="font-display text-lg font-semibold text-cream flex items-center gap-2">
+        <i data-lucide="gamepad-2" class="w-5 h-5 text-amber-400"></i> Event Challenges &amp; Preset Shocks
+      </h2>
+      <span class="text-xs text-cream/50">Select an event or tweak sandbox sliders below</span>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <!-- Challenge 1: El Niño -->
+      <button
+        type="button"
+        onclick="applyPresetShock(-25, 1.5, 20, 10, 'The 2024 El Niño Drought')"
+        class="preset-card p-3 rounded-xl bg-forest-800/80 border border-white/10 hover:border-risk-high text-left transition-all group"
+      >
+        <div class="text-xl mb-1">🎲</div>
+        <div class="font-bold text-xs text-cream group-hover:text-risk-high">El Niño Drought</div>
+        <div class="text-[10px] text-cream/50">-25% Rain &bull; +1.5°C</div>
+      </button>
+
+      <!-- Challenge 2: Bumper Glut -->
+      <button
+        type="button"
+        onclick="applyPresetShock(15, -0.5, -30, 0, 'Bumper Harvest Price Slump')"
+        class="preset-card p-3 rounded-xl bg-forest-800/80 border border-white/10 hover:border-water text-left transition-all group"
+      >
+        <div class="text-xl mb-1">🌾</div>
+        <div class="font-bold text-xs text-cream group-hover:text-water-soft">Bumper Harvest</div>
+        <div class="text-[10px] text-cream/50">+15% Rain &bull; -30% Price</div>
+      </button>
+
+      <!-- Challenge 3: Fertilizer Spike -->
+      <button
+        type="button"
+        onclick="applyPresetShock(0, 0, 0, 35, 'Fertiliser Price Shock')"
+        class="preset-card p-3 rounded-xl bg-forest-800/80 border border-white/10 hover:border-amber-400 text-left transition-all group"
+      >
+        <div class="text-xl mb-1">🧪</div>
+        <div class="font-bold text-xs text-cream group-hover:text-amber-300">Fertiliser Shock</div>
+        <div class="text-[10px] text-cream/50">+35% Input Cost</div>
+      </button>
+
+      <!-- Challenge 4: Heat Dome -->
+      <button
+        type="button"
+        onclick="applyPresetShock(-10, 2.5, 0, 0, 'Heat Wave Extreme')"
+        class="preset-card p-3 rounded-xl bg-forest-800/80 border border-white/10 hover:border-risk-high text-left transition-all group"
+      >
+        <div class="text-xl mb-1">☀️</div>
+        <div class="font-bold text-xs text-cream group-hover:text-risk-high">Heat Dome</div>
+        <div class="text-[10px] text-cream/50">+2.5°C Thermal Stress</div>
+      </button>
+
+      <!-- Challenge 5: La Niña -->
+      <button
+        type="button"
+        onclick="applyPresetShock(15, -0.5, 5, -5, 'Optimal La Niña Season')"
+        class="preset-card p-3 rounded-xl bg-forest-800/80 border border-white/10 hover:border-leaf text-left transition-all group"
+      >
+        <div class="text-xl mb-1">🌈</div>
+        <div class="font-bold text-xs text-cream group-hover:text-leaf">Ideal Season</div>
+        <div class="text-[10px] text-cream/50">+15% Rain &bull; Bumper</div>
+      </button>
+
+      <!-- Challenge 6: Reset Sandbox -->
+      <button
+        type="button"
+        onclick="applyPresetShock(0, 0, 0, 0, 'Sandbox Mode')"
+        class="preset-card p-3 rounded-xl bg-forest-950 border border-white/15 hover:border-cream text-left transition-all group"
+      >
+        <div class="text-xl mb-1">🕹️</div>
+        <div class="font-bold text-xs text-cream">Reset Sandbox</div>
+        <div class="text-[10px] text-cream/50">Baseline 0% Shock</div>
+      </button>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- TACTILE GAME SLIDERS (SANDBOX CONTROLS) -->
+  <!-- ========================================================================= -->
+  <section class="fp-card p-6 space-y-6">
+    <div class="flex items-center justify-between border-b border-white/5 pb-3">
+      <h2 class="font-display text-base font-semibold text-cream flex items-center gap-2">
+        <i data-lucide="sliders" class="w-4 h-4 text-leaf"></i> Tactile Shock Dials
+      </h2>
+      <span id="active-event-title" class="text-xs font-mono text-amber-300">Sandbox Mode</span>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+      <!-- Dial 1: Rainfall -->
+      <div class="space-y-2 p-3.5 rounded-xl bg-forest-900/60 border border-white/5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-medium text-cream flex items-center gap-1.5">
+            <i data-lucide="cloud-rain" class="w-3.5 h-3.5 text-water"></i> Rainfall Anomaly
+          </span>
+          <span id="slider-rain-val" class="font-mono font-bold text-water text-xs">0%</span>
+        </div>
+        <input
+          id="slider-rain"
+          type="range"
+          min="-40"
+          max="40"
+          value="0"
+          step="5"
+          class="w-full accent-water cursor-pointer"
+          oninput="onGameSliderChange()"
+        >
+        <div class="flex justify-between text-[9px] text-cream/40 font-mono">
+          <span>-40% Drought</span>
+          <span>Normal</span>
+          <span>+40% Excess</span>
+        </div>
+      </div>
+
+      <!-- Dial 2: Temperature -->
+      <div class="space-y-2 p-3.5 rounded-xl bg-forest-900/60 border border-white/5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-medium text-cream flex items-center gap-1.5">
+            <i data-lucide="thermometer" class="w-3.5 h-3.5 text-risk-high"></i> Temperature Shift
+          </span>
+          <span id="slider-temp-val" class="font-mono font-bold text-risk-high text-xs">+0.0°C</span>
+        </div>
+        <input
+          id="slider-temp"
+          type="range"
+          min="-1.0"
+          max="3.5"
+          value="0.0"
+          step="0.5"
+          class="w-full accent-risk-high cursor-pointer"
+          oninput="onGameSliderChange()"
+        >
+        <div class="flex justify-between text-[9px] text-cream/40 font-mono">
+          <span>-1.0°C</span>
+          <span>0.0°C</span>
+          <span>+3.5°C Heat</span>
+        </div>
+      </div>
+
+      <!-- Dial 3: Market Prices -->
+      <div class="space-y-2 p-3.5 rounded-xl bg-forest-900/60 border border-white/5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-medium text-cream flex items-center gap-1.5">
+            <i data-lucide="trending-up" class="w-3.5 h-3.5 text-leaf"></i> Commodity Prices
+          </span>
+          <span id="slider-price-val" class="font-mono font-bold text-leaf text-xs">0%</span>
+        </div>
+        <input
+          id="slider-price"
+          type="range"
+          min="-35"
+          max="35"
+          value="0"
+          step="5"
+          class="w-full accent-leaf cursor-pointer"
+          oninput="onGameSliderChange()"
+        >
+        <div class="flex justify-between text-[9px] text-cream/40 font-mono">
+          <span>-35% Crash</span>
+          <span>Base</span>
+          <span>+35% Spike</span>
+        </div>
+      </div>
+
+      <!-- Dial 4: Input Costs -->
+      <div class="space-y-2 p-3.5 rounded-xl bg-forest-900/60 border border-white/5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-medium text-cream flex items-center gap-1.5">
+            <i data-lucide="receipt" class="w-3.5 h-3.5 text-amber-400"></i> Input / Fertiliser Cost
+          </span>
+          <span id="slider-cost-val" class="font-mono font-bold text-amber-300 text-xs">0%</span>
+        </div>
+        <input
+          id="slider-cost"
+          type="range"
+          min="-20"
+          max="40"
+          value="0"
+          step="5"
+          class="w-full accent-amber-400 cursor-pointer"
+          oninput="onGameSliderChange()"
+        >
+        <div class="flex justify-between text-[9px] text-cream/40 font-mono">
+          <span>-20% Subsidized</span>
+          <span>Base</span>
+          <span>+40% Shock</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- CROP COMBAT GRID: PER-CROP SIMULATED RESULTS -->
+  <!-- ========================================================================= -->
+  <section class="space-y-4">
+    <div class="flex items-center justify-between">
+      <h2 class="font-display text-lg font-semibold text-cream">Crop Response Under Current Shock</h2>
+      <span class="text-xs text-cream/50">Simulated yields &amp; new break-even thresholds</span>
+    </div>
+
+    <div id="crop-combat-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for item in initial_sim.sim_items %}
+        <div class="fp-card p-4 space-y-3 border border-white/10" id="crop-card-{{ item.crop_slug }}">
+          <div class="flex items-center justify-between">
+            <span class="font-display font-semibold text-cream text-base flex items-center gap-1.5">
+              <i data-lucide="sprout" class="w-4 h-4 text-leaf"></i>
+              {{ item.crop_name }}
+            </span>
+            <span class="crop-status-pill text-[10px] font-bold px-2 py-0.5 rounded-full {% if item.sim_margin_mwk >= 0 %}bg-leaf/20 text-leaf border border-leaf/40{% else %}bg-risk-high/20 text-risk-high border border-risk-high/40{% endif %}">
+              {{ item.status }}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-xs font-mono pt-1 border-t border-white/5">
+            <div>
+              <span class="text-[10px] text-cream/50 font-sans block">Simulated Yield:</span>
+              <span class="crop-yield-val text-cream font-medium">{{ item.sim_yield_total_kg|floatformat:0|intcomma }} kg</span>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] text-cream/50 font-sans block">Simulated Margin:</span>
+              <span class="crop-margin-val font-bold {% if item.sim_margin_mwk >= 0 %}text-leaf{% else %}text-risk-high{% endif %}">
+                MWK {{ item.sim_margin_mwk|floatformat:0|intcomma }}
+              </span>
+            </div>
+          </div>
+
+          <div class="p-2 rounded-lg bg-forest-900/60 flex items-center justify-between text-[11px] font-mono">
+            <span class="text-cream/50 font-sans">New Break-Even Price:</span>
+            <span class="crop-breakeven-val text-amber-300 font-bold">MWK {{ item.sim_break_even_mwk|floatformat:0 }}/kg</span>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Scientific Disclaimer Pill -->
+  <section class="p-3.5 rounded-xl bg-forest-950/60 border border-white/10 text-xs text-cream/50 flex items-start gap-2.5">
+    <i data-lucide="shield-check" class="w-4 h-4 text-leaf shrink-0 mt-0.5"></i>
+    <span>
+      <strong>Illustrative Response Model:</strong> Demonstration scenario simulation calibrated to agro-ecological response elasticities for Malawian smallholders. These illustrative assumptions are designed for strategic stress testing and educational exploration.
+    </span>
+  </section>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Baseline Data embedded from Django view
+  const BASELINE_DATA = {{ baseline_json|safe }};
+
+  // Instant Game Loop Calculation in JavaScript
+  function onGameSliderChange() {
+    const rain = parseFloat(document.getElementById('slider-rain').value) || 0;
+    const temp = parseFloat(document.getElementById('slider-temp').value) || 0;
+    const price = parseFloat(document.getElementById('slider-price').value) || 0;
+    const cost = parseFloat(document.getElementById('slider-cost').value) || 0;
+
+    // Update Slider Value Badges
+    document.getElementById('slider-rain-val').textContent = (rain > 0 ? '+' : '') + rain + '%';
+    document.getElementById('slider-temp-val').textContent = (temp > 0 ? '+' : '') + temp.toFixed(1) + '°C';
+    document.getElementById('slider-price-val').textContent = (price > 0 ? '+' : '') + price + '%';
+    document.getElementById('slider-cost-val').textContent = (cost > 0 ? '+' : '') + cost + '%';
+
+    // Compute Shocks Locally (instant 60fps game feel)
+    runLocalGameEngine(rain, temp, price, cost);
+  }
+
+  function applyPresetShock(rain, temp, price, cost, title) {
+    document.getElementById('slider-rain').value = rain;
+    document.getElementById('slider-temp').value = temp;
+    document.getElementById('slider-price').value = price;
+    document.getElementById('slider-cost').value = cost;
+    document.getElementById('active-event-title').textContent = title;
+
+    onGameSliderChange();
+  }
+
+  function runLocalGameEngine(rainDelta, tempDelta, priceDelta, costDelta) {
+    let totalSimCost = 0;
+    let totalSimRev = 0;
+    let maizeYield = 0;
+
+    const heatPenalty = Math.max(0, (tempDelta - 1.2) * 0.08);
+
+    BASELINE_DATA.items.forEach(item => {
+      // 1. Yield
+      let rainMultiplier = 1.0;
+      if (rainDelta < 0) {
+        const elasticity = (item.crop_slug === 'maize') ? 1.25 : 0.75;
+        rainMultiplier = 1.0 + ((rainDelta / 100.0) * elasticity) - heatPenalty;
+      } else {
+        rainMultiplier = 1.0 + Math.min(0.20, (rainDelta / 100.0) * 0.5) - heatPenalty;
+      }
+      rainMultiplier = Math.max(0.25, rainMultiplier);
+
+      const simYieldTotal = item.area_ha * item.yield_kg_ha * rainMultiplier;
+      if (item.crop_slug === 'maize') maizeYield += simYieldTotal;
+
+      // 2. Cost
+      const costMultiplier = Math.max(0.6, 1.0 + (costDelta / 100.0));
+      const simCost = item.total_cost_mwk * costMultiplier;
+
+      // 3. Price
+      const marketSpike = (rainDelta <= -20 && item.crop_slug === 'maize') ? 0.18 : 0.0;
+      const priceMultiplier = Math.max(0.4, 1.0 + (priceDelta / 100.0) + marketSpike);
+      const simRev = simYieldTotal * item.price_kg_mwk * priceMultiplier;
+      const simMargin = simRev - simCost;
+      const simBreakEven = (simYieldTotal > 0) ? (simCost / simYieldTotal) : 0;
+
+      totalSimCost += simCost;
+      totalSimRev += simRev;
+
+      // Update Per-Crop DOM
+      const card = document.getElementById(`crop-card-${item.crop_slug}`);
+      if (card) {
+        const yieldEl = card.querySelector('.crop-yield-val');
+        const marginEl = card.querySelector('.crop-margin-val');
+        const breakEvenEl = card.querySelector('.crop-breakeven-val');
+        const pill = card.querySelector('.crop-status-pill');
+
+        if (yieldEl) yieldEl.textContent = Math.round(simYieldTotal).toLocaleString() + ' kg';
+        if (marginEl) {
+          marginEl.textContent = 'MWK ' + Math.round(simMargin).toLocaleString();
+          marginEl.className = 'crop-margin-val font-bold ' + (simMargin >= 0 ? 'text-leaf' : 'text-risk-high');
+        }
+        if (breakEvenEl) breakEvenEl.textContent = 'MWK ' + Math.round(simBreakEven).toLocaleString() + '/kg';
+        if (pill) {
+          if (simMargin >= 0) {
+            pill.textContent = 'Thriving';
+            pill.className = 'crop-status-pill text-[10px] font-bold px-2 py-0.5 rounded-full bg-leaf/20 text-leaf border border-leaf/40';
+          } else {
+            pill.textContent = 'Loss-Making';
+            pill.className = 'crop-status-pill text-[10px] font-bold px-2 py-0.5 rounded-full bg-risk-high/20 text-risk-high border border-risk-high/40';
+          }
+        }
+      }
+    });
+
+    const totalSimMargin = totalSimRev - totalSimCost;
+    const origMargin = BASELINE_DATA.total_margin_mwk;
+    const deltaMargin = totalSimMargin - origMargin;
+
+    // 4. Update HUD
+    // Resilience Score
+    const ratio = origMargin > 0 ? (totalSimMargin / origMargin) : 0.5;
+    const resilienceScore = Math.max(5, Math.min(100, Math.round(50 + (ratio * 40))));
+
+    const resBar = document.getElementById('hud-resilience-bar');
+    const resScoreEl = document.getElementById('hud-resilience-score');
+    const resStatusEl = document.getElementById('hud-health-status');
+    const marginValEl = document.getElementById('hud-margin-val');
+    const marginDeltaEl = document.getElementById('hud-margin-delta');
+    const gradeEl = document.getElementById('hud-grade');
+    const foodBar = document.getElementById('hud-food-bar');
+    const foodPctEl = document.getElementById('hud-food-pct');
+    const commentaryEl = document.getElementById('hud-commentary-text');
+
+    if (resScoreEl) resScoreEl.textContent = resilienceScore + '/100 XP';
+    if (resBar) {
+      resBar.style.width = resilienceScore + '%';
+      if (resilienceScore >= 70) resBar.className = 'h-full rounded-full transition-all duration-300 bg-leaf';
+      else if (resilienceScore >= 45) resBar.className = 'h-full rounded-full transition-all duration-300 bg-risk-medium';
+      else resBar.className = 'h-full rounded-full transition-all duration-300 bg-risk-high';
+    }
+
+    // Health Status & Grade
+    let grade = 'B';
+    let statusText = 'Weather Strained';
+    if (resilienceScore >= 85 && totalSimMargin > 0) {
+      grade = 'A+';
+      statusText = 'Thriving & Resilient';
+      gradeEl.className = 'inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-forest-950 border-2 border-leaf font-display text-2xl font-black text-leaf shadow-[0_0_20px_rgba(143,203,98,0.4)]';
+    } else if (resilienceScore >= 70 && totalSimMargin > 0) {
+      grade = 'A';
+      statusText = 'Solid Harvest';
+      gradeEl.className = 'inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-forest-950 border-2 border-leaf font-display text-2xl font-black text-leaf';
+    } else if (resilienceScore >= 45) {
+      grade = 'B';
+      statusText = 'Weather Strained';
+      gradeEl.className = 'inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-forest-950 border-2 border-risk-medium font-display text-2xl font-black text-risk-medium';
+    } else if (resilienceScore >= 25) {
+      grade = 'C';
+      statusText = 'Vulnerable';
+      gradeEl.className = 'inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-forest-950 border-2 border-risk-high font-display text-2xl font-black text-risk-high';
+    } else {
+      grade = 'F';
+      statusText = 'Severe Crop Failure';
+      gradeEl.className = 'inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-forest-950 border-2 border-risk-high font-display text-2xl font-black text-risk-high shadow-[0_0_20px_rgba(231,106,106,0.5)]';
+    }
+    if (gradeEl) gradeEl.textContent = grade;
+    if (resStatusEl) resStatusEl.textContent = statusText;
+
+    // Coin Meter
+    if (marginValEl) {
+      marginValEl.textContent = 'MWK ' + Math.round(totalSimMargin).toLocaleString();
+      marginValEl.className = 'font-display text-2xl lg:text-3xl font-bold font-mono ' + (totalSimMargin >= 0 ? 'text-leaf' : 'text-risk-high');
+    }
+    if (marginDeltaEl) {
+      const sign = deltaMargin >= 0 ? '+' : '';
+      marginDeltaEl.textContent = `${sign}MWK ${Math.round(deltaMargin).toLocaleString()} vs baseline`;
+    }
+
+    // Food Security
+    const foodPct = maizeYield > 0 ? Math.min(100, Math.round((maizeYield / 1200.0) * 100)) : 100;
+    if (foodPctEl) foodPctEl.textContent = foodPct + '%';
+    if (foodBar) foodBar.style.width = foodPct + '%';
+
+    // Commentary Reaction
+    if (commentaryEl) {
+      if (deltaMargin >= 50000) {
+        commentaryEl.textContent = "Superb outcome! Favourable climate and market tailwinds increased your net farm profits.";
+      } else if (totalSimMargin > 0) {
+        commentaryEl.textContent = "Weather shock absorbed! While yield dropped, your crop diversification preserved positive cashflow.";
+      } else {
+        commentaryEl.textContent = "Crisis Alert: Production expenditures exceed harvest earnings under this severe shock. Adjust allocations or invest in drought-tolerant seed.";
+      }
+    }
+  }
+</script>
+{% endblock %}

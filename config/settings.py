@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "farms",
     "climate",
     "market",
+    "planner",
     "django.contrib.humanize",
 ]
 

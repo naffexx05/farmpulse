@@ -9,4 +9,5 @@ urlpatterns = [
     path('', include('farms.urls')),
     path('', include('climate.urls')),
     path('', include('market.urls')),
+    path('', include('planner.urls')),
 ]
