@@ -6,7 +6,8 @@ from django.core.exceptions import ValidationError
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from farms.models import Crop, Farm, Planting, Season
+from farms.models import Crop, Farm, Planting, Season, SeasonReview
+from planner.models import Plan, PlanItem
 
 
 class PlantingModelTest(TestCase):
@@ -243,3 +244,120 @@ class FarmHistoryViewsTest(TestCase):
         response = self.client.post(delete_url)
         self.assertEqual(response.status_code, 404)
         self.assertTrue(Planting.objects.filter(pk=self.planting1.pk).exists())
+
+
+
+class SeasonReviewTest(TestCase):
+    def setUp(self):
+        self.user1 = User.objects.create_user(username='farmer1', password='password123')
+        self.user2 = User.objects.create_user(username='farmer2', password='password123')
+
+        self.farm1 = Farm.objects.create(
+            owner=self.user1,
+            name='Lilongwe Demo Farm',
+            total_land_ha=Decimal('4.00'),
+            cultivated_land_ha=Decimal('3.00'),
+        )
+        self.crop1 = Crop.objects.create(name='Maize', slug='maize', category='cereal')
+        self.crop2 = Crop.objects.create(name='Groundnuts', slug='groundnuts', category='legume')
+
+        self.season1 = Season.objects.create(
+            farm=self.farm1,
+            name='2023/24 Rainy Season',
+            start_date=date(2023, 11, 1),
+            end_date=date(2024, 4, 30),
+        )
+
+        self.planting1 = Planting.objects.create(
+            season=self.season1,
+            crop=self.crop1,
+            area_ha=Decimal('2.00'),
+            yield_kg=Decimal('4000.00'),
+            production_cost_mwk=Decimal('300000.00'),
+            selling_price_mwk_per_kg=Decimal('350.00'),
+            revenue_mwk=Decimal('1400000.00'),
+        )
+
+        self.plan1 = Plan.objects.create(
+            farm=self.farm1,
+            name='Balanced Plan 2023/24',
+            strategy_type='balanced',
+            total_land_ha=Decimal('2.00'),
+            total_expected_cost_mwk=Decimal('280000.00'),
+            total_expected_revenue_mwk=Decimal('1200000.00'),
+            total_expected_margin_mwk=Decimal('920000.00'),
+        )
+        self.plan_item1 = PlanItem.objects.create(
+            plan=self.plan1,
+            crop=self.crop1,
+            area_ha=Decimal('2.00'),
+            expected_yield_kg_per_ha=Decimal('1900.00'),
+            expected_yield_kg_total=Decimal('3800.00'),
+            expected_cost_per_ha_mwk=Decimal('140000.00'),
+            expected_total_cost_mwk=Decimal('280000.00'),
+            expected_selling_price_mwk_per_kg=Decimal('315.79'),
+            expected_revenue_mwk=Decimal('1200000.00'),
+            expected_gross_margin_mwk=Decimal('920000.00'),
+            break_even_price_mwk_per_kg=Decimal('73.68'),
+        )
+
+    def test_season_review_creation_and_str(self):
+        review = SeasonReview.objects.create(
+            season=self.season1,
+            associated_plan=self.plan1,
+            overall_satisfaction=5,
+            lessons_learned="Early planting avoided late dry spells.",
+            weather_assessment="Normal onset in November, good rainfall distribution.",
+            market_assessment="Favorable wholesale prices realized in Lilongwe.",
+        )
+        self.assertEqual(str(review), "Review: 2023/24 Rainy Season")
+        self.assertEqual(review.overall_satisfaction, 5)
+
+    def test_season_review_index_view(self):
+        self.client.login(username='farmer1', password='password123')
+        url = reverse('farms:season_review_index')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '2023/24 Rainy Season')
+
+    def test_season_review_detail_view(self):
+        self.client.login(username='farmer1', password='password123')
+        SeasonReview.objects.create(
+            season=self.season1,
+            associated_plan=self.plan1,
+            overall_satisfaction=4,
+            lessons_learned="Satisfactory grain quality.",
+        )
+        url = reverse('farms:season_review_detail', kwargs={'season_id': self.season1.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Balanced Plan 2023/24')
+        self.assertContains(response, 'Crop-by-Crop Performance Breakdown')
+        self.assertEqual(response.context['totals']['actual_area'], Decimal('2.00'))
+        self.assertEqual(response.context['totals']['planned_area'], Decimal('2.00'))
+
+    def test_season_review_edit_post(self):
+        self.client.login(username='farmer1', password='password123')
+        url = reverse('farms:season_review_edit', kwargs={'season_id': self.season1.id})
+        response = self.client.post(url, {
+            'associated_plan': self.plan1.id,
+            'overall_satisfaction': 5,
+            'lessons_learned': 'Hybrid seeds gave 25% higher yield.',
+            'weather_assessment': 'Good rain throughout December.',
+            'market_assessment': 'Sold to commercial aggregator.',
+        })
+        self.assertEqual(response.status_code, 302)
+        review = SeasonReview.objects.get(season=self.season1)
+        self.assertEqual(review.overall_satisfaction, 5)
+        self.assertEqual(review.associated_plan, self.plan1)
+        self.assertIn('Hybrid seeds', review.lessons_learned)
+
+    def test_multi_tenant_isolation_season_review(self):
+        self.client.login(username='farmer2', password='password123')
+        detail_url = reverse('farms:season_review_detail', kwargs={'season_id': self.season1.id})
+        response = self.client.get(detail_url)
+        self.assertEqual(response.status_code, 404)
+
+        edit_url = reverse('farms:season_review_edit', kwargs={'season_id': self.season1.id})
+        response = self.client.get(edit_url)
+        self.assertEqual(response.status_code, 404)

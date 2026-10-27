@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Season Review · FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-leaf/10 text-leaf">
+          Module 7 · Performance Evaluation
+        </span>
+        <span class="text-xs text-earth-muted">Retrospective Analysis</span>
+      </div>
+      <h1 class="text-2xl font-bold text-earth-heading mt-1">Season Review & Outcomes</h1>
+      <p class="text-sm text-earth-muted mt-1">
+        Compare planned allocations and targets against observed field harvests to refine future decisions.
+      </p>
+    </div>
+    {% if farm %}
+      <div class="flex items-center gap-3">
+        <a href="{% url 'farms:farm_history' %}" class="fp-btn-outline inline-flex items-center gap-2 text-sm">
+          <i data-lucide="history" class="w-4 h-4"></i> View Farm History
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+  {% if not farm %}
+    <div class="fp-card p-12 text-center max-w-lg mx-auto">
+      <div class="w-12 h-12 rounded-full bg-leaf/10 text-leaf flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="map-pin" class="w-6 h-6"></i>
+      </div>
+      <h3 class="text-lg font-semibold text-earth-heading">No Farm Profile Setup</h3>
+      <p class="text-sm text-earth-muted mt-1">
+        Configure your farm profile to record seasons and review harvest outcomes.
+      </p>
+      <div class="mt-6">
+        <a href="{% url 'farms:farm_edit' %}" class="fp-btn-primary inline-flex items-center gap-2">
+          <i data-lucide="plus" class="w-4 h-4"></i> Create Farm Profile
+        </a>
+      </div>
+    </div>
+  {% elif not seasons_data %}
+    <div class="fp-card p-12 text-center max-w-lg mx-auto">
+      <div class="w-12 h-12 rounded-full bg-leaf/10 text-leaf flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="calendar" class="w-6 h-6"></i>
+      </div>
+      <h3 class="text-lg font-semibold text-earth-heading">No Seasons Recorded Yet</h3>
+      <p class="text-sm text-earth-muted mt-1">
+        Add growing seasons and plantings in Farm History to unlock performance comparisons.
+      </p>
+      <div class="mt-6">
+        <a href="{% url 'farms:season_create' %}" class="fp-btn-primary inline-flex items-center gap-2">
+          <i data-lucide="plus" class="w-4 h-4"></i> Add Growing Season
+        </a>
+      </div>
+    </div>
+  {% else %}
+
+    <!-- Seasons Review Grid -->
+    <div class="space-y-4">
+      {% for s in seasons_data %}
+        <div class="fp-card p-6 hover:border-leaf/40 transition-colors">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            
+            <!-- Left Info -->
+            <div class="space-y-2">
+              <div class="flex flex-wrap items-center gap-2">
+                <h3 class="text-lg font-bold text-earth-heading">{{ s.season.name }}</h3>
+                {% if s.has_review %}
+                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                    <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Reviewed
+                  </span>
+                  {% if s.review.associated_plan %}
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-leaf/10 text-leaf font-medium">
+                      <i data-lucide="bookmark" class="w-3 h-3"></i> Linked: {{ s.review.associated_plan.name }}
+                    </span>
+                  {% else %}
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-amber-50 text-amber-700 font-medium">
+                      <i data-lucide="alert-circle" class="w-3 h-3"></i> Plan unlinked
+                    </span>
+                  {% endif %}
+                {% else %}
+                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                    <i data-lucide="clock" class="w-3.5 h-3.5"></i> Pending Review
+                  </span>
+                {% endif %}
+              </div>
+              <p class="text-xs text-earth-muted flex items-center gap-3">
+                <span><i data-lucide="calendar" class="w-3.5 h-3.5 inline mr-1"></i>{{ s.season.start_date|date:"M Y" }} – {{ s.season.end_date|date:"M Y" }}</span>
+                <span>•</span>
+                <span><i data-lucide="sprout" class="w-3.5 h-3.5 inline mr-1"></i>{{ s.planting_count }} crop{{ s.planting_count|pluralize }} planted</span>
+                <span>•</span>
+                <span><i data-lucide="pie-chart" class="w-3.5 h-3.5 inline mr-1"></i>{{ s.total_area|floatformat:2 }} ha cultivated</span>
+              </p>
+            </div>
+
+            <!-- Financials / Score Summary -->
+            <div class="flex flex-wrap items-center gap-6 text-sm">
+              <div>
+                <span class="text-xs text-earth-muted block">Observed Cost</span>
+                <span class="font-semibold text-earth-heading">MWK {{ s.total_cost|floatformat:0|intcomma }}</span>
+              </div>
+              <div>
+                <span class="text-xs text-earth-muted block">Observed Revenue</span>
+                <span class="font-semibold text-earth-heading">MWK {{ s.total_rev|floatformat:0|intcomma }}</span>
+              </div>
+              <div>
+                <span class="text-xs text-earth-muted block">Gross Margin</span>
+                <span class="font-bold {% if s.total_margin >= 0 %}text-emerald-700{% else %}text-rose-700{% endif %}">
+                  MWK {{ s.total_margin|floatformat:0|intcomma }}
+                </span>
+              </div>
+              {% if s.has_review %}
+                <div class="border-l border-earth-border/60 pl-4">
+                  <span class="text-xs text-earth-muted block">Satisfaction</span>
+                  <div class="flex items-center gap-1 text-amber-500 font-semibold text-sm">
+                    <span>{{ s.review.overall_satisfaction }} / 5</span>
+                    <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+                  </div>
+                </div>
+              {% endif %}
+
+              <!-- CTA Buttons -->
+              <div class="flex items-center gap-2">
+                <a href="{% url 'farms:season_review_detail' s.season.id %}" class="fp-btn-primary inline-flex items-center gap-1.5 text-xs">
+                  <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> View Comparison
+                </a>
+                <a href="{% url 'farms:season_review_edit' s.season.id %}" class="fp-btn-outline inline-flex items-center gap-1.5 text-xs">
+                  <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> {% if s.has_review %}Edit Notes{% else %}Start Review{% endif %}
+                </a>
+              </div>
+            </div>
+
+          </div>
+
+          {% if s.has_review and s.review.lessons_learned %}
+            <div class="mt-4 pt-3 border-t border-earth-border/40 text-xs text-earth-text">
+              <span class="font-semibold text-earth-muted">Key Lesson:</span> {{ s.review.lessons_learned|truncatewords:28 }}
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+  {% endif %}
+
+</div>
+{% endblock %}

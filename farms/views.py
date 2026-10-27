@@ -4,8 +4,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .forms import FarmForm, PlantingForm, SeasonForm
-from .models import Farm, Planting, Season
+from .forms import FarmForm, PlantingForm, SeasonForm, SeasonReviewForm
+from .models import Farm, Planting, Season, SeasonReview
 
 
 @login_required
@@ -333,4 +333,220 @@ def planting_delete(request, pk):
         'warning_text': f"This will permanently delete this planting record, including its yield and financial history.",
         'cancel_url': 'farms:farm_history',
         'active_nav': 'farm_history',
+    })
+
+
+
+# ==============================================================================
+# Module 7 — Season Review Views
+# ==============================================================================
+
+@login_required
+def season_review_index(request):
+    """
+    Overview list of seasons for the user's farm, displaying review status,
+    satisfaction ratings, and planned-vs-actual progress.
+    """
+    farm = Farm.objects.filter(owner=request.user).first()
+    if not farm:
+        return render(request, 'farms/season_review_index.html', {
+            'farm': None,
+            'seasons_data': [],
+            'active_nav': 'season_review',
+        })
+
+    seasons = Season.objects.filter(farm=farm).prefetch_related('plantings__crop', 'review').order_by('-start_date')
+    seasons_data = []
+
+    for s in seasons:
+        plantings = list(s.plantings.all())
+        total_area = sum(p.area_ha for p in plantings)
+        total_rev = sum(p.revenue_mwk or Decimal('0') for p in plantings)
+        total_cost = sum(p.production_cost_mwk or Decimal('0') for p in plantings)
+        total_margin = sum(p.gross_margin_mwk or Decimal('0') for p in plantings if p.gross_margin_mwk is not None)
+        has_review = hasattr(s, 'review') and s.review is not None
+
+        seasons_data.append({
+            'season': s,
+            'planting_count': len(plantings),
+            'total_area': total_area,
+            'total_rev': total_rev,
+            'total_cost': total_cost,
+            'total_margin': total_margin,
+            'has_review': has_review,
+            'review': s.review if has_review else None,
+        })
+
+    return render(request, 'farms/season_review_index.html', {
+        'farm': farm,
+        'seasons_data': seasons_data,
+        'active_nav': 'season_review',
+    })
+
+
+@login_required
+def season_review_detail(request, season_id):
+    """
+    Side-by-side comparison of Planned targets vs Actual outcomes for a season.
+    Pulls benchmarks from planner.Plan and actual outcomes from plantings.
+    """
+    season = get_object_or_404(Season, pk=season_id, farm__owner=request.user)
+    review = getattr(season, 'review', None)
+    plantings = list(season.plantings.select_related('crop').all())
+
+    # Actuals
+    actual_area = sum(p.area_ha for p in plantings)
+    actual_yield = sum(p.yield_kg or Decimal('0') for p in plantings)
+    actual_cost = sum(p.production_cost_mwk or Decimal('0') for p in plantings)
+    actual_rev = sum(p.revenue_mwk or Decimal('0') for p in plantings)
+    actual_margin = sum(p.gross_margin_mwk or Decimal('0') for p in plantings if p.gross_margin_mwk is not None)
+
+    # Planned
+    plan = review.associated_plan if review else None
+    planned_items = list(plan.items.select_related('crop').all()) if plan else []
+
+    planned_area = plan.total_land_ha if plan else Decimal('0')
+    planned_yield = sum(it.expected_yield_kg_total for it in planned_items) if planned_items else Decimal('0')
+    planned_cost = plan.total_expected_cost_mwk if plan else Decimal('0')
+    planned_rev = plan.total_expected_revenue_mwk if plan else Decimal('0')
+    planned_margin = plan.total_expected_margin_mwk if plan else Decimal('0')
+
+    # Overall Variances
+    def calc_delta(actual, planned):
+        diff = actual - planned
+        pct = (diff / planned * 100) if (planned and planned != 0) else None
+        return diff, pct
+
+    area_diff, area_pct = calc_delta(actual_area, planned_area) if plan else (None, None)
+    yield_diff, yield_pct = calc_delta(actual_yield, planned_yield) if plan else (None, None)
+    cost_diff, cost_pct = calc_delta(actual_cost, planned_cost) if plan else (None, None)
+    rev_diff, rev_pct = calc_delta(actual_rev, planned_rev) if plan else (None, None)
+    margin_diff, margin_pct = calc_delta(actual_margin, planned_margin) if plan else (None, None)
+
+    # Per-Crop Comparison Grid
+    crops_map = {}
+    for it in planned_items:
+        crops_map[it.crop.id] = {
+            'crop': it.crop,
+            'planned_area': it.area_ha,
+            'planned_yield': it.expected_yield_kg_total,
+            'planned_cost': it.expected_total_cost_mwk,
+            'planned_rev': it.expected_revenue_mwk,
+            'planned_margin': it.expected_gross_margin_mwk,
+            'actual_area': Decimal('0'),
+            'actual_yield': Decimal('0'),
+            'actual_cost': Decimal('0'),
+            'actual_rev': Decimal('0'),
+            'actual_margin': Decimal('0'),
+            'has_actual': False,
+            'has_planned': True,
+        }
+
+    for p in plantings:
+        cid = p.crop.id
+        if cid not in crops_map:
+            crops_map[cid] = {
+                'crop': p.crop,
+                'planned_area': Decimal('0'),
+                'planned_yield': Decimal('0'),
+                'planned_cost': Decimal('0'),
+                'planned_rev': Decimal('0'),
+                'planned_margin': Decimal('0'),
+                'actual_area': Decimal('0'),
+                'actual_yield': Decimal('0'),
+                'actual_cost': Decimal('0'),
+                'actual_rev': Decimal('0'),
+                'actual_margin': Decimal('0'),
+                'has_actual': True,
+                'has_planned': False,
+            }
+        c_entry = crops_map[cid]
+        c_entry['has_actual'] = True
+        c_entry['actual_area'] += p.area_ha
+        c_entry['actual_yield'] += (p.yield_kg or Decimal('0'))
+        c_entry['actual_cost'] += (p.production_cost_mwk or Decimal('0'))
+        c_entry['actual_rev'] += (p.revenue_mwk or Decimal('0'))
+        c_entry['actual_margin'] += (p.gross_margin_mwk or Decimal('0'))
+
+    crop_comparisons = []
+    for item in crops_map.values():
+        c_p_area = item['planned_area']
+        c_a_area = item['actual_area']
+        c_p_yield = item['planned_yield']
+        c_a_yield = item['actual_yield']
+        c_p_cost = item['planned_cost']
+        c_a_cost = item['actual_cost']
+        c_p_rev = item['planned_rev']
+        c_a_rev = item['actual_rev']
+        c_p_margin = item['planned_margin']
+        c_a_margin = item['actual_margin']
+
+        item['area_diff'] = c_a_area - c_p_area if item['has_planned'] and item['has_actual'] else None
+        item['margin_diff'] = c_a_margin - c_p_margin if item['has_planned'] and item['has_actual'] else None
+        item['margin_pct'] = ((c_a_margin - c_p_margin) / abs(c_p_margin) * 100) if (item['has_planned'] and item['has_actual'] and c_p_margin != 0) else None
+        crop_comparisons.append(item)
+
+    # Chart data
+    chart_labels = [c['crop'].name for c in crop_comparisons]
+    chart_planned_margin = [float(c['planned_margin']) for c in crop_comparisons]
+    chart_actual_margin = [float(c['actual_margin']) for c in crop_comparisons]
+
+    return render(request, 'farms/season_review_detail.html', {
+        'season': season,
+        'review': review,
+        'plan': plan,
+        'plantings': plantings,
+        'crop_comparisons': crop_comparisons,
+        'totals': {
+            'actual_area': actual_area,
+            'planned_area': planned_area,
+            'area_diff': area_diff,
+            'area_pct': area_pct,
+            'actual_yield': actual_yield,
+            'planned_yield': planned_yield,
+            'yield_diff': yield_diff,
+            'yield_pct': yield_pct,
+            'actual_cost': actual_cost,
+            'planned_cost': planned_cost,
+            'cost_diff': cost_diff,
+            'cost_pct': cost_pct,
+            'actual_rev': actual_rev,
+            'planned_rev': planned_rev,
+            'rev_diff': rev_diff,
+            'rev_pct': rev_pct,
+            'actual_margin': actual_margin,
+            'planned_margin': planned_margin,
+            'margin_diff': margin_diff,
+            'margin_pct': margin_pct,
+        },
+        'chart_labels_json': json.dumps(chart_labels),
+        'chart_planned_json': json.dumps(chart_planned_margin),
+        'chart_actual_json': json.dumps(chart_actual_margin),
+        'active_nav': 'season_review',
+    })
+
+
+@login_required
+def season_review_edit(request, season_id):
+    """Create or update qualitative notes, satisfaction score, and linked plan for a season."""
+    season = get_object_or_404(Season, pk=season_id, farm__owner=request.user)
+    review = getattr(season, 'review', None)
+
+    if request.method == 'POST':
+        form = SeasonReviewForm(request.POST, instance=review, farm=season.farm)
+        if form.is_valid():
+            review_obj = form.save(commit=False)
+            review_obj.season = season
+            review_obj.save()
+            messages.success(request, f"Season review for '{season.name}' saved.")
+            return redirect('farms:season_review_detail', season_id=season.id)
+    else:
+        form = SeasonReviewForm(instance=review, farm=season.farm)
+
+    return render(request, 'farms/season_review_form.html', {
+        'form': form,
+        'season': season,
+        'review': review,
+        'is_edit': review is not None,
+        'active_nav': 'season_review',
     })

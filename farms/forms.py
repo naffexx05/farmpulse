@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Crop, Farm, Season, Planting
+from .models import Crop, Farm, Season, Planting, SeasonReview
 
 
 class FarmForm(forms.ModelForm):
@@ -117,3 +117,40 @@ class PlantingForm(forms.ModelForm):
             self.add_error('area_ha', 'Planted area must be greater than 0 hectares.')
 
         return cleaned_data
+
+
+class SeasonReviewForm(forms.ModelForm):
+    """Create or update qualitative review, satisfaction, and lessons learned for a season."""
+
+    class Meta:
+        model = SeasonReview
+        fields = [
+            'associated_plan',
+            'overall_satisfaction',
+            'lessons_learned',
+            'weather_assessment',
+            'market_assessment',
+        ]
+        widgets = {
+            'associated_plan': forms.Select(attrs={'class': 'fp-input'}),
+            'overall_satisfaction': forms.Select(attrs={'class': 'fp-input'}),
+            'lessons_learned': forms.Textarea(attrs={
+                'class': 'fp-input', 'rows': 4,
+                'placeholder': 'What worked well? What agronomic tactics succeeded or failed (e.g. planting dates, seed variety, spacing)?'
+            }),
+            'weather_assessment': forms.Textarea(attrs={
+                'class': 'fp-input', 'rows': 3,
+                'placeholder': 'Rainfall patterns, dry spell duration, temperature anomalies, flood or heat impact.'
+            }),
+            'market_assessment': forms.Textarea(attrs={
+                'class': 'fp-input', 'rows': 3,
+                'placeholder': 'Prices realized, buyer access (ADMARC, local vendors, aggregators), payment terms.'
+            }),
+        }
+
+    def __init__(self, *args, farm=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if farm:
+            from planner.models import Plan
+            self.fields['associated_plan'].queryset = Plan.objects.filter(farm=farm).order_by('-created_at')
+            self.fields['associated_plan'].empty_label = "— None / Not Linked —"

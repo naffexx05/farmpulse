@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Crop, Farm, Season, Planting
+from .models import Crop, Farm, Season, Planting, SeasonReview
 
 
 @admin.register(Crop)
@@ -60,3 +60,10 @@ class PlantingAdmin(admin.ModelAdmin):
             return '—'
         return f'{gm:,.2f}'
     gross_margin_display.short_description = 'Gross margin (MWK)'
+
+
+@admin.register(SeasonReview)
+class SeasonReviewAdmin(admin.ModelAdmin):
+    list_display = ('season', 'associated_plan', 'overall_satisfaction', 'created_at')
+    list_filter = ('overall_satisfaction',)
+    search_fields = ('season__name', 'season__farm__name', 'lessons_learned')

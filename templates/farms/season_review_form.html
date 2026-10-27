@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if is_edit %}Edit{% else %}Record{% endif %} Season Review: {{ season.name }} · FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+
+  <!-- Header -->
+  <div>
+    <div class="flex items-center gap-2">
+      <a href="{% url 'farms:season_review_index' %}" class="text-xs text-earth-muted hover:text-leaf inline-flex items-center gap-1">
+        <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Season Reviews
+      </a>
+      <span class="text-xs text-earth-muted">/</span>
+      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-leaf/10 text-leaf">
+        {{ season.name }}
+      </span>
+    </div>
+    <h1 class="text-2xl font-bold text-earth-heading mt-2">
+      {% if is_edit %}Edit{% else %}Record{% endif %} Season Review
+    </h1>
+    <p class="text-sm text-earth-muted mt-1">
+      Link your formulated plan and document qualitative observations to complete your season post-mortem.
+    </p>
+  </div>
+
+  <!-- Form Card -->
+  <div class="fp-card p-6 sm:p-8">
+    <form method="post" class="space-y-6" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="p-4 rounded-lg bg-rose-50 border border-rose-200 text-sm text-rose-800">
+          {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <!-- Associated Plan & Satisfaction Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- Plan Link -->
+        <div>
+          <label for="{{ form.associated_plan.id_for_label }}" class="block text-sm font-semibold text-earth-heading mb-1">
+            Associated Baseline Crop Plan
+          </label>
+          {{ form.associated_plan }}
+          <p class="text-xs text-earth-muted mt-1">
+            Select the crop plan you formulated for this season to compute planned-vs-actual variances.
+          </p>
+          {% if form.associated_plan.errors %}
+            <p class="text-xs text-rose-600 mt-1">{{ form.associated_plan.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <!-- Overall Satisfaction -->
+        <div>
+          <label for="{{ form.overall_satisfaction.id_for_label }}" class="block text-sm font-semibold text-earth-heading mb-1">
+            Overall Satisfaction Score
+          </label>
+          {{ form.overall_satisfaction }}
+          <p class="text-xs text-earth-muted mt-1">
+            Subjective evaluation of agronomic performance and financial return.
+          </p>
+          {% if form.overall_satisfaction.errors %}
+            <p class="text-xs text-rose-600 mt-1">{{ form.overall_satisfaction.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+      </div>
+
+      <!-- Lessons Learned -->
+      <div>
+        <label for="{{ form.lessons_learned.id_for_label }}" class="block text-sm font-semibold text-earth-heading mb-1">
+          Agronomic & Operational Lessons Learned
+        </label>
+        {{ form.lessons_learned }}
+        <p class="text-xs text-earth-muted mt-1">
+          What varieties performed well? Which seed rates, planting windows, or pest management tactics should be repeated or changed?
+        </p>
+        {% if form.lessons_learned.errors %}
+          <p class="text-xs text-rose-600 mt-1">{{ form.lessons_learned.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Weather Assessment -->
+      <div>
+        <label for="{{ form.weather_assessment.id_for_label }}" class="block text-sm font-semibold text-earth-heading mb-1">
+          Weather & Climate Assessment
+        </label>
+        {{ form.weather_assessment }}
+        <p class="text-xs text-earth-muted mt-1">
+          How did rainfall onset, mid-season dry spells, or heat events influence germination and yields?
+        </p>
+        {% if form.weather_assessment.errors %}
+          <p class="text-xs text-rose-600 mt-1">{{ form.weather_assessment.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Market Assessment -->
+      <div>
+        <label for="{{ form.market_assessment.id_for_label }}" class="block text-sm font-semibold text-earth-heading mb-1">
+          Market Dynamics & Price Realization
+        </label>
+        {{ form.market_assessment }}
+        <p class="text-xs text-earth-muted mt-1">
+          Did realized prices match expectations? Were crops sold at farmgate, wholesale markets, or held for better prices?
+        </p>
+        {% if form.market_assessment.errors %}
+          <p class="text-xs text-rose-600 mt-1">{{ form.market_assessment.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center justify-end gap-3 pt-4 border-t border-earth-border">
+        <a href="{% url 'farms:season_review_index' %}" class="fp-btn-outline text-sm">
+          Cancel
+        </a>
+        <button type="submit" class="fp-btn-primary inline-flex items-center gap-2 text-sm">
+          <i data-lucide="check" class="w-4 h-4"></i> Save Season Review
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+{% endblock %}

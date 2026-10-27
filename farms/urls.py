@@ -16,4 +16,9 @@ urlpatterns = [
     path('farm-history/plantings/new/', views.planting_create, name='planting_create'),
     path('farm-history/plantings/<int:pk>/edit/', views.planting_edit, name='planting_edit'),
     path('farm-history/plantings/<int:pk>/delete/', views.planting_delete, name='planting_delete'),
+
+    # Module 7: Season Review
+    path('season-review/', views.season_review_index, name='season_review_index'),
+    path('season-review/<int:season_id>/', views.season_review_detail, name='season_review_detail'),
+    path('season-review/<int:season_id>/edit/', views.season_review_edit, name='season_review_edit'),
 ]

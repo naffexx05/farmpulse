@@ -195,3 +195,52 @@ class Planting(models.Model):
             errors['harvest_date'] = 'Harvest date must be on or after planting date.'
         if errors:
             raise ValidationError(errors)
+
+
+class SeasonReview(models.Model):
+    """
+    Captures retrospective reflections and qualitative evaluation for a season,
+    linking the actual plantings against a planned benchmark (from planner.Plan).
+    """
+    SATISFACTION_CHOICES = [
+        (5, '5 — Excellent (exceeded expectations)'),
+        (4, '4 — Good (met targets with minor issues)'),
+        (3, '3 — Moderate (acceptable harvest, some challenges)'),
+        (2, '2 — Challenging (missed key yield/revenue targets)'),
+        (1, '1 — Severe Difficulties (major crop failure / high losses)'),
+    ]
+
+    season = models.OneToOneField(Season, on_delete=models.CASCADE, related_name='review')
+    associated_plan = models.ForeignKey(
+        'planner.Plan',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='season_reviews',
+        help_text="The crop plan originally formulated for this season, if available."
+    )
+    overall_satisfaction = models.PositiveSmallIntegerField(
+        choices=SATISFACTION_CHOICES,
+        default=4,
+        help_text="Overall assessment score for the season."
+    )
+    lessons_learned = models.TextField(
+        blank=True,
+        help_text="Key agronomic and operational takeaways (e.g. planting dates, seed varieties)."
+    )
+    weather_assessment = models.TextField(
+        blank=True,
+        help_text="Rainfall onset, dry spells, flood or heat impact on performance."
+    )
+    market_assessment = models.TextField(
+        blank=True,
+        help_text="Selling price realization, buyer availability, transport conditions."
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-season__start_date']
+
+    def __str__(self):
+        return f"Review: {self.season.name}"
