@@ -8,4 +8,5 @@ urlpatterns = [
     path('dev/design-preview/', core_views.design_preview, name='design_preview'),
     path('', include('farms.urls')),
     path('', include('climate.urls')),
+    path('', include('market.urls')),
 ]
