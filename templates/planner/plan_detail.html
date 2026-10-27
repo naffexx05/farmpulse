@@ -21,11 +21,20 @@
     </div>
 
     <!-- Actions -->
-    <div class="flex items-center gap-2.5">
-      <a href="{% url 'planner:scenario_simulator' %}?plan={{ plan.pk }}" class="fp-btn-primary">
+    <div class="flex items-center gap-2 flex-wrap">
+      <a href="{% url 'planner:scenario_simulator' %}?plan={{ plan.pk }}" class="fp-btn-primary text-xs">
         🎮 Stress-Test in Simulator
       </a>
-      <a href="{% url 'planner:plan_delete' plan.pk %}" class="fp-btn-ghost text-risk-high" title="Delete Plan">
+      <a href="{% url 'planner:plan_duplicate' plan.pk %}" class="fp-btn-ghost text-xs" title="Duplicate this plan">
+        <i data-lucide="copy" class="w-3.5 h-3.5"></i> Duplicate
+      </a>
+      <a href="{% url 'planner:plan_export_csv' plan.pk %}" class="fp-btn-ghost text-xs" title="Export as CSV spreadsheet">
+        <i data-lucide="download" class="w-3.5 h-3.5"></i> Export CSV
+      </a>
+      <a href="{% url 'planner:plan_delete' plan.pk %}" class="fp-btn-ghost text-risk-high text-xs" title="Delete Plan">
+        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+      </a>
+    </div>
         <i data-lucide="trash-2" class="w-4 h-4"></i>
       </a>
     </div>

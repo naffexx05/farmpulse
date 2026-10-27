@@ -1,8 +1,9 @@
+import csv
 import json
 from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -178,7 +179,6 @@ def scenario_simulator(request):
         messages.warning(request, "Please register your farm before running scenario simulations.")
         return redirect('farms:farm_edit')
 
-    # Load baseline from saved active plan or generate a default balanced plan
     saved_plan_id = request.GET.get('plan')
     saved_plan = None
     if saved_plan_id:
@@ -207,7 +207,6 @@ def scenario_simulator(request):
             ]
         }
     else:
-        # Generate default balanced plan on the fly
         calc = calculate_plan_allocations(
             farm=farm,
             total_land_ha=farm.cultivated_land_ha or farm.total_land_ha or Decimal('2.00'),
@@ -215,10 +214,8 @@ def scenario_simulator(request):
         )
         baseline_plan = calc['plans'][0]
 
-    # Run default neutral simulation
     initial_sim = simulate_game_shocks(baseline_plan, 0.0, 0.0, 0.0, 0.0)
 
-    # Serialize baseline items for client-side instant game loop
     baseline_json = json.dumps({
         'title': baseline_plan.get('title', 'Baseline Plan'),
         'total_land_ha': float(baseline_plan['total_land_ha']),
@@ -298,7 +295,7 @@ def simulate_scenario_api(request):
 
 
 # ==============================================================================
-# Module 6 Preview: My Plans
+# Module 6: My Plans (List, Detail, Compare, Duplicate, CSV Export, Delete)
 # ==============================================================================
 
 @login_required
@@ -322,6 +319,136 @@ def plan_detail(request, pk):
         'assumptions': assumptions,
         'active_nav': 'plans',
     })
+
+
+@login_required
+def plan_compare(request):
+    """
+    Phase 6.3 Compare view: side-by-side comparison of 2 or 3 saved plans.
+    """
+    all_user_plans = Plan.objects.filter(farm__owner=request.user).order_by('-created_at')
+
+    # Get selected plan IDs
+    ids_param = request.GET.get('ids', '')
+    plan_ids = []
+    if ids_param:
+        plan_ids = [int(i.strip()) for i in ids_param.split(',') if i.strip().isdigit()]
+    elif 'id' in request.GET:
+        plan_ids = [int(i) for i in request.GET.getlist('id') if i.isdigit()]
+
+    if not plan_ids and all_user_plans.count() >= 2:
+        plan_ids = list(all_user_plans[:3].values_list('id', flat=True))
+
+    selected_plans = list(
+        Plan.objects.filter(id__in=plan_ids, farm__owner=request.user)
+        .prefetch_related('items__crop')
+    )
+
+    all_crop_names = sorted(list({
+        item.crop.name
+        for p in selected_plans
+        for item in p.items.all()
+    }))
+
+    crop_comparison = []
+    for crop_name in all_crop_names:
+        row = {'crop_name': crop_name, 'plans': []}
+        for p in selected_plans:
+            matching = next((item for item in p.items.all() if item.crop.name == crop_name), None)
+            row['plans'].append(matching)
+        crop_comparison.append(row)
+
+    return render(request, 'planner/plan_compare.html', {
+        'all_user_plans': all_user_plans,
+        'selected_plans': selected_plans,
+        'crop_comparison': crop_comparison,
+        'active_nav': 'plans',
+    })
+
+
+@login_required
+def plan_duplicate(request, pk):
+    """Phase 6.4 Duplicate plan action."""
+    plan = get_object_or_404(Plan, pk=pk, farm__owner=request.user)
+    new_plan = Plan.objects.create(
+        farm=plan.farm,
+        name=f"Copy of {plan.name}",
+        strategy_type=plan.strategy_type,
+        status='draft',
+        total_land_ha=plan.total_land_ha,
+        total_budget_mwk=plan.total_budget_mwk,
+        total_expected_cost_mwk=plan.total_expected_cost_mwk,
+        total_expected_revenue_mwk=plan.total_expected_revenue_mwk,
+        total_expected_margin_mwk=plan.total_expected_margin_mwk,
+        notes=plan.notes,
+    )
+    for item in plan.items.all():
+        PlanItem.objects.create(
+            plan=new_plan,
+            crop=item.crop,
+            area_ha=item.area_ha,
+            expected_yield_kg_per_ha=item.expected_yield_kg_per_ha,
+            expected_yield_kg_total=item.expected_yield_kg_total,
+            expected_cost_per_ha_mwk=item.expected_cost_per_ha_mwk,
+            expected_total_cost_mwk=item.expected_total_cost_mwk,
+            expected_selling_price_mwk_per_kg=item.expected_selling_price_mwk_per_kg,
+            expected_revenue_mwk=item.expected_revenue_mwk,
+            expected_gross_margin_mwk=item.expected_gross_margin_mwk,
+            break_even_price_mwk_per_kg=item.break_even_price_mwk_per_kg,
+        )
+    for a in plan.assumptions.all():
+        PlanAssumption.objects.create(
+            plan=new_plan,
+            category=a.category,
+            parameter_name=a.parameter_name,
+            value_used=a.value_used,
+            source_note=a.source_note,
+        )
+    messages.success(request, f"Plan duplicated as '{new_plan.name}'.")
+    return redirect('planner:plan_detail', pk=new_plan.pk)
+
+
+@login_required
+def plan_export_csv(request, pk):
+    """Phase 6.4 CSV Export action."""
+    plan = get_object_or_404(Plan, pk=pk, farm__owner=request.user)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="farmpulse_plan_{plan.pk}.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['FarmPulse Malawi — Strategic Crop Plan Export'])
+    writer.writerow(['Plan Name', plan.name])
+    writer.writerow(['Farm', plan.farm.name])
+    writer.writerow(['Strategy', plan.get_strategy_type_display()])
+    writer.writerow(['Total Land (ha)', plan.total_land_ha])
+    writer.writerow(['Total Cost (MWK)', plan.total_expected_cost_mwk])
+    writer.writerow(['Total Revenue (MWK)', plan.total_expected_revenue_mwk])
+    writer.writerow(['Expected Net Margin (MWK)', plan.total_expected_margin_mwk])
+    writer.writerow([])
+    writer.writerow([
+        'Crop', 'Area (ha)', 'Yield (kg/ha)', 'Total Yield (kg)',
+        'Cost/ha (MWK)', 'Total Cost (MWK)', 'Selling Price (MWK/kg)',
+        'Revenue (MWK)', 'Gross Margin (MWK)', 'Break-Even Price (MWK/kg)'
+    ])
+    for item in plan.items.select_related('crop').all():
+        writer.writerow([
+            item.crop.name,
+            item.area_ha,
+            item.expected_yield_kg_per_ha,
+            item.expected_yield_kg_total,
+            item.expected_cost_per_ha_mwk,
+            item.expected_total_cost_mwk,
+            item.expected_selling_price_mwk_per_kg,
+            item.expected_revenue_mwk,
+            item.expected_gross_margin_mwk,
+            item.break_even_price_mwk_per_kg,
+        ])
+    writer.writerow([])
+    writer.writerow(['Category', 'Parameter', 'Value', 'Source'])
+    for a in plan.assumptions.all():
+        writer.writerow([a.get_category_display(), a.parameter_name, a.value_used, a.source_note])
+
+    return response
 
 
 @login_required

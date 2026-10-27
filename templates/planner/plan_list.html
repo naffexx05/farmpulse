@@ -13,9 +13,16 @@
         Review, stress-test, or track past generated seasonal crop allocations.
       </p>
     </div>
-    <a href="{% url 'planner:planner_input' %}" class="fp-btn-primary">
-      <i data-lucide="plus" class="w-4 h-4"></i> Create New Plan
-    </a>
+    <div class="flex items-center gap-2.5">
+      {% if plans.count >= 2 %}
+        <a href="{% url 'planner:plan_compare' %}" class="fp-btn-ghost text-xs">
+          <i data-lucide="columns-2" class="w-4 h-4 text-leaf"></i> Compare Plans
+        </a>
+      {% endif %}
+      <a href="{% url 'planner:planner_input' %}" class="fp-btn-primary text-xs">
+        <i data-lucide="plus" class="w-4 h-4"></i> Create New Plan
+      </a>
+    </div>
   </header>
 
   {% if plans %}
