@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}{% if is_edit %}Edit Season{% else %}Add Season{% endif %} — FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
+
+  <!-- Header -->
+  <header>
+    <a href="{% url 'farms:farm_history' %}" class="text-sm text-cream/60 hover:text-cream inline-flex items-center gap-1.5 mb-2">
+      <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Back to Farm History
+    </a>
+    <h1 class="font-display text-3xl font-semibold text-cream">
+      {% if is_edit %}Edit Season{% else %}Add Growing Season{% endif %}
+    </h1>
+    <p class="mt-1 text-sm text-cream/60">
+      A season groups your crop plantings and tracks overall climate and operational outcomes.
+    </p>
+  </header>
+
+  {% if form.non_field_errors %}
+    <div class="rounded-xl border border-risk-high/30 bg-risk-high/15 p-3 text-sm text-risk-high">
+      {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post" class="space-y-6" novalidate>
+    {% csrf_token %}
+
+    <section class="fp-glass p-6 space-y-5">
+      <!-- Season Name -->
+      <div>
+        <label for="{{ form.name.id_for_label }}" class="fp-label">Season Name</label>
+        {{ form.name }}
+        {% if form.name.errors %}<p class="mt-1 text-xs text-risk-high">{{ form.name.errors.0 }}</p>{% endif %}
+        <p class="mt-1 text-xs text-cream/40">e.g. 2024/25 Rainy Season or 2024 Winter Irrigated</p>
+      </div>
+
+      <!-- Dates Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="{{ form.start_date.id_for_label }}" class="fp-label">Season Start Date</label>
+          {{ form.start_date }}
+          {% if form.start_date.errors %}<p class="mt-1 text-xs text-risk-high">{{ form.start_date.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label for="{{ form.end_date.id_for_label }}" class="fp-label">Season End Date</label>
+          {{ form.end_date }}
+          {% if form.end_date.errors %}<p class="mt-1 text-xs text-risk-high">{{ form.end_date.errors.0 }}</p>{% endif %}
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div>
+        <label for="{{ form.notes.id_for_label }}" class="fp-label">Season Notes &amp; Observations (Optional)</label>
+        {{ form.notes }}
+        {% if form.notes.errors %}<p class="mt-1 text-xs text-risk-high">{{ form.notes.errors.0 }}</p>{% endif %}
+      </div>
+    </section>
+
+    <!-- Actions -->
+    <div class="flex items-center justify-end gap-3 pt-2">
+      <a href="{% url 'farms:farm_history' %}" class="fp-btn-ghost">Cancel</a>
+      <button type="submit" class="fp-btn-primary">
+        <i data-lucide="check" class="w-4 h-4"></i>
+        {% if is_edit %}Save Changes{% else %}Create Season{% endif %}
+      </button>
+    </div>
+
+  </form>
+
+</div>
+{% endblock %}

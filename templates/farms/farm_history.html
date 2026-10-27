@@ -1,0 +1,535 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Farm History — FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-8">
+
+  <!-- Header & Actions -->
+  <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-2">
+        <h1 class="font-display text-3xl font-semibold text-cream">Farm History</h1>
+        <span class="fp-demo-pill">Observed Data</span>
+      </div>
+      <p class="mt-1 text-sm text-cream/60">
+        Timeline of past seasons, crop plantings, harvested yields, and verified gross margins.
+      </p>
+    </div>
+    {% if farm %}
+      <div class="flex items-center gap-3">
+        <a href="{% url 'farms:season_create' %}" class="fp-btn-ghost">
+          <i data-lucide="calendar-plus" class="w-4 h-4 text-leaf"></i> Add Season
+        </a>
+        <a href="{% url 'farms:planting_create' %}" class="fp-btn-primary">
+          <i data-lucide="plus" class="w-4 h-4"></i> Record Planting
+        </a>
+      </div>
+    {% endif %}
+  </header>
+
+  {% if not farm %}
+    <!-- No Farm State -->
+    <div class="fp-glass p-12 text-center">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-forest-700 mb-4">
+        <i data-lucide="map-pin" class="w-6 h-6 text-leaf"></i>
+      </div>
+      <h2 class="font-display text-xl font-semibold text-cream">Farm profile required</h2>
+      <p class="mt-2 text-sm text-cream/60 max-w-md mx-auto">
+        Please register your farm before recording seasons and historical crop plantings.
+      </p>
+      <a href="{% url 'farms:farm_edit' %}" class="fp-btn-primary mt-6">
+        <i data-lucide="plus" class="w-4 h-4"></i> Add a farm
+      </a>
+    </div>
+
+  {% elif not seasons %}
+    <!-- Empty Seasons State -->
+    <div class="fp-glass p-12 text-center">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-forest-700 mb-4">
+        <i data-lucide="history" class="w-6 h-6 text-leaf"></i>
+      </div>
+      <h2 class="font-display text-xl font-semibold text-cream">No history recorded yet</h2>
+      <p class="mt-2 text-sm text-cream/60 max-w-md mx-auto">
+        Track past growing seasons, compare yield variations, and build financial benchmarks for upcoming crop plans.
+      </p>
+      <div class="mt-6 flex flex-wrap justify-center gap-3">
+        <a href="{% url 'farms:season_create' %}" class="fp-btn-primary">
+          <i data-lucide="calendar-plus" class="w-4 h-4"></i> Create First Season
+        </a>
+      </div>
+    </div>
+
+  {% else %}
+
+    <!-- Top KPI Cards -->
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="fp-card p-4 sm:p-5">
+        <div class="fp-label flex items-center justify-between">
+          <span>Seasons</span>
+          <i data-lucide="calendar" class="w-4 h-4 text-leaf"></i>
+        </div>
+        <div class="mt-1 font-display text-2xl sm:text-3xl font-semibold text-cream">
+          {{ kpi.seasons_count }}
+          <span class="text-xs font-normal text-muted">({{ kpi.plantings_count }} plantings)</span>
+        </div>
+      </div>
+
+      <div class="fp-card p-4 sm:p-5">
+        <div class="fp-label flex items-center justify-between">
+          <span>Total Land Planted</span>
+          <i data-lucide="layers" class="w-4 h-4 text-leaf"></i>
+        </div>
+        <div class="mt-1 font-display text-2xl sm:text-3xl font-semibold text-cream">
+          {{ kpi.total_area|floatformat:2 }}<span class="text-xs font-normal text-muted"> ha cumulative</span>
+        </div>
+      </div>
+
+      <div class="fp-card p-4 sm:p-5">
+        <div class="fp-label flex items-center justify-between">
+          <span>Total Production Cost</span>
+          <i data-lucide="trending-down" class="w-4 h-4 text-risk-medium"></i>
+        </div>
+        <div class="mt-1 font-display text-2xl sm:text-3xl font-semibold text-cream">
+          {% if kpi.total_cost is not None %}
+            {{ kpi.total_cost|floatformat:0|intcomma }}<span class="text-xs font-normal text-muted"> MWK</span>
+          {% else %}
+            <span class="text-cream/40">—</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="fp-card p-4 sm:p-5">
+        <div class="fp-label flex items-center justify-between">
+          <span>Net Gross Margin</span>
+          <i data-lucide="circle-dollar-sign" class="w-4 h-4 text-leaf"></i>
+        </div>
+        <div class="mt-1 font-display text-2xl sm:text-3xl font-semibold {% if kpi.total_margin and kpi.total_margin >= 0 %}text-leaf{% elif kpi.total_margin %}text-risk-high{% else %}text-cream{% endif %}">
+          {% if kpi.total_margin is not None %}
+            {{ kpi.total_margin|floatformat:0|intcomma }}<span class="text-xs font-normal text-muted"> MWK</span>
+          {% else %}
+            <span class="text-cream/40">—</span>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+    <!-- Phase 2.9 Historical Charts Section -->
+    <section class="fp-glass p-6 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-white/5 pb-4">
+        <div>
+          <h2 class="font-display text-lg font-semibold text-cream">Historical Trends &amp; Allocations</h2>
+          <p class="text-xs text-cream/60">Visual progression across recorded growing seasons.</p>
+        </div>
+        <!-- Chart Tab Buttons -->
+        <div class="flex items-center gap-1.5 p-1 bg-forest-900/60 rounded-xl border border-white/10 text-xs">
+          <button id="btn-tab-margins" onclick="switchChartTab('margins')" class="px-3 py-1.5 rounded-lg font-medium transition-colors bg-forest-700 text-cream">
+            Financials
+          </button>
+          <button id="btn-tab-yields" onclick="switchChartTab('yields')" class="px-3 py-1.5 rounded-lg font-medium transition-colors text-cream/70 hover:text-cream">
+            Yields (kg/ha)
+          </button>
+          <button id="btn-tab-area" onclick="switchChartTab('area')" class="px-3 py-1.5 rounded-lg font-medium transition-colors text-cream/70 hover:text-cream">
+            Crop Area Share
+          </button>
+        </div>
+      </div>
+
+      <!-- Chart Canvases -->
+      <div id="chart-panel-margins" class="h-64 sm:h-72 w-full">
+        <canvas id="financialsChart"></canvas>
+      </div>
+
+      <div id="chart-panel-yields" class="h-64 sm:h-72 w-full hidden">
+        <canvas id="yieldsChart"></canvas>
+      </div>
+
+      <div id="chart-panel-area" class="h-64 sm:h-72 w-full hidden flex items-center justify-center">
+        <div class="h-64 w-64">
+          <canvas id="areaChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Phase 2.7 Timeline Table Grouped by Season -->
+    <section class="space-y-6">
+      <div class="flex items-center justify-between">
+        <h2 class="font-display text-xl font-semibold text-cream">Season Timeline</h2>
+        <span class="text-xs text-cream/50">Sorted by most recent</span>
+      </div>
+
+      {% for item in seasons %}
+        <article class="fp-card border border-white/10 overflow-hidden">
+
+          <!-- Season Card Header -->
+          <div class="p-5 bg-forest-800/80 border-b border-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="space-y-1">
+              <div class="flex flex-wrap items-center gap-2.5">
+                <h3 class="font-display text-lg font-semibold text-cream">{{ item.season.name }}</h3>
+                <span class="fp-badge-water">
+                  <i data-lucide="calendar" class="w-3 h-3"></i>
+                  {{ item.season.start_date|date:"M Y" }} – {{ item.season.end_date|date:"M Y" }}
+                </span>
+                <span class="text-xs text-muted">
+                  {{ item.total_area|floatformat:2 }} ha planted &bull; {{ item.planting_count }} crop{{ item.planting_count|pluralize }}
+                </span>
+              </div>
+              {% if item.season.notes %}
+                <p class="text-xs text-cream/60 italic">{{ item.season.notes }}</p>
+              {% endif %}
+            </div>
+
+            <!-- Season Actions & Summary Badges -->
+            <div class="flex items-center gap-2 self-start md:self-auto">
+              <a href="{% url 'farms:planting_create' %}?season={{ item.season.pk }}" class="fp-btn-ghost !px-3 !py-1.5 text-xs text-leaf hover:text-leaf-soft">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Planting
+              </a>
+              <a href="{% url 'farms:season_edit' item.season.pk %}" class="fp-btn-ghost !px-2.5 !py-1.5 text-xs text-cream/80" title="Edit season details">
+                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+              </a>
+              <a href="{% url 'farms:season_delete' item.season.pk %}" class="fp-btn-ghost !px-2.5 !py-1.5 text-xs text-risk-high hover:bg-risk-high/10" title="Delete season">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Plantings Table -->
+          {% if item.plantings %}
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead>
+                  <tr class="text-[11px] uppercase tracking-wider text-cream/50 bg-forest-900/60 border-b border-white/5">
+                    <th class="py-3 px-4 font-medium">Crop</th>
+                    <th class="py-3 px-4 font-medium text-right">Area</th>
+                    <th class="py-3 px-4 font-medium">Dates</th>
+                    <th class="py-3 px-4 font-medium text-right">Harvest Yield</th>
+                    <th class="py-3 px-4 font-medium text-right">Cost</th>
+                    <th class="py-3 px-4 font-medium text-right">Price / kg</th>
+                    <th class="py-3 px-4 font-medium text-right">Revenue</th>
+                    <th class="py-3 px-4 font-medium text-right">Gross Margin</th>
+                    <th class="py-3 px-4 font-medium text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5 font-mono text-xs">
+                  {% for row in item.plantings %}
+                    <tr class="hover:bg-white/[0.02] transition-colors">
+                      <!-- Crop -->
+                      <td class="py-3.5 px-4 font-sans">
+                        <div class="font-medium text-cream">{{ row.obj.crop.name }}</div>
+                        <span class="text-[10px] text-cream/40 uppercase tracking-wider">{{ row.obj.crop.get_category_display }}</span>
+                        {% if row.obj.notes %}
+                          <p class="text-[11px] text-cream/50 italic font-sans mt-0.5 line-clamp-1" title="{{ row.obj.notes }}">
+                            {{ row.obj.notes }}
+                          </p>
+                        {% endif %}
+                      </td>
+
+                      <!-- Area -->
+                      <td class="py-3.5 px-4 text-right text-cream font-mono">
+                        {{ row.obj.area_ha|floatformat:2 }} <span class="text-cream/50 font-sans">ha</span>
+                      </td>
+
+                      <!-- Planting / Harvest dates -->
+                      <td class="py-3.5 px-4 font-sans text-cream/70 text-xs whitespace-nowrap">
+                        {% if row.obj.planting_date or row.obj.harvest_date %}
+                          <div>{{ row.obj.planting_date|date:"d M Y"|default:"—" }}</div>
+                          <div class="text-[10px] text-cream/40">&rarr; {{ row.obj.harvest_date|date:"d M Y"|default:"—" }}</div>
+                        {% else %}
+                          <span class="text-cream/30">—</span>
+                        {% endif %}
+                      </td>
+
+                      <!-- Yield -->
+                      <td class="py-3.5 px-4 text-right">
+                        {% if row.obj.yield_kg is not None %}
+                          <div class="text-cream font-semibold">{{ row.obj.yield_kg|floatformat:0|intcomma }} <span class="font-normal text-cream/50 font-sans">kg</span></div>
+                          {% if row.yield_per_ha %}
+                            <div class="text-[10px] text-leaf font-sans">{{ row.yield_per_ha|floatformat:0|intcomma }} kg/ha</div>
+                          {% endif %}
+                        {% else %}
+                          <span class="text-cream/30">—</span>
+                        {% endif %}
+                      </td>
+
+                      <!-- Cost -->
+                      <td class="py-3.5 px-4 text-right text-cream/90">
+                        {% if row.obj.production_cost_mwk is not None %}
+                          {{ row.obj.production_cost_mwk|floatformat:0|intcomma }}
+                        {% else %}
+                          <span class="text-cream/30">—</span>
+                        {% endif %}
+                      </td>
+
+                      <!-- Price per kg -->
+                      <td class="py-3.5 px-4 text-right text-cream/80">
+                        {% if row.obj.selling_price_mwk_per_kg is not None %}
+                          {{ row.obj.selling_price_mwk_per_kg|floatformat:0|intcomma }}
+                        {% else %}
+                          <span class="text-cream/30">—</span>
+                        {% endif %}
+                      </td>
+
+                      <!-- Revenue -->
+                      <td class="py-3.5 px-4 text-right text-cream">
+                        {% if row.obj.revenue_mwk is not None %}
+                          <span class="font-medium">{{ row.obj.revenue_mwk|floatformat:0|intcomma }}</span>
+                        {% else %}
+                          <span class="text-cream/30">—</span>
+                        {% endif %}
+                      </td>
+
+                      <!-- Gross margin -->
+                      <td class="py-3.5 px-4 text-right font-semibold">
+                        {% if row.gross_margin is not None %}
+                          {% if row.gross_margin >= 0 %}
+                            <span class="text-leaf">+{{ row.gross_margin|floatformat:0|intcomma }}</span>
+                          {% else %}
+                            <span class="text-risk-high">{{ row.gross_margin|floatformat:0|intcomma }}</span>
+                          {% endif %}
+                        {% else %}
+                          <span class="text-cream/30 font-normal">—</span>
+                        {% endif %}
+                      </td>
+
+                      <!-- Actions -->
+                      <td class="py-3.5 px-4 text-center font-sans whitespace-nowrap">
+                        <div class="inline-flex items-center gap-1.5">
+                          <a href="{% url 'farms:planting_edit' row.obj.pk %}" class="p-1 rounded text-cream/60 hover:text-cream hover:bg-white/5" title="Edit planting">
+                            <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                          </a>
+                          <a href="{% url 'farms:planting_delete' row.obj.pk %}" class="p-1 rounded text-risk-high/70 hover:text-risk-high hover:bg-white/5" title="Delete planting">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+
+                <!-- Season Totals Footer -->
+                <tfoot>
+                  <tr class="bg-forest-900/90 font-mono text-xs border-t border-white/10 text-cream font-semibold">
+                    <td class="py-3 px-4 font-sans text-cream/70">Season Totals</td>
+                    <td class="py-3 px-4 text-right">{{ item.total_area|floatformat:2 }} ha</td>
+                    <td class="py-3 px-4 font-sans text-cream/30">—</td>
+                    <td class="py-3 px-4 font-sans text-cream/30 text-right">—</td>
+                    <td class="py-3 px-4 text-right">
+                      {% if item.total_cost is not None %}
+                        {{ item.total_cost|floatformat:0|intcomma }}
+                      {% else %}
+                        <span class="text-cream/30">—</span>
+                      {% endif %}
+                    </td>
+                    <td class="py-3 px-4 font-sans text-cream/30 text-right">—</td>
+                    <td class="py-3 px-4 text-right">
+                      {% if item.total_revenue is not None %}
+                        {{ item.total_revenue|floatformat:0|intcomma }}
+                      {% else %}
+                        <span class="text-cream/30">—</span>
+                      {% endif %}
+                    </td>
+                    <td class="py-3 px-4 text-right">
+                      {% if item.total_margin is not None %}
+                        <span class="{% if item.total_margin >= 0 %}text-leaf{% else %}text-risk-high{% endif %}">
+                          {{ item.total_margin|floatformat:0|intcomma }}
+                        </span>
+                      {% else %}
+                        <span class="text-cream/30">—</span>
+                      {% endif %}
+                    </td>
+                    <td class="py-3 px-4"></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          {% else %}
+            <div class="p-8 text-center bg-forest-900/30">
+              <p class="text-xs text-cream/50 mb-3">No plantings recorded for this season yet.</p>
+              <a href="{% url 'farms:planting_create' %}?season={{ item.season.pk }}" class="fp-btn-ghost !px-3 !py-1.5 text-xs text-leaf">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add First Planting
+              </a>
+            </div>
+          {% endif %}
+
+        </article>
+      {% endfor %}
+    </section>
+
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Tab switching for charts
+  function switchChartTab(tab) {
+    const tabs = ['margins', 'yields', 'area'];
+    tabs.forEach(t => {
+      const panel = document.getElementById(`chart-panel-${t}`);
+      const btn = document.getElementById(`btn-tab-${t}`);
+      if (t === tab) {
+        panel.classList.remove('hidden');
+        btn.classList.add('bg-forest-700', 'text-cream');
+        btn.classList.remove('text-cream/70');
+      } else {
+        panel.classList.add('hidden');
+        btn.classList.remove('bg-forest-700', 'text-cream');
+        btn.classList.add('text-cream/70');
+      }
+    });
+  }
+
+  // Render Charts with Chart.js
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!window.Chart) return;
+
+    // Default chart dark-mode stylings
+    Chart.defaults.color = '#A8BDB0';
+    Chart.defaults.font.family = 'Inter, sans-serif';
+    Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.08)';
+
+    // 1. Financials Chart
+    const finData = {{ chart_financials_json|safe }};
+    const finCtx = document.getElementById('financialsChart');
+    if (finCtx && finData.labels && finData.labels.length > 0) {
+      new Chart(finCtx, {
+        type: 'bar',
+        data: {
+          labels: finData.labels,
+          datasets: [
+            {
+              label: 'Production Cost (MWK)',
+              data: finData.costs,
+              backgroundColor: 'rgba(242, 180, 65, 0.45)',
+              borderColor: '#F2B441',
+              borderWidth: 1.5,
+              borderRadius: 6,
+            },
+            {
+              label: 'Revenue (MWK)',
+              data: finData.revenues,
+              backgroundColor: 'rgba(79, 183, 217, 0.45)',
+              borderColor: '#4FB7D9',
+              borderWidth: 1.5,
+              borderRadius: 6,
+            },
+            {
+              label: 'Net Margin (MWK)',
+              data: finData.margins,
+              type: 'line',
+              borderColor: '#8FCB62',
+              backgroundColor: '#8FCB62',
+              pointBackgroundColor: '#8FCB62',
+              pointRadius: 5,
+              tension: 0.2,
+              borderWidth: 2.5,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'top', labels: { boxWidth: 12, boxHeight: 12 } },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return ctx.dataset.label + ': MWK ' + Number(ctx.raw).toLocaleString();
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) { return 'MWK ' + (value >= 1000 ? (value / 1000) + 'k' : value); }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // 2. Yields Trend Chart (kg/ha)
+    const yieldData = {{ chart_yield_json|safe }};
+    const yieldCtx = document.getElementById('yieldsChart');
+    if (yieldCtx && yieldData.labels && yieldData.labels.length > 0) {
+      const datasets = yieldData.series.map(s => ({
+        label: s.name + ' (kg/ha)',
+        data: s.data,
+        borderColor: s.color,
+        backgroundColor: s.color,
+        pointBackgroundColor: s.color,
+        pointRadius: 5,
+        tension: 0.25,
+        borderWidth: 2,
+        spanGaps: true,
+      }));
+
+      new Chart(yieldCtx, {
+        type: 'line',
+        data: {
+          labels: yieldData.labels,
+          datasets: datasets
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'top', labels: { boxWidth: 12, boxHeight: 12 } },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return ctx.dataset.label + ': ' + Number(ctx.raw).toLocaleString() + ' kg/ha';
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) { return value + ' kg/ha'; }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // 3. Area Distribution Chart (ha by crop)
+    const areaData = {{ chart_area_json|safe }};
+    const areaCtx = document.getElementById('areaChart');
+    if (areaCtx && areaData.labels && areaData.labels.length > 0) {
+      new Chart(areaCtx, {
+        type: 'doughnut',
+        data: {
+          labels: areaData.labels,
+          datasets: [{
+            data: areaData.values,
+            backgroundColor: areaData.colors,
+            borderColor: '#062B20',
+            borderWidth: 2,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, padding: 12 } },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return ctx.label + ': ' + ctx.raw + ' ha';
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

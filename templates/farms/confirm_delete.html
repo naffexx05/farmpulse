@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Delete {{ item_type }} — FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto pt-8">
+
+  <div class="fp-card border border-risk-high/30 p-6 sm:p-8 space-y-6">
+
+    <div class="flex items-start gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-risk-high/15 border border-risk-high/30 text-risk-high flex items-center justify-center shrink-0">
+        <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+      </div>
+      <div>
+        <h1 class="font-display text-2xl font-semibold text-cream">Delete {{ item_type }}</h1>
+        <p class="mt-1 text-sm text-cream/70">
+          Are you sure you want to permanently delete <strong class="text-cream">{{ item_title }}</strong>?
+        </p>
+      </div>
+    </div>
+
+    {% if warning_text %}
+      <div class="p-4 rounded-xl bg-forest-900/80 border border-white/5 text-xs text-cream/60">
+        {{ warning_text }}
+      </div>
+    {% endif %}
+
+    <form method="post" class="flex items-center justify-end gap-3 pt-2">
+      {% csrf_token %}
+      <a href="{% url cancel_url %}" class="fp-btn-ghost">
+        Cancel
+      </a>
+      <button type="submit" class="fp-btn-danger">
+        <i data-lucide="trash-2" class="w-4 h-4"></i> Yes, Delete {{ item_type }}
+      </button>
+    </form>
+
+  </div>
+
+</div>
+{% endblock %}

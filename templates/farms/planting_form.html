@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% block title %}{% if is_edit %}Edit Planting{% else %}Record Planting{% endif %} — FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+
+  <!-- Header -->
+  <header>
+    <a href="{% url 'farms:farm_history' %}" class="text-sm text-cream/60 hover:text-cream inline-flex items-center gap-1.5 mb-2">
+      <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Back to Farm History
+    </a>
+    <h1 class="font-display text-3xl font-semibold text-cream">
+      {% if is_edit %}Edit Planting{% else %}Record Crop Planting{% endif %}
+    </h1>
+    <p class="mt-1 text-sm text-cream/60">
+      Track planted area, input expenses, harvest yields, and market earnings. Leave future or unknown metrics blank (they will show as —).
+    </p>
+  </header>
+
+  {% if form.non_field_errors %}
+    <div class="rounded-xl border border-risk-high/30 bg-risk-high/15 p-3 text-sm text-risk-high">
+      {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post" class="space-y-6" novalidate>
+    {% csrf_token %}
+
+    <!-- Section 1: Season & Crop Allocation -->
+    <section class="fp-glass p-6 space-y-4">
+      <h2 class="font-display text-lg font-semibold text-cream">Season &amp; Crop</h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="{{ form.season.id_for_label }}" class="fp-label">Season</label>
+          {{ form.season }}
+          {% if form.season.errors %}<p class="mt-1 text-xs text-risk-high">{{ form.season.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label for="{{ form.crop.id_for_label }}" class="fp-label">Crop</label>
+          {{ form.crop }}
+          {% if form.crop.errors %}<p class="mt-1 text-xs text-risk-high">{{ form.crop.errors.0 }}</p>{% endif %}
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+        <div>
+          <label for="{{ form.area_ha.id_for_label }}" class="fp-label">Area Planted (ha)</label>
+          {{ form.area_ha }}
+          {% if form.area_ha.errors %}<p class="mt-1 text-xs text-risk-high">{{ form.area_ha.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label for="{{ form.planting_date.id_for_label }}" class="fp-label">Planting Date</label>
+          {{ form.planting_date }}
+          {% if form.planting_date.errors %}<p class="mt-1 text-xs text-risk-high">{{ form.planting_date.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label for="{{ form.harvest_date.id_for_label }}" class="fp-label">Harvest Date</label>
+          {{ form.harvest_date }}
+          {% if form.harvest_date.errors %}<p class="mt-1 text-xs text-risk-high">{{ form.harvest_date.errors.0 }}</p>{% endif %}
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Production Cost & Harvest Yield -->
+    <section class="fp-glass p-6 space-y-4">
+      <h2 class="font-display text-lg font-semibold text-cream">Production &amp; Yield</h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="{{ form.production_cost_mwk.id_for_label }}" class="fp-label">Production Cost (MWK)</label>
+          {{ form.production_cost_mwk }}
+          {% if form.production_cost_mwk.errors %}<p class="mt-1 text-xs text-risk-high">{{ form.production_cost_mwk.errors.0 }}</p>{% endif %}
+          <p class="mt-1 text-xs text-cream/40">Total expenditure (seed, fertiliser, labour, agrochemicals)</p>
+        </div>
+        <div>
+          <label for="{{ form.yield_kg.id_for_label }}" class="fp-label">Harvest Yield (kg)</label>
+          {{ form.yield_kg }}
+          {% if form.yield_kg.errors %}<p class="mt-1 text-xs text-risk-high">{{ form.yield_kg.errors.0 }}</p>{% endif %}
+          <p class="mt-1 text-xs text-cream/40">Actual weight in kilograms harvested</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Financial Sales & Revenue -->
+    <section class="fp-glass p-6 space-y-4">
+      <h2 class="font-display text-lg font-semibold text-cream">Market Sale &amp; Revenue</h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="{{ form.selling_price_mwk_per_kg.id_for_label }}" class="fp-label">Selling Price (MWK / kg)</label>
+          {{ form.selling_price_mwk_per_kg }}
+          {% if form.selling_price_mwk_per_kg.errors %}<p class="mt-1 text-xs text-risk-high">{{ form.selling_price_mwk_per_kg.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <div class="flex items-center justify-between">
+            <label for="{{ form.revenue_mwk.id_for_label }}" class="fp-label">Actual Revenue (MWK)</label>
+            <button type="button" id="btn-calc-rev" class="text-[11px] text-leaf hover:underline hidden mb-1.5">
+              Compute from yield &times; price
+            </button>
+          </div>
+          {{ form.revenue_mwk }}
+          {% if form.revenue_mwk.errors %}<p class="mt-1 text-xs text-risk-high">{{ form.revenue_mwk.errors.0 }}</p>{% endif %}
+          <p class="mt-1 text-xs text-cream/40">Total money realized from sales</p>
+        </div>
+      </div>
+
+      <!-- Real-time Gross Margin Preview -->
+      <div id="margin-preview-box" class="p-3 rounded-xl bg-forest-900/60 border border-white/10 flex items-center justify-between text-xs hidden">
+        <span class="text-cream/70 font-sans">Projected Gross Margin:</span>
+        <span id="margin-preview-val" class="font-mono font-semibold text-leaf">MWK 0</span>
+      </div>
+    </section>
+
+    <!-- Section 4: Notes -->
+    <section class="fp-glass p-6 space-y-2">
+      <label for="{{ form.notes.id_for_label }}" class="fp-label">Field Notes &amp; Observations</label>
+      {{ form.notes }}
+      {% if form.notes.errors %}<p class="mt-1 text-xs text-risk-high">{{ form.notes.errors.0 }}</p>{% endif %}
+    </section>
+
+    <!-- Actions -->
+    <div class="flex items-center justify-end gap-3 pt-2">
+      <a href="{% url 'farms:farm_history' %}" class="fp-btn-ghost">Cancel</a>
+      <button type="submit" class="fp-btn-primary">
+        <i data-lucide="check" class="w-4 h-4"></i>
+        {% if is_edit %}Save Planting{% else %}Record Planting{% endif %}
+      </button>
+    </div>
+
+  </form>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const costInput = document.getElementById('{{ form.production_cost_mwk.id_for_label }}');
+    const yieldInput = document.getElementById('{{ form.yield_kg.id_for_label }}');
+    const priceInput = document.getElementById('{{ form.selling_price_mwk_per_kg.id_for_label }}');
+    const revInput = document.getElementById('{{ form.revenue_mwk.id_for_label }}');
+    const btnCalc = document.getElementById('btn-calc-rev');
+    const previewBox = document.getElementById('margin-preview-box');
+    const previewVal = document.getElementById('margin-preview-val');
+
+    function checkCalcButton() {
+      const y = parseFloat(yieldInput?.value) || 0;
+      const p = parseFloat(priceInput?.value) || 0;
+      if (y > 0 && p > 0 && (!revInput?.value || revInput?.value === '0')) {
+        btnCalc?.classList.remove('hidden');
+      } else {
+        btnCalc?.classList.add('hidden');
+      }
+      updateMarginPreview();
+    }
+
+    function updateMarginPreview() {
+      const cost = parseFloat(costInput?.value);
+      const rev = parseFloat(revInput?.value);
+      if (!isNaN(cost) && !isNaN(rev)) {
+        const margin = rev - cost;
+        previewBox.classList.remove('hidden');
+        previewVal.textContent = 'MWK ' + margin.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        if (margin >= 0) {
+          previewVal.className = 'font-mono font-semibold text-leaf';
+        } else {
+          previewVal.className = 'font-mono font-semibold text-risk-high';
+        }
+      } else {
+        previewBox.classList.add('hidden');
+      }
+    }
+
+    btnCalc?.addEventListener('click', function () {
+      const y = parseFloat(yieldInput.value) || 0;
+      const p = parseFloat(priceInput.value) || 0;
+      if (y > 0 && p > 0) {
+        revInput.value = (y * p).toFixed(2);
+        btnCalc.classList.add('hidden');
+        updateMarginPreview();
+      }
+    });
+
+    [costInput, yieldInput, priceInput, revInput].forEach(el => {
+      el?.addEventListener('input', checkCalcButton);
+    });
+
+    checkCalcButton();
+  });
+</script>
+{% endblock %}
