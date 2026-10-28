@@ -151,3 +151,132 @@ class TransportCost(models.Model):
 
     def __str__(self):
         return f"{self.from_location} &rarr; {self.to_market} ({self.cost_per_50kg_bag_mwk:,.0f} MWK/bag)"
+
+
+class MarketHub(models.Model):
+    """
+    Physical agricultural commodity market hub, aggregation depot, or terminal trading center in Malawi.
+    """
+    HUB_TYPES = [
+        ('rural_aggregation', 'Rural Aggregation & Assembly Depot (Primary Farmgate)'),
+        ('urban_wholesale', 'Urban Wholesale & Processing Terminal (AMIS Regional Hub)'),
+        ('cross_border', 'Strategic Cross-Border Market (Regional Trade Flow)'),
+        ('commodity_exchange', 'Formal Commodity Exchange / Auction Floor (AHCX / Auction Floors)'),
+    ]
+
+    hub_id = models.CharField(max_length=60, unique=True, help_text="e.g. AMIS-LL-MITUNDU-01")
+    name = models.CharField(max_length=140)
+    district = models.ForeignKey('climate.District', on_delete=models.CASCADE, related_name='market_hubs')
+    hub_type = models.CharField(max_length=40, choices=HUB_TYPES, default='rural_aggregation')
+    latitude = models.DecimalField(max_digits=9, decimal_places=6)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6)
+    primary_commodities = models.CharField(max_length=200, default='Maize, Soybeans, Groundnuts, Beans')
+    operating_schedule = models.CharField(max_length=100, default='Daily Trading')
+    is_active = models.BooleanField(default=True)
+    last_sync = models.DateTimeField(null=True, blank=True, help_text="Timestamp of last live price surveillance sync.")
+    api_endpoint = models.URLField(blank=True, default='https://amis.agriculture.gov.mw/api/v1/live-feed')
+    notes = models.TextField(blank=True, help_text="Trading capacity, road access, and major buyer profiles.")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return f"{self.name} ({self.hub_id}) — {self.district.name}"
+
+
+class DailyMarketPrice(models.Model):
+    """
+    Ground-truth and daily surveillance price quote recorded at an agricultural trading hub.
+    Captures farmgate, wholesale, and retail price tiers with trading volume and short-term trend.
+    """
+    TREND_CHOICES = [
+        ('rising', 'Rising (High Demand / Lean Season)'),
+        ('falling', 'Falling (Harvest Glut / High Supply)'),
+        ('stable', 'Stable (Equilibrium)'),
+    ]
+
+    hub = models.ForeignKey(MarketHub, on_delete=models.CASCADE, related_name='daily_prices')
+    crop = models.ForeignKey('farms.Crop', on_delete=models.CASCADE, related_name='daily_market_prices')
+    date = models.DateField(db_index=True)
+
+    price_farmgate_mwk = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True,
+        help_text="Direct village/aggregation purchase price paid to smallholder."
+    )
+    price_wholesale_mwk = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True,
+        help_text="Wholesale price per kg for bulk bagged trade."
+    )
+    price_retail_mwk = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True,
+        help_text="Urban or local consumer retail price per kg."
+    )
+    volume_traded_bags = models.PositiveIntegerField(
+        default=0,
+        help_text="Estimated 50kg bags transacted on market day."
+    )
+    price_trend = models.CharField(max_length=20, choices=TREND_CHOICES, default='stable')
+    source_label = models.CharField(max_length=120, default='MoA AMIS Live Surveillance')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('hub', 'crop', 'date')
+        ordering = ['-date', 'crop__name']
+
+    def __str__(self):
+        return f"{self.hub.name} — {self.crop.name} ({self.date}): FG {self.price_farmgate_mwk} / WS {self.price_wholesale_mwk} MWK"
+
+    @property
+    def wholesale_spread_mwk(self):
+        """Wholesale markup over farmgate."""
+        if self.price_wholesale_mwk is not None and self.price_farmgate_mwk is not None:
+            return self.price_wholesale_mwk - self.price_farmgate_mwk
+        return None
+
+    @property
+    def retail_spread_mwk(self):
+        """Retail markup over farmgate."""
+        if self.price_retail_mwk is not None and self.price_farmgate_mwk is not None:
+            return self.price_retail_mwk - self.price_farmgate_mwk
+        return None
+
+
+class MarketPriceForecast(models.Model):
+    """
+    Rolling 7-to-30 day price projection generated from seasonal price curves,
+    crop production balances, and spatial market integration models.
+    """
+    TREND_CHOICES = [
+        ('bullish', 'Bullish (+ Rising Price Expected)'),
+        ('bearish', 'Bearish (- Softening Price Expected)'),
+        ('sideways', 'Sideways (Stable Plateau Expected)'),
+    ]
+
+    hub = models.ForeignKey(MarketHub, on_delete=models.CASCADE, related_name='price_forecasts')
+    crop = models.ForeignKey('farms.Crop', on_delete=models.CASCADE, related_name='price_forecasts')
+    target_date = models.DateField(db_index=True)
+    horizon_days = models.PositiveIntegerField(help_text="Days ahead (e.g. 7, 14, 21, 30)")
+
+    projected_farmgate_mwk = models.DecimalField(max_digits=10, decimal_places=2)
+    projected_wholesale_mwk = models.DecimalField(max_digits=10, decimal_places=2)
+    projected_retail_mwk = models.DecimalField(max_digits=10, decimal_places=2)
+
+    confidence_score = models.DecimalField(
+        max_digits=3, decimal_places=2, default=0.85,
+        help_text="Econometric statistical confidence level (0.00 - 1.00)."
+    )
+    trend_direction = models.CharField(max_length=20, choices=TREND_CHOICES, default='bullish')
+    market_driver = models.CharField(
+        max_length=250,
+        help_text="Dominant market driver (e.g. Lean season depletion, commercial brewer demand, export border flows)."
+    )
+    raw_payload = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('hub', 'crop', 'target_date')
+        ordering = ['target_date', 'crop__name']
+
+    def __str__(self):
+        return f"{self.hub.name} Forecast {self.crop.name} [{self.target_date} (+{self.horizon_days}d)]: FG {self.projected_farmgate_mwk} MWK"

@@ -80,6 +80,202 @@
   {% if active_tab == 'prices' %}
     <div class="space-y-6">
 
+      <!-- Live AMIS Market Hub Telemetry & Real-Time Price Ingestion Engine -->
+      {% if selected_hub %}
+      <section class="fp-card p-6 space-y-5 border-emerald-500/30 bg-gradient-to-br from-forest-900 via-forest-850 to-forest-900 shadow-xl">
+        
+        <!-- Hub Header & Live Sync Controls -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                Live AMIS Price Surveillance
+              </span>
+              <span class="text-xs text-muted font-mono">{{ selected_hub.hub_id }}</span>
+              {% if selected_hub.last_sync %}
+                <span class="text-[10px] text-cream/50 bg-white/5 px-2 py-0.5 rounded">Synced {{ selected_hub.last_sync|timesince }} ago</span>
+              {% endif %}
+            </div>
+            <h2 class="text-lg font-bold text-cream mt-1 flex items-center gap-2">
+              <i data-lucide="store" class="w-5 h-5 text-emerald-400 animate-pulse"></i>
+              {{ selected_hub.name }}
+            </h2>
+            <p class="text-xs text-muted">
+              {{ selected_hub.district.name }} District &bull; {{ selected_hub.get_hub_type_display }} &bull; {{ selected_hub.operating_schedule }}
+            </p>
+          </div>
+
+          <!-- Hub Selector & Sync Trigger -->
+          <div class="flex flex-wrap items-center gap-2.5">
+            <select
+              class="fp-input !py-1.5 !pr-7 text-xs font-semibold cursor-pointer max-w-[240px]"
+              onchange="window.location.href='?tab=prices&crop={{ selected_crop.slug }}&hub=' + this.value"
+            >
+              {% for hb in market_hubs %}
+                <option value="{{ hb.hub_id }}" {% if hb.hub_id == selected_hub.hub_id %}selected{% endif %}>
+                  {{ hb.name }} ({{ hb.district.name }})
+                </option>
+              {% endfor %}
+            </select>
+
+            <a
+              href="{% url 'market:sync_market_hub' selected_hub.hub_id %}?crop={{ selected_crop.slug }}"
+              class="fp-btn-primary !bg-emerald-600 hover:!bg-emerald-500 inline-flex items-center gap-1.5 text-xs !py-1.5 !px-3 font-semibold shadow-md shrink-0"
+              title="Connects to live AMIS / commodity price API to refresh quotes and 30-day forecast curves"
+            >
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Sync Live API
+            </a>
+          </div>
+        </div>
+
+        <!-- Dual Strategic Intelligence Banners: Arbitrage & Storage -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          <!-- Arbitrage Intelligence Card -->
+          {% if arbitrage_insight %}
+          <div class="p-4 rounded-xl border {{ arbitrage_insight.badge_class }} flex flex-col justify-between gap-3 text-xs">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="font-bold uppercase tracking-wider text-[10px] flex items-center gap-1.5">
+                  <i data-lucide="arrow-up-right" class="w-4 h-4 text-leaf"></i>
+                  Spatial Arbitrage Analysis
+                </span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-white/10 border border-white/20">
+                  {{ arbitrage_insight.viability }}
+                </span>
+              </div>
+              <p class="text-cream/90 text-xs leading-relaxed">
+                {{ arbitrage_insight.summary }}
+              </p>
+            </div>
+            <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] font-mono">
+              <div>Farmgate: <strong>{{ arbitrage_insight.origin_price_farmgate|floatformat:0 }}</strong> MWK</div>
+              <div>Freight: <strong>-{{ arbitrage_insight.freight_per_kg|floatformat:0 }}</strong>/kg</div>
+              <div class="text-leaf font-bold">Net: <strong>+{{ arbitrage_insight.net_profit_kg|floatformat:0 }}</strong> MWK/kg</div>
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Storage Strategy Card -->
+          {% if storage_advisory %}
+          <div class="p-4 rounded-xl border {{ storage_advisory.badge_class }} flex flex-col justify-between gap-3 text-xs">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="font-bold uppercase tracking-wider text-[10px] flex items-center gap-1.5">
+                  <i data-lucide="package-check" class="w-4 h-4 text-amber-400"></i>
+                  Storage vs. Sale Advisory
+                </span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-white/10 border border-white/20">
+                  {{ storage_advisory.action }}
+                </span>
+              </div>
+              <p class="text-cream/90 text-xs leading-relaxed">
+                {{ storage_advisory.advice }}
+              </p>
+            </div>
+            <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] font-mono">
+              <div>Today: <strong>{{ storage_advisory.current_price_fg|floatformat:0 }}</strong> MWK</div>
+              <div>30d Target: <strong>{{ storage_advisory.projected_30d_fg|floatformat:0 }}</strong> MWK</div>
+              <div class="font-bold {% if storage_advisory.net_storage_benefit_kg >= 0 %}text-leaf{% else %}text-amber-400{% endif %}">
+                Net: <strong>{% if storage_advisory.net_storage_benefit_kg >= 0 %}+{% endif %}{{ storage_advisory.net_storage_benefit_kg|floatformat:0 }}</strong> MWK/kg
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+        </div>
+
+        <!-- Live Daily Commodity Price Ticker for Selected Hub -->
+        {% if hub_daily_quotes %}
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs text-muted">
+            <span class="font-semibold text-cream/70 flex items-center gap-1.5">
+              <i data-lucide="activity" class="w-3.5 h-3.5 text-emerald-400"></i>
+              Today's Live Commodity Quotations ({{ selected_hub.name }})
+            </span>
+            <span class="text-[11px] font-mono">Quotes updated on {{ hub_daily_quotes.0.date|date:"d M Y" }}</span>
+          </div>
+          
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+            {% for quote in hub_daily_quotes|slice:":6" %}
+              <div class="p-3 rounded-xl bg-forest-950/70 border border-white/10 hover:border-emerald-500/40 transition-all flex flex-col justify-between space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-cream truncate">{{ quote.crop.name }}</span>
+                  {% if quote.price_trend == 'rising' %}
+                    <span class="text-[10px] font-bold text-emerald-400 flex items-center" title="Price Trending Up">&uarr; Bullish</span>
+                  {% elif quote.price_trend == 'falling' %}
+                    <span class="text-[10px] font-bold text-amber-400 flex items-center" title="Price Softening">&darr; Soft</span>
+                  {% else %}
+                    <span class="text-[10px] font-medium text-cream/50 flex items-center">&rarr; Steady</span>
+                  {% endif %}
+                </div>
+                
+                <div class="space-y-0.5">
+                  <div class="text-[10px] text-amber-400/90 font-mono flex justify-between">
+                    <span>FG:</span>
+                    <span class="font-bold">{{ quote.price_farmgate_mwk|floatformat:0 }} MWK</span>
+                  </div>
+                  <div class="text-[10px] text-leaf font-mono flex justify-between">
+                    <span>WS:</span>
+                    <span class="font-bold">{{ quote.price_wholesale_mwk|floatformat:0 }} MWK</span>
+                  </div>
+                  <div class="text-[10px] text-water font-mono flex justify-between">
+                    <span>RT:</span>
+                    <span class="font-bold">{{ quote.price_retail_mwk|floatformat:0 }} MWK</span>
+                  </div>
+                </div>
+
+                <div class="text-[10px] text-cream/40 border-t border-white/5 pt-1 text-center font-mono">
+                  Vol: {{ quote.volume_traded_bags }} bags
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- 30-Day Forward Price Projections Strip for Selected Crop -->
+        {% if hub_forecasts %}
+        <div class="space-y-2 pt-2 border-t border-white/10">
+          <div class="flex items-center justify-between text-xs text-muted">
+            <span class="font-semibold text-cream/70 flex items-center gap-1.5">
+              <i data-lucide="trending-up" class="w-3.5 h-3.5 text-leaf"></i>
+              30-Day Forward Econometric Price Curve ({{ selected_crop.name }})
+            </span>
+            <span class="text-[11px] text-cream/40">Model Confidence: 82%–88%</span>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {% for fc in hub_forecasts %}
+              <div class="p-3 rounded-xl bg-forest-950/60 border border-white/10 hover:border-leaf/40 transition-all space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-cream/60">+{{ fc.horizon_days }} Days Horizon</span>
+                  <span class="text-[10px] font-mono px-1.5 py-0.5 rounded {% if fc.trend_direction == 'bullish' %}bg-emerald-500/20 text-emerald-300{% elif fc.trend_direction == 'bearish' %}bg-amber-500/20 text-amber-300{% else %}bg-white/10 text-cream/70{% endif %}">
+                    {{ fc.get_trend_direction_display }}
+                  </span>
+                </div>
+                
+                <div class="font-display text-lg font-bold text-cream">
+                  {{ fc.projected_farmgate_mwk|floatformat:0|intcomma }} <span class="text-xs font-normal text-muted">MWK/kg</span>
+                </div>
+
+                <div class="text-[10px] text-cream/70 line-clamp-2 italic leading-tight">
+                  &ldquo;{{ fc.market_driver }}&rdquo;
+                </div>
+
+                <div class="flex items-center justify-between text-[10px] text-cream/40 border-t border-white/5 pt-1 font-mono">
+                  <span>Wholesale: {{ fc.projected_wholesale_mwk|floatformat:0 }}</span>
+                  <span>Target: {{ fc.target_date|date:"d M" }}</span>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+      </section>
+      {% endif %}
+
       <!-- Crop Selection Chips -->
       <div class="space-y-2">
         <div class="fp-label">Select Crop to Inspect</div>

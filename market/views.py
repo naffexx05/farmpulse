@@ -1,19 +1,53 @@
 import json
 import statistics
 from decimal import Decimal
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from farms.models import Crop
-from .models import MarketSource, CropPrice, InputCost, TransportCost
+from .models import (
+    MarketSource, CropPrice, InputCost, TransportCost,
+    MarketHub, DailyMarketPrice, MarketPriceForecast,
+)
+from .services import (
+    fetch_live_market_feed_for_hub,
+    compute_spatial_arbitrage_for_hub,
+    calculate_storage_vs_sale_advisory,
+)
+
+
+@login_required
+def sync_market_hub(request, hub_id):
+    """
+    On-demand synchronization of real-time price surveillance quotes and
+    30-day forward forecasts for an agricultural market hub.
+    """
+    hub = get_object_or_404(MarketHub, hub_id=hub_id)
+    crop_slug = request.GET.get('crop', 'maize')
+
+    try:
+        result = fetch_live_market_feed_for_hub(hub)
+        messages.success(
+            request,
+            f"Successfully updated live AMIS market quotes ({result['quotes_updated']} price points) "
+            f"and 30-day projection curves ({result['forecasts_updated']} forecast horizons) for {hub.name}."
+        )
+    except Exception as e:
+        messages.error(request, f"Could not sync live feed for {hub.name}: {e}")
+
+    redirect_url = reverse('market:dashboard') + f"?tab=prices&hub={hub.hub_id}&crop={crop_slug}"
+    return redirect(redirect_url)
 
 
 @login_required
 def market_dashboard(request):
     """
     Market Intelligence Dashboard:
-    - Tab 1 (Prices): 12-month prices for 8 crops with strictly distinguished
-      Farmgate (Amber), Wholesale (Green), and Retail (Blue) price points.
+    - Tier 1: Real-time telemetry price quotes and 30-day forward price forecasts by Market Hub.
+    - Tier 2: Spatial market arbitrage engine and hermetic bag storage economic advisory.
+    - Tier 3: 12-month historical price surveillance across Farmgate, Wholesale, and Retail.
     - Tab 2 (Inputs): Certified seeds, basal/top fertilizers, and field labour costs per ha.
     - Tab 3 (Transport): Logistics freight tariffs to assembly and wholesale markets.
     """
@@ -27,7 +61,41 @@ def market_dashboard(request):
     sources = MarketSource.objects.all()
 
     # =========================================================================
-    # TAB 1: PRICES & PRICE TREND DATA
+    # LIVE MARKET HUBS & TELEMETRY STREAM
+    # =========================================================================
+    market_hubs = list(MarketHub.objects.filter(is_active=True).select_related('district').order_by('name'))
+    selected_hub_id = request.GET.get('hub')
+    selected_hub = None
+    if market_hubs:
+        if selected_hub_id:
+            selected_hub = next((h for h in market_hubs if h.hub_id == selected_hub_id), None)
+        if not selected_hub:
+            selected_hub = market_hubs[0]
+
+    hub_daily_quotes = []
+    hub_forecasts = []
+    arbitrage_insight = None
+    storage_advisory = None
+
+    if selected_hub and selected_crop:
+        # Latest daily quotes for the selected hub
+        hub_daily_quotes = list(
+            DailyMarketPrice.objects.filter(hub=selected_hub)
+            .select_related('crop')
+            .order_by('-date', 'crop__name')[:12]
+        )
+        # 30-day forward forecasts for this hub and selected crop
+        hub_forecasts = list(
+            MarketPriceForecast.objects.filter(hub=selected_hub, crop=selected_crop)
+            .order_by('target_date')[:6]
+        )
+        # Compute spatial market arbitrage viability
+        arbitrage_insight = compute_spatial_arbitrage_for_hub(selected_hub, selected_crop)
+        # Compute hermetic storage advisory
+        storage_advisory = calculate_storage_vs_sale_advisory(selected_hub, selected_crop)
+
+    # =========================================================================
+    # TAB 1: PRICES & HISTORICAL TREND DATA
     # =========================================================================
     # All 12-month prices for the selected crop ordered chronologically
     selected_crop_prices = list(
@@ -86,7 +154,6 @@ def market_dashboard(request):
     # =========================================================================
     # TAB 2: INPUTS & COSTS DATA
     # =========================================================================
-    # Group inputs by crop
     input_costs_by_crop = []
     for c in crops:
         items = list(InputCost.objects.filter(crop=c).select_related('source'))
@@ -108,7 +175,13 @@ def market_dashboard(request):
         'crops': crops,
         'selected_crop': selected_crop,
         'sources': sources,
-        'selected_crop_prices': list(reversed(selected_crop_prices)),  # newest month first in table
+        'market_hubs': market_hubs,
+        'selected_hub': selected_hub,
+        'hub_daily_quotes': hub_daily_quotes,
+        'hub_forecasts': hub_forecasts,
+        'arbitrage_insight': arbitrage_insight,
+        'storage_advisory': storage_advisory,
+        'selected_crop_prices': list(reversed(selected_crop_prices)),
         'all_crops_latest_prices': all_crops_latest_prices,
         'variance_stats': variance_stats,
         'chart_price_json': chart_price_json,

@@ -1,5 +1,37 @@
 from django.contrib import admin
-from .models import MarketSource, CropPrice, InputCost, TransportCost
+from .models import (
+    MarketSource, CropPrice, InputCost, TransportCost,
+    MarketHub, DailyMarketPrice, MarketPriceForecast,
+)
+
+
+@admin.register(MarketHub)
+class MarketHubAdmin(admin.ModelAdmin):
+    list_display = ('hub_id', 'name', 'district', 'hub_type', 'is_active', 'last_sync')
+    list_filter = ('hub_type', 'district', 'is_active')
+    search_fields = ('hub_id', 'name', 'notes')
+
+
+@admin.register(DailyMarketPrice)
+class DailyMarketPriceAdmin(admin.ModelAdmin):
+    list_display = (
+        'hub', 'crop', 'date', 'price_farmgate_mwk',
+        'price_wholesale_mwk', 'price_retail_mwk',
+        'wholesale_spread_mwk', 'volume_traded_bags', 'price_trend',
+    )
+    list_filter = ('crop', 'hub__district', 'price_trend', 'date')
+    search_fields = ('hub__name', 'crop__name')
+
+
+@admin.register(MarketPriceForecast)
+class MarketPriceForecastAdmin(admin.ModelAdmin):
+    list_display = (
+        'hub', 'crop', 'target_date', 'horizon_days',
+        'projected_farmgate_mwk', 'projected_wholesale_mwk',
+        'confidence_score', 'trend_direction',
+    )
+    list_filter = ('crop', 'trend_direction', 'horizon_days')
+    search_fields = ('hub__name', 'crop__name', 'market_driver')
 
 
 @admin.register(MarketSource)
