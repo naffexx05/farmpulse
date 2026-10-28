@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import District, ClimateSource, ClimateRecord
+from .models import District, ClimateSource, ClimateRecord, WeatherStation, DailyWeatherObservation, WeatherForecast
 
 
 @admin.register(District)
@@ -26,3 +26,27 @@ class ClimateRecordAdmin(admin.ModelAdmin):
     list_filter = ('district', 'record_type', 'year')
     search_fields = ('district__name', 'notes')
     date_hierarchy = None
+
+
+
+@admin.register(WeatherStation)
+class WeatherStationAdmin(admin.ModelAdmin):
+    list_display = ('name', 'station_id', 'district', 'station_type', 'is_active', 'last_sync')
+    list_filter = ('district', 'station_type', 'is_active')
+    search_fields = ('name', 'station_id')
+
+
+@admin.register(DailyWeatherObservation)
+class DailyWeatherObservationAdmin(admin.ModelAdmin):
+    list_display = ('station', 'date', 'rainfall_mm', 'temp_max_c', 'temp_min_c', 'is_verified')
+    list_filter = ('station__district', 'date', 'is_verified')
+    search_fields = ('station__name', 'date')
+    date_hierarchy = 'date'
+
+
+@admin.register(WeatherForecast)
+class WeatherForecastAdmin(admin.ModelAdmin):
+    list_display = ('station', 'target_date', 'expected_rain_mm', 'rain_probability_pct', 'temp_max_c', 'temp_min_c', 'condition_code')
+    list_filter = ('station__district', 'condition_code', 'target_date')
+    search_fields = ('station__name', 'target_date')
+    date_hierarchy = 'target_date'

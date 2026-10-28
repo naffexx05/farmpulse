@@ -67,6 +67,113 @@
     </div>
   </section>
 
+  <!-- Live 14-Day Station Telemetry & Forecast Engine -->
+  {% if active_station %}
+  <section class="fp-card p-6 space-y-5 border-sky-500/30 bg-gradient-to-br from-forest-900 via-forest-850 to-forest-900 shadow-xl">
+    
+    <!-- Station Header & Live Sync Controls -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">
+            Live Automated Station Telemetry
+          </span>
+          <span class="text-xs text-muted font-mono">{{ active_station.station_id }}</span>
+        </div>
+        <h2 class="text-lg font-bold text-cream mt-1 flex items-center gap-2">
+          <i data-lucide="radio" class="w-5 h-5 text-sky-400 animate-pulse"></i>
+          {{ active_station.name }}
+        </h2>
+        <p class="text-xs text-muted">
+          Lat: {{ active_station.latitude }}°, Lng: {{ active_station.longitude }}° &bull; Elevation: {{ active_station.elevation_m }}m &bull; {{ active_station.get_station_type_display }}
+        </p>
+      </div>
+
+      <!-- Station Selector & Sync Trigger -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        <select
+          class="fp-input !py-1.5 !pr-7 text-xs font-semibold cursor-pointer max-w-[220px]"
+          onchange="window.location.href='?district={{ active_district.slug }}&station=' + this.value"
+        >
+          {% for st in stations %}
+            <option value="{{ st.station_id }}" {% if st.station_id == active_station.station_id %}selected{% endif %}>
+              {{ st.name }}
+            </option>
+          {% endfor %}
+        </select>
+
+        <a
+          href="{% url 'climate:sync_station_forecast' active_station.station_id %}"
+          class="fp-btn-primary !bg-sky-600 hover:!bg-sky-500 inline-flex items-center gap-1.5 text-xs !py-1.5 !px-3 font-semibold shadow-md shrink-0"
+          title="Connects to live station API to refresh ECMWF 14-day numerical predictions"
+        >
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Sync Live API
+        </a>
+      </div>
+    </div>
+
+    <!-- Live Agrometeorological Advisory Box -->
+    <div class="p-3.5 rounded-xl border {% if forecast_insights.level == 'warning' %}bg-amber-500/15 border-amber-500/30 text-amber-200{% elif forecast_insights.level == 'optimal' %}bg-emerald-500/15 border-emerald-500/30 text-emerald-200{% else %}bg-forest-800/80 border-white/10 text-cream/90{% endif %} flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+      <div class="flex items-center gap-2.5">
+        <i data-lucide="sparkles" class="w-4 h-4 text-sky-400 shrink-0"></i>
+        <span><strong>Agro-Advisory:</strong> {{ forecast_insights.advisory }}</span>
+      </div>
+      <div class="flex items-center gap-3 shrink-0 font-mono text-[11px] text-cream/80">
+        <span>Total Rain: <strong>{{ forecast_insights.total_rain_mm }} mm</strong></span>
+        <span>&bull;</span>
+        <span>Rain Days: <strong>{{ forecast_insights.rainy_days }}</strong></span>
+      </div>
+    </div>
+
+    <!-- 14-Day Forecast Horizontal Scroll Strip -->
+    <div class="space-y-2">
+      <div class="flex items-center justify-between text-xs text-muted">
+        <span class="font-bold text-cream uppercase tracking-wider text-[10px]">14-Day Rolling Numerical Weather Prediction</span>
+        <span>Updated: {% if active_station.last_sync %}{{ active_station.last_sync|timesince }} ago{% else %}Just now{% endif %}</span>
+      </div>
+
+      <div class="flex gap-2.5 overflow-x-auto pb-2 scrollbar-thin">
+        {% for f in forecasts %}
+          <div class="min-w-[110px] p-3 rounded-xl bg-forest-800/60 border border-white/5 hover:border-sky-400/40 transition-colors flex flex-col items-center text-center space-y-1.5 shrink-0">
+            <span class="text-[10px] font-semibold text-muted uppercase">{{ f.target_date|date:"D, M d" }}</span>
+            
+            <!-- Weather Icon -->
+            <div class="w-8 h-8 rounded-full bg-forest-900/80 flex items-center justify-center my-0.5">
+              {% if f.condition_code == 'heavy_rain' %}
+                <i data-lucide="cloud-lightning" class="w-4 h-4 text-rose-400"></i>
+              {% elif f.condition_code == 'isolated_showers' %}
+                <i data-lucide="cloud-rain" class="w-4 h-4 text-water"></i>
+              {% elif f.condition_code == 'sunny' %}
+                <i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>
+              {% elif f.condition_code == 'dry_spell' %}
+                <i data-lucide="sun-dim" class="w-4 h-4 text-amber-500"></i>
+              {% else %}
+                <i data-lucide="cloud-sun" class="w-4 h-4 text-leaf"></i>
+              {% endif %}
+            </div>
+
+            <!-- Temperature -->
+            <div class="text-xs font-bold text-cream">
+              {{ f.temp_max_c|floatformat:0 }}° <span class="text-muted font-normal text-[10px]">/ {{ f.temp_min_c|floatformat:0 }}°</span>
+            </div>
+
+            <!-- Rain probability pill -->
+            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full {% if f.rain_probability_pct >= 60 %}bg-water/20 text-water border border-water/30{% elif f.rain_probability_pct >= 30 %}bg-leaf/20 text-leaf{% else %}bg-forest-900 text-muted{% endif %}">
+              {{ f.rain_probability_pct }}% Rain
+            </span>
+
+            <!-- Rain volume -->
+            <span class="text-[10px] text-cream/70 font-mono">
+              {% if f.expected_rain_mm > 0 %}{{ f.expected_rain_mm|floatformat:1 }}mm{% else %}0 mm{% endif %}
+            </span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </section>
+  {% endif %}
+
   <!-- Phase 3.6 Risk Scoring Indicators -->
   <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 

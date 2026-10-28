@@ -1,12 +1,16 @@
 import json
 import statistics
 from decimal import Decimal
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils import timezone
 
 from farms.models import Farm
-from .models import District, ClimateSource, ClimateRecord
+from .models import District, ClimateSource, ClimateRecord, WeatherStation, DailyWeatherObservation, WeatherForecast
 from .risk import calculate_climate_risks
+from .services import analyze_forecast_dry_spells, fetch_live_forecast_for_station
 
 
 @login_required
@@ -41,6 +45,32 @@ def climate_dashboard(request):
 
     # Sources
     sources = ClimateSource.objects.all()
+
+    # Active Station & Live Telemetry for this District
+    stations = WeatherStation.objects.filter(district=active_district, is_active=True)
+    if not stations.exists():
+        stations = WeatherStation.objects.filter(is_active=True)
+
+    station_id_param = request.GET.get('station')
+    active_station = None
+    if station_id_param:
+        active_station = WeatherStation.objects.filter(station_id=station_id_param).first()
+    if not active_station:
+        active_station = stations.first() or WeatherStation.objects.first()
+
+    today = timezone.now().date()
+    forecasts = []
+    forecast_insights = {'max_dry_streak': 0, 'rainy_days': 0, 'total_rain_mm': Decimal('0.0'), 'advisory': 'Normal conditions', 'level': 'normal'}
+    recent_observations = []
+
+    if active_station:
+        forecasts = list(active_station.forecasts.filter(target_date__gte=today).order_by('target_date')[:14])
+        if not forecasts:
+            # Auto-ingest if empty
+            fetch_live_forecast_for_station(active_station)
+            forecasts = list(active_station.forecasts.filter(target_date__gte=today).order_by('target_date')[:14])
+        forecast_insights = analyze_forecast_dry_spells(forecasts)
+        recent_observations = list(active_station.observations.order_by('-date')[:7])
 
     # Query records for active district
     hist_records = list(active_district.climate_records.filter(record_type='historical').order_by('year', 'month'))
@@ -213,6 +243,11 @@ def climate_dashboard(request):
         'districts': districts,
         'active_district': active_district,
         'sources': sources,
+        'stations': stations,
+        'active_station': active_station,
+        'forecasts': forecasts,
+        'forecast_insights': forecast_insights,
+        'recent_observations': recent_observations,
         'risk': risk_assessment,
         'wet_months_summary': wet_months_summary,
         'mean_annual_rain': mean_annual_rain,
@@ -223,3 +258,14 @@ def climate_dashboard(request):
         'active_nav': 'climate',
     }
     return render(request, 'climate/dashboard.html', context)
+
+
+@login_required
+def sync_station_forecast(request, station_id):
+    """
+    Triggers live on-demand forecast synchronization from station APIs.
+    """
+    station = get_object_or_404(WeatherStation, station_id=station_id)
+    count, src = fetch_live_forecast_for_station(station, timeout_seconds=6)
+    messages.success(request, f"Live synchronization completed for '{station.name}'. Ingested {count} forecast days via {src}.")
+    return redirect(f"{reverse('climate:dashboard')}?district={station.district.slug}&station={station.station_id}")

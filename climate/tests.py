@@ -4,7 +4,9 @@ from django.db import IntegrityError
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from climate.models import District, ClimateSource, ClimateRecord
+from datetime import date, timedelta
+from climate.models import District, ClimateSource, ClimateRecord, WeatherStation, DailyWeatherObservation, WeatherForecast
+from climate.services import analyze_forecast_dry_spells, fetch_live_forecast_for_station
 from climate.risk import calculate_climate_risks
 
 
@@ -166,3 +168,97 @@ class ClimateDashboardViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['active_district'].slug, 'salima')
         self.assertContains(response, 'Salima')
+
+
+
+class WeatherStationAndForecastTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='stationuser', password='password123')
+        self.district = District.objects.create(
+            name='Lilongwe',
+            slug='lilongwe',
+            region='central',
+            elevation_m=1050,
+        )
+        self.station = WeatherStation.objects.create(
+            station_id='DCCMS-LL-TEST-01',
+            name='Test Agromet Station',
+            district=self.district,
+            station_type='research_station',
+            latitude=Decimal('-13.974400'),
+            longitude=Decimal('33.649900'),
+            elevation_m=1146,
+        )
+
+    def test_station_creation_and_str(self):
+        self.assertEqual(str(self.station), 'Test Agromet Station (DCCMS-LL-TEST-01) — Lilongwe')
+        self.assertTrue(self.station.is_active)
+
+    def test_daily_observation_creation(self):
+        obs = DailyWeatherObservation.objects.create(
+            station=self.station,
+            date=date(2024, 11, 1),
+            rainfall_mm=Decimal('18.5'),
+            temp_max_c=Decimal('29.0'),
+            temp_min_c=Decimal('17.2'),
+            relative_humidity_pct=72,
+        )
+        self.assertEqual(obs.rainfall_mm, Decimal('18.5'))
+        self.assertIn('18.5mm', str(obs))
+
+    def test_forecast_creation_and_str(self):
+        target = date.today() + timedelta(days=1)
+        fc = WeatherForecast.objects.create(
+            station=self.station,
+            target_date=target,
+            expected_rain_mm=Decimal('12.0'),
+            rain_probability_pct=75,
+            temp_max_c=Decimal('28.5'),
+            temp_min_c=Decimal('17.0'),
+            condition_code='heavy_rain',
+        )
+        self.assertEqual(fc.rain_probability_pct, 75)
+        self.assertIn('Forecast', str(fc))
+
+    def test_forecast_dry_spell_analyzer(self):
+        today = date.today()
+        # Build 10 consecutive dry days
+        fcs = []
+        for i in range(10):
+            fcs.append(WeatherForecast(
+                station=self.station,
+                target_date=today + timedelta(days=i),
+                expected_rain_mm=Decimal('0.0'),
+                rain_probability_pct=10,
+                temp_max_c=Decimal('30.0'),
+                temp_min_c=Decimal('18.0'),
+                condition_code='sunny'
+            ))
+        result = analyze_forecast_dry_spells(fcs)
+        self.assertEqual(result['max_dry_streak'], 10)
+        self.assertEqual(result['level'], 'warning')
+        self.assertIn('High Dry-Spell Risk', result['advisory'])
+
+    def test_live_forecast_ingestion_service(self):
+        count, src = fetch_live_forecast_for_station(self.station, timeout_seconds=1)
+        self.assertGreaterEqual(count, 7)
+        self.assertTrue(WeatherForecast.objects.filter(station=self.station).exists())
+        self.station.refresh_from_db()
+        self.assertIsNotNone(self.station.last_sync)
+
+    def test_dashboard_renders_station_forecasts(self):
+        self.client.login(username='stationuser', password='password123')
+        # Ingest forecasts
+        fetch_live_forecast_for_station(self.station, timeout_seconds=1)
+        response = self.client.get(reverse('climate:dashboard') + '?district=lilongwe')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Live Automated Station Telemetry')
+        self.assertContains(response, 'Test Agromet Station')
+        self.assertContains(response, '14-Day Rolling Numerical Weather Prediction')
+
+    def test_sync_station_forecast_view(self):
+        self.client.login(username='stationuser', password='password123')
+        url = reverse('climate:sync_station_forecast', kwargs={'station_id': self.station.station_id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('district=lilongwe', response.url)
