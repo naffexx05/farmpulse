@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FarmPulse Malawi - System Overview</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 20mm 20mm 20mm 20mm;
+      @bottom-right {
+        content: counter(page);
+        font-family: Calibri, 'Segoe UI', Arial, sans-serif;
+        font-size: 9pt;
+        color: #7F7F7F;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Calibri, 'Segoe UI', Arial, Helvetica, sans-serif;
+      font-size: 11pt;
+      line-height: 1.35;
+      color: #262626;
+      background: #ffffff;
+      padding: 10px 5px;
+    }
+
+    /* Word Title & Subtitle */
+    .doc-title {
+      font-size: 24pt;
+      font-weight: bold;
+      color: #1F4E79; /* Word Accent 1 Dark Blue */
+      margin-bottom: 4px;
+      line-height: 1.15;
+    }
+
+    .doc-subtitle {
+      font-size: 13pt;
+      color: #595959;
+      font-style: italic;
+      margin-bottom: 12px;
+    }
+
+    .doc-meta {
+      font-size: 9.5pt;
+      color: #7F7F7F;
+      border-top: 1px solid #D9D9D9;
+      border-bottom: 1.5px solid #1F4E79;
+      padding: 6px 0;
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Headings */
+    h1 {
+      font-size: 15pt;
+      font-weight: bold;
+      color: #1F4E79;
+      margin-top: 18px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #D9D9D9;
+      padding-bottom: 3px;
+      page-break-after: avoid;
+    }
+
+    h2 {
+      font-size: 12.5pt;
+      font-weight: bold;
+      color: #2F5597;
+      margin-top: 14px;
+      margin-bottom: 5px;
+      page-break-after: avoid;
+    }
+
+    h3 {
+      font-size: 11.5pt;
+      font-weight: bold;
+      color: #262626;
+      margin-top: 10px;
+      margin-bottom: 4px;
+      page-break-after: avoid;
+    }
+
+    p {
+      margin-bottom: 8px;
+      text-align: justify;
+    }
+
+    /* Word-style Callout Box */
+    .callout-box {
+      background: #F2F4F7;
+      border-left: 4px solid #2F5597;
+      padding: 10px 14px;
+      margin: 12px 0 16px 0;
+      font-size: 10.5pt;
+      color: #1F3864;
+    }
+
+    .callout-box strong {
+      color: #1F4E79;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin-left: 22px;
+      margin-bottom: 10px;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    li strong {
+      color: #1F4E79;
+    }
+
+    /* Word-style Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 16px 0;
+      font-size: 10pt;
+      page-break-inside: avoid;
+    }
+
+    th {
+      background-color: #1F4E79;
+      color: #ffffff;
+      font-weight: bold;
+      text-align: left;
+      padding: 7px 10px;
+      border: 1px solid #1F4E79;
+    }
+
+    td {
+      padding: 6px 10px;
+      border: 1px solid #D9D9D9;
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td {
+      background-color: #F9FAFB;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+
+    .footer {
+      margin-top: 24px;
+      padding-top: 8px;
+      border-top: 1px solid #D9D9D9;
+      font-size: 9pt;
+      color: #7F7F7F;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Title Block -->
+  <div class="doc-title">FarmPulse Malawi</div>
+  <div class="doc-subtitle">A Simple Explanation of What Our Platform Does</div>
+  
+  <div class="doc-meta">
+    <span><strong>Prepared for:</strong> External Overview &amp; Partner Briefing</span>
+    <span><strong>Location:</strong> Malawi</span>
+    <span><strong>Date:</strong> October 2026</span>
+  </div>
+
+  <!-- Summary Callout -->
+  <div class="callout-box">
+    <strong>In Short:</strong> FarmPulse Malawi is an all-in-one digital assistant for farmers. It removes the guesswork from agriculture by telling farmers <strong>what to plant</strong>, <strong>when it will rain</strong>, and <strong>where to sell their harvest for the highest profit</strong>.
+  </div>
+
+  <!-- Section 1 -->
+  <h1>1. Why Was FarmPulse Built?</h1>
+  <p>
+    Most farming families in Malawi work very hard, but they often struggle to make a good profit due to three major problems:
+  </p>
+  <ul>
+    <li>
+      <strong>Unpredictable Weather:</strong> Rains often start late, sudden dry spells kill young crops, or unexpected heavy rains wash away expensive fertilizer.
+    </li>
+    <li>
+      <strong>Unfair Market Prices:</strong> Traveling middlemen (vendors) visit rural villages and buy crops very cheaply because farmers have no way of knowing what crops are actually selling for in big city markets like Lilongwe or Blantyre.
+    </li>
+    <li>
+      <strong>Expensive Farm Inputs:</strong> Fertilizer and certified seeds are very expensive. When farmers buy the wrong quantity or apply them at the wrong time, they lose money.
+    </li>
+  </ul>
+  <p>
+    <strong>FarmPulse was created to solve these exact problems.</strong> It provides clear, reliable information on a mobile phone or computer so farmers can make smart business decisions.
+  </p>
+
+  <!-- Section 2 -->
+  <h1>2. What Does the System Do? (The 5 Main Features)</h1>
+  <p>
+    The platform is divided into five simple, practical tools:
+  </p>
+
+  <h2>Feature 1: Smart Crop Planner &amp; Budget Calculator</h2>
+  <p>
+    A farmer selects their district, soil type, and how much land they have (for example, 2 acres in Lilongwe). The system immediately calculates:
+  </p>
+  <ul>
+    <li>The exact number of bags of certified seed to buy.</li>
+    <li>The exact number of bags of Basal fertilizer (NPK) and Top Dressing (Urea) needed.</li>
+    <li>How much field labour will cost for land preparation, weeding, and harvesting.</li>
+    <li>The expected harvest yield in 50 kg bags and the estimated profit in Malawian Kwacha (MWK).</li>
+  </ul>
+  <p>
+    <em>Result: The farmer knows all their costs and expected profits before spending a single Kwacha.</em>
+  </p>
+
+  <h2>Feature 2: Live Weather Station Forecasts &amp; Rain Warnings</h2>
+  <p>
+    FarmPulse connects directly to official weather stations across Malawi (such as Chitedze, Kasungu, Salima, and Bvumbwe).
+  </p>
+  <ul>
+    <li>
+      <strong>14-Day Live Forecast:</strong> Shows daily temperatures and rainfall chances so farmers can plan their week.
+    </li>
+    <li>
+      <strong>Dry-Spell Warnings:</strong> If the system detects that 7 or more dry days in a row are coming, it alerts the farmer <em>not</em> to apply top-dressing fertilizer, preventing fertilizer from burning the crops.
+    </li>
+    <li>
+      <strong>Planting Window Alert:</strong> Confirms when at least 25 mm of rain has fallen into the soil, letting farmers know it is safe to plant without seeds drying out.
+    </li>
+  </ul>
+
+  <!-- Page Break -->
+  <div class="page-break"></div>
+
+  <h2>Feature 3: Market Prices &amp; Smart Selling (Beating the Middlemen)</h2>
+  <p>
+    FarmPulse tracks daily commodity prices across major trading centers in Malawi, including Mitundu, Mchesi, Limbe, Lunzu, and Chinkhoma.
+  </p>
+  <p>
+    It clearly separates prices into three levels so farmers are never confused:
+  </p>
+  <table style="margin-top: 6px; margin-bottom: 12px;">
+    <tr>
+      <th style="width: 25%;">Price Level</th>
+      <th style="width: 35%;">Where It Applies</th>
+      <th style="width: 40%;">What It Means for the Farmer</th>
+    </tr>
+    <tr>
+      <td><strong>1. Farmgate</strong></td>
+      <td>Village aggregation point</td>
+      <td>The cash price paid directly to the farmer at their home.</td>
+    </tr>
+    <tr>
+      <td><strong>2. Wholesale</strong></td>
+      <td>Regional depots &amp; commercial mills</td>
+      <td>The higher price paid for bulk 50 kg bags in commercial hubs.</td>
+    </tr>
+    <tr>
+      <td><strong>3. Retail</strong></td>
+      <td>Town markets &amp; grocery stores</td>
+      <td>The final consumer price paid per kilogram.</td>
+    </tr>
+  </table>
+  <p>
+    <strong>Two Smart Selling Tools:</strong>
+  </p>
+  <ul>
+    <li>
+      <strong>Where to Sell (Transport Arbitrage):</strong> The system calculates truck freight costs. It shows whether renting a shared truck to transport crops to an urban wholesale market (like Limbe or Mchesi) will earn more net profit than selling at the village gate.
+    </li>
+    <li>
+      <strong>Sell Now vs. Store Later:</strong> It compares today's harvest price against projected prices 30 days ahead. If prices are expected to rise significantly, it advises the farmer to store their grain in airtight hermetic (PICS) bags rather than selling during the low-price harvest rush.
+    </li>
+  </ul>
+
+  <h2>Feature 4: The Scenario Simulator ("What-If" Testing)</h2>
+  <p>
+    Before the season starts, farmers can test different situations like a flight simulator:
+  </p>
+  <ul>
+    <li><em>"What happens to my profit if there is a 3-week drought during flowering?"</em></li>
+    <li><em>"What happens if fertilizer prices increase by 20%?"</em></li>
+    <li><em>"How much safer is my income if I grow groundnuts or soybeans alongside maize?"</em></li>
+  </ul>
+
+  <h2>Feature 5: Inclusive Technology (Built for Every Farmer)</h2>
+  <p>
+    Not every farmer in rural Malawi has a smartphone or internet. FarmPulse includes special features so no one is left behind:
+  </p>
+  <ul>
+    <li>
+      <strong>USSD Menu (*384#):</strong> Works on any basic $10 button phone without internet. A farmer dials a code to get today's market prices and weather alerts via SMS.
+    </li>
+    <li>
+      <strong>Satellite Field Twin:</strong> Uses European Space Agency satellites to scan crops from space, detecting dry or diseased patches before they spread across the whole field.
+    </li>
+    <li>
+      <strong>Automatic Drought Insurance:</strong> If satellites detect severe drought in a district, insurance money is sent straight to the farmer's mobile money wallet (Airtel Money or TNM Mpamba) without filling out paperwork.
+    </li>
+    <li>
+      <strong>Mlimi AI Assistant:</strong> A digital advisor that speaks both <strong>Chichewa</strong> and <strong>English</strong> to answer everyday farming questions.
+    </li>
+  </ul>
+
+  <!-- Section 3 -->
+  <h1>3. Who Benefits from FarmPulse?</h1>
+  <table style="margin-top: 8px;">
+    <tr>
+      <th style="width: 30%;">User Group</th>
+      <th style="width: 70%;">How They Benefit</th>
+    </tr>
+    <tr>
+      <td><strong>Smallholder Farmers</strong></td>
+      <td>Earn more money per acre, save on fertilizer, and protect crops from drought.</td>
+    </tr>
+    <tr>
+      <td><strong>Farmer Cooperatives</strong></td>
+      <td>Pool harvests together, hire shared trucks, and negotiate better wholesale contracts.</td>
+    </tr>
+    <tr>
+      <td><strong>Extension Workers (AEDOs)</strong></td>
+      <td>Advise entire villages using accurate, verified agricultural and weather data.</td>
+    </tr>
+    <tr>
+      <td><strong>Banks &amp; Buyers</strong></td>
+      <td>Lend money safely with verified farm plans and buy grain directly from organized groups.</td>
+    </tr>
+  </table>
+
+  <!-- Final Summary -->
+  <div class="callout-box" style="margin-top: 14px;">
+    <strong>Conclusion:</strong> FarmPulse turns farming in Malawi from a risky gamble into a planned, profitable business by connecting simple weather forecasts, input planning, and market prices in one easy system.
+  </div>
+
+  <div class="footer">
+    <span>FarmPulse Malawi &bull; Platform Overview</span>
+    <span>www.farmpulse.mw &bull; Confidential &bull; Page 2 of 2</span>
+  </div>
+
+</body>
+</html>
