@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class Plan(models.Model):
@@ -93,3 +94,91 @@ class PlanAssumption(models.Model):
 
     def __str__(self):
         return f"{self.parameter_name}: {self.value_used} ({self.source_note})"
+
+
+class InputCostBenchmark(models.Model):
+    """
+    Reference market prices for each input category per crop, per hectare.
+    Pre-populated with ADMARC / AGORA published input prices.
+    Editable by admins each season.
+    """
+
+    INPUT_CATEGORIES = [
+        ('seed',        'Seed / Planting Material'),
+        ('basal_fert',  'Basal Fertiliser (23:21:0+4S)'),
+        ('top_dress',   'Top Dressing (CAN / Urea)'),
+        ('labour',      'Labour (tillage, planting, weeding, harvest)'),
+        ('herbicide',   'Herbicide / Pesticide'),
+        ('transport',   'Transport to Market'),
+    ]
+
+    crop = models.ForeignKey(
+        'farms.Crop', on_delete=models.CASCADE,
+        related_name='input_benchmarks'
+    )
+    input_category = models.CharField(max_length=20, choices=INPUT_CATEGORIES)
+    description = models.CharField(
+        max_length=160,
+        help_text="E.g. 'SC403 hybrid seed, 25 kg/ha' or 'CAN 50kg bag × 4/ha'"
+    )
+    # Price per HECTARE (normalised) in MWK
+    benchmark_price_mwk_per_ha = models.DecimalField(max_digits=12, decimal_places=2)
+    season_year = models.PositiveSmallIntegerField(default=2025)
+    source_note = models.CharField(max_length=200, blank=True,
+        help_text="E.g. 'ADMARC Input Price Bulletin Oct 2025'")
+
+    class Meta:
+        ordering = ['crop__name', 'input_category']
+        unique_together = [('crop', 'input_category', 'season_year')]
+
+    def __str__(self):
+        return f"{self.crop.name} — {self.get_input_category_display()} ({self.season_year})"
+
+
+class SeasonalInputCost(models.Model):
+    """
+    A farmer's actual / adjusted input prices for a given crop this season.
+    Created/updated via the Input Cost Ledger in the planner UI.
+    Overrides InputCostBenchmark prices when present.
+    """
+
+    farm = models.ForeignKey(
+        'farms.Farm', on_delete=models.CASCADE,
+        related_name='seasonal_input_costs'
+    )
+    crop = models.ForeignKey(
+        'farms.Crop', on_delete=models.CASCADE,
+        related_name='seasonal_input_costs'
+    )
+    season_year = models.PositiveSmallIntegerField(default=2025)
+
+    # Six itemised cost fields (MWK per hectare) — nullable means "use benchmark"
+    seed_cost_mwk_per_ha        = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    basal_fert_cost_mwk_per_ha  = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    top_dress_cost_mwk_per_ha   = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    labour_cost_mwk_per_ha      = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    herbicide_cost_mwk_per_ha   = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    transport_cost_mwk_per_ha   = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+
+    notes = models.TextField(blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['crop__name']
+        unique_together = [('farm', 'crop', 'season_year')]
+
+    def __str__(self):
+        return f"{self.farm.name} — {self.crop.name} input costs ({self.season_year})"
+
+    def total_cost_per_ha(self):
+        """Sum of all non-null input fields."""
+        fields = [
+            self.seed_cost_mwk_per_ha,
+            self.basal_fert_cost_mwk_per_ha,
+            self.top_dress_cost_mwk_per_ha,
+            self.labour_cost_mwk_per_ha,
+            self.herbicide_cost_mwk_per_ha,
+            self.transport_cost_mwk_per_ha,
+        ]
+        from decimal import Decimal
+        return sum(f for f in fields if f is not None) or Decimal('0')

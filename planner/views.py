@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST
 
 from farms.models import Crop, Farm
 from .engine import calculate_plan_allocations, get_crop_benchmarks, simulate_game_shocks
-from .models import Plan, PlanItem, PlanAssumption
+from .models import Plan, PlanItem, PlanAssumption, InputCostBenchmark, SeasonalInputCost
 
 
 @login_required
@@ -97,6 +97,42 @@ def planner_input(request):
             }.get(c.slug, '#8FCB62'),
         }
 
+
+    # -- Input Cost Ledger --------------------------------------------------
+    CURRENT_SEASON = 2025
+    INPUT_CATEGORIES = [
+        ('seed',       'Seed / Planting Material'),
+        ('basal_fert', 'Basal Fertiliser'),
+        ('top_dress',  'Top Dressing'),
+        ('labour',     'Labour'),
+        ('herbicide',  'Herbicide / Pesticide'),
+        ('transport',  'Transport to Market'),
+    ]
+    benchmarks_qs = InputCostBenchmark.objects.filter(season_year=CURRENT_SEASON).select_related('crop')
+    benchmarks_by_crop = {}
+    for _b in benchmarks_qs:
+        benchmarks_by_crop.setdefault(_b.crop.slug, {})[_b.input_category] = {
+            'description': _b.description,
+            'price': float(_b.benchmark_price_mwk_per_ha),
+        }
+    farmer_overrides = {}
+    if farm:
+        for sic in SeasonalInputCost.objects.filter(farm=farm, season_year=CURRENT_SEASON).select_related('crop'):
+            farmer_overrides[sic.crop.slug] = {
+                'seed':       float(sic.seed_cost_mwk_per_ha or 0),
+                'basal_fert': float(sic.basal_fert_cost_mwk_per_ha or 0),
+                'top_dress':  float(sic.top_dress_cost_mwk_per_ha or 0),
+                'labour':     float(sic.labour_cost_mwk_per_ha or 0),
+                'herbicide':  float(sic.herbicide_cost_mwk_per_ha or 0),
+                'transport':  float(sic.transport_cost_mwk_per_ha or 0),
+            }
+    input_ledger_json = json.dumps({
+        'categories': INPUT_CATEGORIES,
+        'benchmarks': benchmarks_by_crop,
+        'farmer_overrides': farmer_overrides,
+        'season_year': CURRENT_SEASON,
+    })
+
     context = {
         'farm': farm,
         'farms': farms,
@@ -107,6 +143,7 @@ def planner_input(request):
         'default_labour': default_labour,
         'plans_data': plans_data,
         'crops_benchmarks_json': json.dumps(crops_benchmarks),
+        'input_ledger_json': input_ledger_json,
         'active_nav': 'planner',
     }
     return render(request, 'planner/planner.html', context)
@@ -589,4 +626,59 @@ def plan_delete(request, pk):
         'warning_text': f"This will permanently delete '{plan.name}' and all its crop allocations and assumptions.",
         'cancel_url': 'planner:plan_list',
         'active_nav': 'plans',
+    })
+
+
+@login_required
+@require_POST
+def save_input_costs(request):
+    """
+    AJAX endpoint: saves farmer-adjusted input prices for a given crop/season.
+    Accepts JSON body: { crop_slug, seed, basal_fert, top_dress, labour, herbicide, transport }
+    Returns JSON: { ok, total_per_ha }
+    """
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
+
+    crop_slug = data.get('crop_slug', '').strip()
+    season_year = int(data.get('season_year', 2025))
+
+    farm = Farm.objects.filter(owner=request.user).first()
+    if not farm:
+        return JsonResponse({'ok': False, 'error': 'No farm registered'}, status=403)
+
+    try:
+        crop = Crop.objects.get(slug=crop_slug)
+    except Crop.DoesNotExist:
+        return JsonResponse({'ok': False, 'error': f'Crop not found: {crop_slug}'}, status=404)
+
+    def _decimal(key):
+        val = data.get(key)
+        if val is None or str(val).strip() == '':
+            return None
+        try:
+            return Decimal(str(val))
+        except Exception:
+            return None
+
+    obj, _ = SeasonalInputCost.objects.update_or_create(
+        farm=farm,
+        crop=crop,
+        season_year=season_year,
+        defaults={
+            'seed_cost_mwk_per_ha':       _decimal('seed'),
+            'basal_fert_cost_mwk_per_ha': _decimal('basal_fert'),
+            'top_dress_cost_mwk_per_ha':  _decimal('top_dress'),
+            'labour_cost_mwk_per_ha':     _decimal('labour'),
+            'herbicide_cost_mwk_per_ha':  _decimal('herbicide'),
+            'transport_cost_mwk_per_ha':  _decimal('transport'),
+        }
+    )
+
+    return JsonResponse({
+        'ok': True,
+        'total_per_ha': float(obj.total_cost_per_ha()),
+        'crop_slug': crop_slug,
     })

@@ -120,6 +120,73 @@
   </section>
 
   <!-- ========================================================================= -->
+  <!-- REAL INPUT COST LEDGER: Itemised affordability verification               -->
+  <!-- ========================================================================= -->
+  <section class="fp-card p-6 border-white/10 space-y-5 shadow-xl" id="input-cost-ledger-section">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <i data-lucide="calculator" class="w-5 h-5 text-amber-400"></i>
+          <h2 class="font-display text-xl font-bold text-cream">Input Cost Verification</h2>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-amber-400/15 text-amber-300 border border-amber-400/25 uppercase tracking-widest font-bold">2025 Season</span>
+        </div>
+        <p class="text-xs text-cream/60 mt-1">
+          Verify your declared budget covers actual input costs. Prices pre-loaded from ADMARC/AGORA benchmarks — adjust to what you are actually being quoted.
+        </p>
+      </div>
+      <!-- Affordability verdict badge -->
+      <div id="affordability-verdict" class="shrink-0 px-4 py-2.5 rounded-xl border text-xs font-semibold text-center min-w-[140px] transition-all duration-300 bg-forest-900/80 border-white/15 text-cream/60">
+        <div class="text-[10px] uppercase tracking-widest text-cream/40 mb-0.5">Budget Status</div>
+        <div id="verdict-text">— Select crops</div>
+      </div>
+    </div>
+
+    <!-- Crop selector tabs -->
+    <div id="ledger-crop-tabs" class="flex flex-wrap gap-2"></div>
+
+    <!-- Ledger table -->
+    <div id="ledger-table-container">
+      <div class="text-center py-8 text-cream/40 text-sm">
+        <i data-lucide="mouse-pointer-click" class="w-5 h-5 mx-auto mb-2 opacity-50"></i>
+        Generate a plan above or select crops to see their input cost breakdown.
+      </div>
+    </div>
+
+    <!-- Totals Summary row -->
+    <div id="ledger-totals" class="hidden">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-white/10">
+        <div class="p-3.5 rounded-xl bg-forest-900/60 border border-white/5 text-center">
+          <div class="fp-label">Total Input Required</div>
+          <div id="total-input-required" class="font-display text-xl font-bold text-amber-300 font-mono">MWK 0</div>
+          <div class="text-[10px] text-cream/40 mt-0.5">Across all selected crops</div>
+        </div>
+        <div class="p-3.5 rounded-xl bg-forest-900/60 border border-white/5 text-center">
+          <div class="fp-label">Your Declared Budget</div>
+          <div id="declared-budget-display" class="font-display text-xl font-bold text-cream font-mono">MWK 0</div>
+          <div class="text-[10px] text-cream/40 mt-0.5">From plan parameters above</div>
+        </div>
+        <div class="p-3.5 rounded-xl border text-center" id="gap-card">
+          <div class="fp-label" id="gap-label">Surplus / Shortfall</div>
+          <div id="budget-gap" class="font-display text-xl font-bold font-mono text-leaf">MWK 0</div>
+          <div id="gap-subtext" class="text-[10px] text-cream/40 mt-0.5">—</div>
+        </div>
+      </div>
+
+      <!-- Save confirmation -->
+      <div class="flex items-center justify-between pt-3 mt-1">
+        <p class="text-[11px] text-cream/50 flex items-center gap-1.5">
+          <i data-lucide="info" class="w-3.5 h-3.5"></i>
+          Price adjustments are saved to your farm profile for this season.
+        </p>
+        <div id="save-status" class="text-[11px] text-leaf font-medium hidden flex items-center gap-1">
+          <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Prices saved
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
   <!-- Interactive Field Land Allocator Canvas                                  -->
   <!-- ========================================================================= -->
   <section class="fp-card p-6 border-white/10 space-y-6 shadow-2xl relative overflow-hidden">
@@ -471,7 +538,6 @@
       {% endif %}
     {% endif %}
 
-    // Filter to crops present in benchmarks
     selectedCrops = selectedCrops.filter(s => benchmarks[s]);
     if (selectedCrops.length === 0) {
       selectedCrops = Object.keys(benchmarks).slice(0, 3);
@@ -485,6 +551,300 @@
         selectedCrops: selectedCrops
       });
     }
+
+    // ── Input Cost Ledger ──────────────────────────────────────────────────
+    initInputCostLedger(selectedCrops, budget, benchmarks);
   });
+
+  // =========================================================================
+  // INPUT COST LEDGER ENGINE
+  // =========================================================================
+  const LEDGER_DATA = JSON.parse('{{ input_ledger_json|escapejs }}');
+  const SAVE_URL = '{% url "planner:save_input_costs" %}';
+  const CSRF_TOKEN = '{{ csrf_token }}';
+
+  // Working copy: farmer's price overrides, merged over benchmarks
+  const ledgerPrices = {};   // { crop_slug: { seed, basal_fert, top_dress, labour, herbicide, transport } }
+  const CATEGORIES = LEDGER_DATA.categories;  // [ [key, label], ... ]
+
+  const CROP_COLOURS = {
+    'maize': '#8FCB62', 'groundnuts': '#F2B441', 'soybeans': '#4FB7D9',
+    'common-beans': '#C084FC', 'cassava': '#34D399', 'rice': '#38BDF8',
+    'sorghum': '#FB923C', 'tobacco': '#A3E635',
+  };
+
+  let _activeCropSlug = null;
+  let _activeLandHa = {};
+  let _budget = 450000;
+
+  function initInputCostLedger(cropSlugs, budgetMwk, landBenchmarks) {
+    _budget = budgetMwk;
+
+    // Estimate land per crop (equal split as default — refined if splitter sets it)
+    const eqSplit = 2.0 / Math.max(cropSlugs.length, 1);
+    cropSlugs.forEach(slug => { _activeLandHa[slug] = eqSplit; });
+
+    // Merge benchmark prices with farmer overrides
+    cropSlugs.forEach(slug => {
+      const bm = LEDGER_DATA.benchmarks[slug] || {};
+      const fo = LEDGER_DATA.farmer_overrides[slug] || {};
+      ledgerPrices[slug] = {};
+      CATEGORIES.forEach(([key]) => {
+        const benchPrice = bm[key] ? bm[key].price : 0;
+        ledgerPrices[slug][key] = fo[key] !== undefined && fo[key] > 0 ? fo[key] : benchPrice;
+      });
+    });
+
+    renderCropTabs(cropSlugs);
+    if (cropSlugs.length > 0) showCropLedger(cropSlugs[0]);
+    updateLedgerTotals();
+  }
+
+  function renderCropTabs(cropSlugs) {
+    const container = document.getElementById('ledger-crop-tabs');
+    if (!container) return;
+    container.innerHTML = '';
+    cropSlugs.forEach((slug, i) => {
+      const label = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      const colour = CROP_COLOURS[slug] || '#8FCB62';
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.slug = slug;
+      btn.className = `ledger-tab px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${i === 0 ? 'border-opacity-80 text-forest-900' : 'bg-forest-900/60 border-white/10 text-cream/70 hover:text-cream'}`;
+      btn.style.cssText = i === 0 ? `background:${colour};border-color:${colour}` : '';
+      btn.textContent = label;
+      btn.onclick = () => showCropLedger(slug);
+      container.appendChild(btn);
+    });
+  }
+
+  function showCropLedger(slug) {
+    _activeCropSlug = slug;
+
+    // Update tab active states
+    document.querySelectorAll('.ledger-tab').forEach(btn => {
+      const colour = CROP_COLOURS[btn.dataset.slug] || '#8FCB62';
+      if (btn.dataset.slug === slug) {
+        btn.style.cssText = `background:${colour};border-color:${colour}`;
+        btn.classList.add('text-forest-900');
+        btn.classList.remove('bg-forest-900/60','border-white/10','text-cream/70');
+      } else {
+        btn.style.cssText = '';
+        btn.classList.remove('text-forest-900');
+        btn.classList.add('bg-forest-900/60','border-white/10','text-cream/70');
+      }
+    });
+
+    const container = document.getElementById('ledger-table-container');
+    if (!container) return;
+
+    const bm = LEDGER_DATA.benchmarks[slug] || {};
+    const prices = ledgerPrices[slug] || {};
+    const landHa = _activeLandHa[slug] || 1.0;
+    const colour = CROP_COLOURS[slug] || '#8FCB62';
+    const cropLabel = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+    let totalPerHa = 0;
+    CATEGORIES.forEach(([key]) => { totalPerHa += prices[key] || 0; });
+    const totalActual = totalPerHa * landHa;
+
+    let rows = '';
+    CATEGORIES.forEach(([key, label]) => {
+      const benchEntry = bm[key];
+      const benchPrice = benchEntry ? benchEntry.price : 0;
+      const desc = benchEntry ? benchEntry.description : '—';
+      const currentPrice = prices[key] || 0;
+      const lineTotal = currentPrice * landHa;
+      const isCustom = LEDGER_DATA.farmer_overrides[slug] &&
+                       LEDGER_DATA.farmer_overrides[slug][key] &&
+                       LEDGER_DATA.farmer_overrides[slug][key] !== benchPrice;
+
+      rows += `
+        <tr class="border-b border-white/5 hover:bg-white/[0.02] group">
+          <td class="py-3 px-4">
+            <div class="text-xs font-medium text-cream">${label}</div>
+            <div class="text-[10px] text-cream/40 mt-0.5">${desc}</div>
+          </td>
+          <td class="py-3 px-4 text-right">
+            <div class="inline-flex items-center gap-1 rounded-lg bg-forest-900/80 border border-white/10 px-2 py-1 focus-within:border-leaf/50">
+              <span class="text-[10px] text-cream/40 font-mono">MWK</span>
+              <input
+                type="number"
+                min="0"
+                step="500"
+                value="${Math.round(currentPrice)}"
+                data-slug="${slug}"
+                data-category="${key}"
+                data-benchmark="${benchPrice}"
+                class="ledger-price-input w-24 bg-transparent text-xs font-mono text-cream text-right outline-none"
+                oninput="onLedgerPriceChange(this)"
+              >
+              <span class="text-[10px] text-cream/40">/ha</span>
+            </div>
+            ${isCustom ? `<div class="text-[9px] text-amber-300 mt-0.5">Adjusted (benchmark: ${Math.round(benchPrice).toLocaleString()})</div>` : (benchPrice > 0 ? `<div class="text-[9px] text-cream/30 mt-0.5">ADMARC ref: ${Math.round(benchPrice).toLocaleString()}</div>` : '')}
+          </td>
+          <td class="py-3 px-4 text-right font-mono text-xs text-cream/80">
+            ${landHa.toFixed(2)} ha
+          </td>
+          <td class="py-3 px-4 text-right font-mono text-xs font-bold" id="line-total-${slug}-${key}">
+            ${lineTotal > 0 ? 'MWK ' + Math.round(lineTotal).toLocaleString() : '<span class="text-cream/30">—</span>'}
+          </td>
+        </tr>`;
+    });
+
+    container.innerHTML = `
+      <div class="overflow-x-auto rounded-xl border border-white/10">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-forest-900/80">
+            <tr>
+              <th class="py-2.5 px-4 text-[10px] uppercase tracking-wider text-cream/50 font-medium w-2/5">
+                Input Item
+                <span class="ml-2 font-bold" style="color:${colour}">${cropLabel}</span>
+                <span class="text-cream/30 font-normal">(${landHa.toFixed(2)} ha)</span>
+              </th>
+              <th class="py-2.5 px-4 text-[10px] uppercase tracking-wider text-cream/50 text-right">Price / ha</th>
+              <th class="py-2.5 px-4 text-[10px] uppercase tracking-wider text-cream/50 text-right">Area</th>
+              <th class="py-2.5 px-4 text-[10px] uppercase tracking-wider text-cream/50 text-right">Line Total</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5">
+            ${rows}
+          </tbody>
+          <tfoot>
+            <tr class="bg-forest-950/60">
+              <td colspan="3" class="py-3 px-4 text-xs font-bold text-cream uppercase tracking-wider">
+                Total Input Cost — ${cropLabel}
+              </td>
+              <td class="py-3 px-4 text-right font-mono text-sm font-bold text-amber-300" id="crop-total-${slug}">
+                MWK ${Math.round(totalActual).toLocaleString()}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="flex justify-end pt-2">
+        <button
+          type="button"
+          onclick="saveInputCostsForCrop('${slug}')"
+          class="fp-btn-primary text-xs !py-1.5 !px-4 flex items-center gap-1.5"
+        >
+          <i data-lucide="save" class="w-3.5 h-3.5"></i> Save My Prices for ${cropLabel}
+        </button>
+      </div>`;
+
+    if (window.lucide) lucide.createIcons();
+    updateLedgerTotals();
+  }
+
+  function onLedgerPriceChange(input) {
+    const slug = input.dataset.slug;
+    const cat  = input.dataset.category;
+    const newVal = parseFloat(input.value) || 0;
+    if (!ledgerPrices[slug]) ledgerPrices[slug] = {};
+    ledgerPrices[slug][cat] = newVal;
+
+    const landHa = _activeLandHa[slug] || 1.0;
+    const lineEl = document.getElementById(`line-total-${slug}-${cat}`);
+    if (lineEl) {
+      const total = newVal * landHa;
+      lineEl.innerHTML = total > 0 ? 'MWK ' + Math.round(total).toLocaleString() : '<span class="text-cream/30">—</span>';
+    }
+
+    // Update crop subtotal in tfoot
+    let cropTotal = 0;
+    CATEGORIES.forEach(([key]) => { cropTotal += (ledgerPrices[slug][key] || 0) * landHa; });
+    const cropTotalEl = document.getElementById(`crop-total-${slug}`);
+    if (cropTotalEl) cropTotalEl.textContent = 'MWK ' + Math.round(cropTotal).toLocaleString();
+
+    updateLedgerTotals();
+  }
+
+  function updateLedgerTotals() {
+    const slugs = Object.keys(ledgerPrices);
+    if (slugs.length === 0) return;
+
+    let grandTotal = 0;
+    slugs.forEach(slug => {
+      const landHa = _activeLandHa[slug] || 1.0;
+      CATEGORIES.forEach(([key]) => {
+        grandTotal += (ledgerPrices[slug][key] || 0) * landHa;
+      });
+    });
+
+    const gap = _budget - grandTotal;
+    const pct = _budget > 0 ? (grandTotal / _budget) * 100 : 0;
+
+    document.getElementById('ledger-totals')?.classList.remove('hidden');
+
+    const totalEl = document.getElementById('total-input-required');
+    const budgetEl = document.getElementById('declared-budget-display');
+    const gapEl   = document.getElementById('budget-gap');
+    const gapCard = document.getElementById('gap-card');
+    const gapLabel = document.getElementById('gap-label');
+    const gapSub   = document.getElementById('gap-subtext');
+    const verdictEl = document.getElementById('verdict-text');
+    const verdictBox = document.getElementById('affordability-verdict');
+
+    if (totalEl) totalEl.textContent = 'MWK ' + Math.round(grandTotal).toLocaleString();
+    if (budgetEl) budgetEl.textContent = 'MWK ' + Math.round(_budget).toLocaleString();
+
+    if (gap >= 0) {
+      // Funded
+      if (gapEl) { gapEl.textContent = '+MWK ' + Math.round(gap).toLocaleString(); gapEl.className = 'font-display text-xl font-bold font-mono text-leaf'; }
+      if (gapCard) gapCard.className = 'p-3.5 rounded-xl border text-center bg-leaf/5 border-leaf/20';
+      if (gapLabel) gapLabel.textContent = 'Budget Surplus';
+      if (gapSub) gapSub.textContent = `${Math.round(pct)}% of budget consumed`;
+      if (verdictEl) verdictEl.textContent = pct > 90 ? 'Tight — Monitor Closely' : 'Fully Funded';
+      if (verdictBox) verdictBox.className = `shrink-0 px-4 py-2.5 rounded-xl border text-xs font-semibold text-center min-w-[140px] transition-all duration-300 ${pct > 90 ? 'bg-risk-medium/10 border-risk-medium/40 text-risk-medium' : 'bg-leaf/10 border-leaf/30 text-leaf'}`;
+    } else {
+      // Shortfall
+      if (gapEl) { gapEl.textContent = 'MWK ' + Math.round(Math.abs(gap)).toLocaleString() + ' SHORT'; gapEl.className = 'font-display text-xl font-bold font-mono text-risk-high'; }
+      if (gapCard) gapCard.className = 'p-3.5 rounded-xl border text-center bg-risk-high/5 border-risk-high/20';
+      if (gapLabel) gapLabel.textContent = 'Funding Gap';
+      if (gapSub) gapSub.textContent = 'Budget insufficient for these inputs';
+      if (verdictEl) verdictEl.textContent = 'Funding Gap';
+      if (verdictBox) verdictBox.className = 'shrink-0 px-4 py-2.5 rounded-xl border text-xs font-semibold text-center min-w-[140px] transition-all duration-300 bg-risk-high/10 border-risk-high/40 text-risk-high';
+    }
+  }
+
+  // Public: called by Field Splitter to update land areas in ledger
+  window.updateLedgerLandAreas = function(areaMap) {
+    Object.assign(_activeLandHa, areaMap);
+    if (_activeCropSlug) showCropLedger(_activeCropSlug);
+    updateLedgerTotals();
+  };
+
+  // Public: update budget from parameter form
+  window.updateLedgerBudget = function(newBudget) {
+    _budget = parseFloat(newBudget) || 450000;
+    updateLedgerTotals();
+  };
+
+  async function saveInputCostsForCrop(slug) {
+    const prices = ledgerPrices[slug] || {};
+    const payload = {
+      crop_slug: slug,
+      season_year: LEDGER_DATA.season_year,
+      ...prices
+    };
+    try {
+      const resp = await fetch(SAVE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+        body: JSON.stringify(payload)
+      });
+      const data = await resp.json();
+      if (data.ok) {
+        const statusEl = document.getElementById('save-status');
+        if (statusEl) {
+          statusEl.classList.remove('hidden');
+          setTimeout(() => statusEl.classList.add('hidden'), 3000);
+        }
+        if (window.lucide) lucide.createIcons();
+      }
+    } catch (e) {
+      console.warn('Failed to save input costs:', e);
+    }
+  }
 </script>
 {% endblock %}

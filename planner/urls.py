@@ -8,6 +8,7 @@ urlpatterns = [
     path('planner/', views.planner_input, name='planner_input'),
     path('planner/result/', views.planner_result, name='planner_result'),
     path('planner/save/', views.save_plan, name='save_plan'),
+    path('planner/save-input-costs/', views.save_input_costs, name='save_input_costs'),
 
     # Module 5: Game-like Scenario Simulator 🎮
     path('scenarios/', views.scenario_simulator, name='scenario_simulator'),
