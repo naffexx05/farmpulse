@@ -1,23 +1,21 @@
 {% extends 'base.html' %}
 {% load humanize %}
-{% block title %}Scenario Simulator Arena 🎮 — FarmPulse Malawi{% endblock %}
+{% block title %}Seasonal Risk Analysis — FarmPulse Malawi{% endblock %}
 
 {% block content %}
 <div class="max-w-6xl mx-auto space-y-8">
 
-  <!-- Arena Header & Target Plan -->
+  <!-- Page Header -->
   <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
-      <div class="flex items-center gap-2">
-        <h1 class="font-display text-3xl font-semibold text-cream flex items-center gap-2">
-          <span>Scenario Simulator</span>
-          <span class="text-xs px-2.5 py-1 rounded-full bg-water/20 text-water-soft border border-water/40 uppercase tracking-wider font-mono">
-            Interactive Arena 🎮
-          </span>
-        </h1>
+      <div class="flex items-center gap-3">
+        <h1 class="font-display text-3xl font-semibold text-cream">Seasonal Risk Analysis</h1>
+        <span class="text-xs px-2.5 py-1 rounded-full bg-water/15 text-water-soft border border-water/30 uppercase tracking-widest font-mono">
+          Simulation Module
+        </span>
       </div>
       <p class="mt-1 text-sm text-cream/60">
-        Stress-test your crop plan against extreme weather events, market crashes, and input cost shocks in real time.
+        Stress-test your crop plan against climate anomalies, market price shocks, and input cost volatility. Results update in real time.
       </p>
     </div>
 
@@ -35,25 +33,25 @@
   </header>
 
   <!-- ========================================================================= -->
-  <!-- GAME HUD (Heads-Up Display): HEALTH, COIN METER, FOOD SECURITY, GRADE -->
+  <!-- FARM PERFORMANCE DASHBOARD: RESILIENCE, CASHFLOW, FOOD SECURITY, RATING  -->
   <!-- ========================================================================= -->
   <section class="fp-glass p-6 border-2 border-white/15 relative overflow-hidden shadow-2xl">
     <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-leaf/10 rounded-full blur-3xl pointer-events-none"></div>
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
 
-      <!-- HUD 1: Farm Resilience Health Bar -->
+      <!-- Panel 1: Farm Resilience Index -->
       <div class="space-y-2 md:col-span-1 border-b md:border-b-0 md:border-r border-white/10 pb-4 md:pb-0 md:pr-4">
         <div class="flex items-center justify-between text-xs">
           <span class="fp-label !mb-0 flex items-center gap-1.5">
-            <i data-lucide="shield" class="w-4 h-4 text-leaf"></i> Resilience
+            <i data-lucide="shield" class="w-4 h-4 text-leaf"></i> Resilience Index
           </span>
           <span id="hud-resilience-score" class="font-mono font-bold text-cream text-sm">
-            {{ initial_sim.resilience_score }}/100 XP
+            {{ initial_sim.resilience_score }}/100
           </span>
         </div>
 
-        <!-- Health Bar -->
+        <!-- Progress Indicator -->
         <div class="w-full bg-forest-900 rounded-full h-3.5 p-0.5 border border-white/15 overflow-hidden">
           <div
             id="hud-resilience-bar"
@@ -67,7 +65,7 @@
         </div>
       </div>
 
-      <!-- HUD 2: Net Profit / Loss Coin Meter & Speedometer -->
+      <!-- Panel 2: Net Farm Cashflow & ROI Gauge -->
       <div class="space-y-1 md:col-span-1 border-b md:border-b-0 md:border-r border-white/10 pb-4 md:pb-0 md:pr-4 flex flex-col justify-between">
         <div>
           <div class="fp-label flex items-center gap-1.5">
@@ -80,11 +78,11 @@
             Baseline: MWK {{ baseline_plan.total_margin_mwk|floatformat:0|intcomma }}
           </div>
         </div>
-        <!-- Profit Speedometer Gauge -->
+        <!-- ROI Gauge -->
         <div id="scenario-profit-speedometer" class="w-full"></div>
       </div>
 
-      <!-- HUD 3: Family Food Security Gauge -->
+      <!-- Panel 3: Family Food Security -->
       <div class="space-y-2 md:col-span-1 border-b md:border-b-0 md:border-r border-white/10 pb-4 md:pb-0 md:pr-4">
         <div class="flex items-center justify-between text-xs">
           <span class="fp-label !mb-0 flex items-center gap-1.5">
@@ -106,10 +104,10 @@
         </div>
       </div>
 
-      <!-- HUD 4: Arcade Grade Badge -->
+      <!-- Panel 4: Seasonal Performance Rating -->
       <div class="flex items-center justify-around sm:justify-center gap-4 text-center">
         <div>
-          <span class="fp-label !mb-1 block">Season Grade</span>
+          <span class="fp-label !mb-1 block">Season Rating</span>
           <div
             id="hud-grade"
             class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-forest-950 border-2 border-leaf font-display text-2xl font-black text-leaf shadow-[0_0_20px_rgba(143,203,98,0.3)] transition-all duration-300"
@@ -121,10 +119,10 @@
 
     </div>
 
-    <!-- Dynamic Game Reaction Commentary Box -->
+    <!-- Projection Summary Advisory -->
     <div id="hud-commentary-box" class="mt-4 p-3 rounded-xl bg-forest-900/80 border border-white/10 flex items-start justify-between gap-3 text-xs text-cream/80">
       <div class="flex items-start gap-2.5">
-        <i data-lucide="message-square" class="w-4 h-4 text-leaf shrink-0 mt-0.5"></i>
+        <i data-lucide="file-text" class="w-4 h-4 text-leaf shrink-0 mt-0.5"></i>
         <span id="hud-commentary-text">{{ initial_sim.commentary }}</span>
       </div>
       <button
@@ -132,102 +130,102 @@
         id="commentary-voice-btn"
         data-fp-speak="{{ initial_sim.commentary }}"
         class="fp-btn-ghost !px-2.5 !py-1 text-[11px] text-leaf inline-flex items-center gap-1 shrink-0"
-        title="Mvetserani mu Chichewa (Oral Voiceover)"
+        title="Audio Advisory in Chichewa"
       >
-        <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> <span>Mvetserani</span>
+        <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> <span>Audio Advisory</span>
       </button>
     </div>
   </section>
 
   <!-- ========================================================================= -->
-  <!-- PRESET SCENARIO CHALLENGE CARDS (ONE-CLICK SHOCKS) -->
+  <!-- CLIMATE & MARKET EVENT PRESETS                                          -->
   <!-- ========================================================================= -->
   <section class="space-y-3">
     <div class="flex items-center justify-between">
       <h2 class="font-display text-lg font-semibold text-cream flex items-center gap-2">
-        <i data-lucide="gamepad-2" class="w-5 h-5 text-amber-400"></i> Event Challenges &amp; Preset Shocks
+        <i data-lucide="zap" class="w-5 h-5 text-amber-400"></i> Climate &amp; Market Shock Scenarios
       </h2>
-      <span class="text-xs text-cream/50">Select an event or tweak sandbox sliders below</span>
+      <span class="text-xs text-cream/50">Select a scenario or adjust parameters manually below</span>
     </div>
 
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-      <!-- Challenge 1: El Niño -->
+      <!-- Scenario 1: El Niño -->
       <button
         type="button"
-        onclick="applyPresetShock(-25, 1.5, 20, 10, 'The 2024 El Niño Drought')"
+        onclick="applyPresetShock(-25, 1.5, 20, 10, 'El Niño Southern Oscillation — Drought')"
         class="preset-card p-3 rounded-xl bg-forest-800/80 border border-white/10 hover:border-risk-high text-left transition-all group"
       >
-        <div class="text-xl mb-1">🎲</div>
+        <div class="mb-2"><i data-lucide="sun" class="w-5 h-5 text-risk-high"></i></div>
         <div class="font-bold text-xs text-cream group-hover:text-risk-high">El Niño Drought</div>
         <div class="text-[10px] text-cream/50">-25% Rain &bull; +1.5°C</div>
       </button>
 
-      <!-- Challenge 2: Bumper Glut -->
+      <!-- Scenario 2: Bumper Glut -->
       <button
         type="button"
-        onclick="applyPresetShock(15, -0.5, -30, 0, 'Bumper Harvest Price Slump')"
+        onclick="applyPresetShock(15, -0.5, -30, 0, 'Bumper Harvest — Price Depression')"
         class="preset-card p-3 rounded-xl bg-forest-800/80 border border-white/10 hover:border-water text-left transition-all group"
       >
-        <div class="text-xl mb-1">🌾</div>
+        <div class="mb-2"><i data-lucide="cloud-rain" class="w-5 h-5 text-water"></i></div>
         <div class="font-bold text-xs text-cream group-hover:text-water-soft">Bumper Harvest</div>
         <div class="text-[10px] text-cream/50">+15% Rain &bull; -30% Price</div>
       </button>
 
-      <!-- Challenge 3: Fertilizer Spike -->
+      <!-- Scenario 3: Fertilizer Spike -->
       <button
         type="button"
-        onclick="applyPresetShock(0, 0, 0, 35, 'Fertiliser Price Shock')"
+        onclick="applyPresetShock(0, 0, 0, 35, 'Fertiliser Price Shock — Input Cost Surge')"
         class="preset-card p-3 rounded-xl bg-forest-800/80 border border-white/10 hover:border-amber-400 text-left transition-all group"
       >
-        <div class="text-xl mb-1">🧪</div>
+        <div class="mb-2"><i data-lucide="trending-up" class="w-5 h-5 text-amber-400"></i></div>
         <div class="font-bold text-xs text-cream group-hover:text-amber-300">Fertiliser Shock</div>
         <div class="text-[10px] text-cream/50">+35% Input Cost</div>
       </button>
 
-      <!-- Challenge 4: Heat Dome -->
+      <!-- Scenario 4: Heat Dome -->
       <button
         type="button"
-        onclick="applyPresetShock(-10, 2.5, 0, 0, 'Heat Wave Extreme')"
+        onclick="applyPresetShock(-10, 2.5, 0, 0, 'Extreme Heat Event — Thermal Crop Stress')"
         class="preset-card p-3 rounded-xl bg-forest-800/80 border border-white/10 hover:border-risk-high text-left transition-all group"
       >
-        <div class="text-xl mb-1">☀️</div>
+        <div class="mb-2"><i data-lucide="thermometer" class="w-5 h-5 text-risk-high"></i></div>
         <div class="font-bold text-xs text-cream group-hover:text-risk-high">Heat Dome</div>
         <div class="text-[10px] text-cream/50">+2.5°C Thermal Stress</div>
       </button>
 
-      <!-- Challenge 5: La Niña -->
+      <!-- Scenario 5: La Niña -->
       <button
         type="button"
-        onclick="applyPresetShock(15, -0.5, 5, -5, 'Optimal La Niña Season')"
+        onclick="applyPresetShock(15, -0.5, 5, -5, 'La Niña — Favourable Season')"
         class="preset-card p-3 rounded-xl bg-forest-800/80 border border-white/10 hover:border-leaf text-left transition-all group"
       >
-        <div class="text-xl mb-1">🌈</div>
+        <div class="mb-2"><i data-lucide="sprout" class="w-5 h-5 text-leaf"></i></div>
         <div class="font-bold text-xs text-cream group-hover:text-leaf">Ideal Season</div>
         <div class="text-[10px] text-cream/50">+15% Rain &bull; Bumper</div>
       </button>
 
-      <!-- Challenge 6: Reset Sandbox -->
+      <!-- Scenario 6: Reset Baseline -->
       <button
         type="button"
-        onclick="applyPresetShock(0, 0, 0, 0, 'Sandbox Mode')"
+        onclick="applyPresetShock(0, 0, 0, 0, 'Baseline — No Shock Applied')"
         class="preset-card p-3 rounded-xl bg-forest-950 border border-white/15 hover:border-cream text-left transition-all group"
       >
-        <div class="text-xl mb-1">🕹️</div>
-        <div class="font-bold text-xs text-cream">Reset Sandbox</div>
-        <div class="text-[10px] text-cream/50">Baseline 0% Shock</div>
+        <div class="mb-2"><i data-lucide="refresh-cw" class="w-5 h-5 text-cream/60"></i></div>
+        <div class="font-bold text-xs text-cream">Reset Baseline</div>
+        <div class="text-[10px] text-cream/50">No Shock Applied</div>
       </button>
     </div>
   </section>
 
   <!-- ========================================================================= -->
-  <!-- TACTILE GAME SLIDERS (SANDBOX CONTROLS) -->
+  <!-- PARAMETER CONTROLS (SCENARIO SHOCK DIALS)                              -->
   <!-- ========================================================================= -->
   <section class="fp-card p-6 space-y-6">
     <div class="flex items-center justify-between border-b border-white/5 pb-3">
       <h2 class="font-display text-base font-semibold text-cream flex items-center gap-2">
-        <i data-lucide="sliders" class="w-4 h-4 text-leaf"></i> Tactile Shock Dials
+        <i data-lucide="sliders" class="w-4 h-4 text-leaf"></i> Parameter Controls
       </h2>
-      <span id="active-event-title" class="text-xs font-mono text-amber-300">Sandbox Mode</span>
+      <span id="active-event-title" class="text-xs font-mono text-amber-300">Baseline — No Shock Applied</span>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -336,12 +334,12 @@
   </section>
 
   <!-- ========================================================================= -->
-  <!-- CROP COMBAT GRID: PER-CROP SIMULATED RESULTS -->
+  <!-- PER-CROP SIMULATED RESULTS                                              -->
   <!-- ========================================================================= -->
   <section class="space-y-4">
     <div class="flex items-center justify-between">
-      <h2 class="font-display text-lg font-semibold text-cream">Crop Response Under Current Shock</h2>
-      <span class="text-xs text-cream/50">Simulated yields &amp; new break-even thresholds</span>
+      <h2 class="font-display text-lg font-semibold text-cream">Crop Response Under Current Scenario</h2>
+      <span class="text-xs text-cream/50">Simulated yields &amp; adjusted break-even thresholds</span>
     </div>
 
     <div id="crop-combat-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -502,7 +500,7 @@
     const foodPctEl = document.getElementById('hud-food-pct');
     const commentaryEl = document.getElementById('hud-commentary-text');
 
-    if (resScoreEl) resScoreEl.textContent = resilienceScore + '/100 XP';
+    if (resScoreEl) resScoreEl.textContent = resilienceScore + '/100';
     if (resBar) {
       resBar.style.width = resilienceScore + '%';
       if (resilienceScore >= 70) resBar.className = 'h-full rounded-full transition-all duration-300 bg-leaf';
@@ -510,27 +508,26 @@
       else resBar.className = 'h-full rounded-full transition-all duration-300 bg-risk-high';
     }
 
-    // Health Status & Grade
     let grade = 'B';
     let statusText = 'Weather Strained';
     if (resilienceScore >= 85 && totalSimMargin > 0) {
       grade = 'A+';
-      statusText = 'Thriving & Resilient';
+      statusText = 'Excellent — Resilient';
       gradeEl.className = 'inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-forest-950 border-2 border-leaf font-display text-2xl font-black text-leaf shadow-[0_0_20px_rgba(143,203,98,0.4)]';
     } else if (resilienceScore >= 70 && totalSimMargin > 0) {
       grade = 'A';
-      statusText = 'Solid Harvest';
+      statusText = 'Strong Performance';
       gradeEl.className = 'inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-forest-950 border-2 border-leaf font-display text-2xl font-black text-leaf';
     } else if (resilienceScore >= 45) {
       grade = 'B';
-      statusText = 'Weather Strained';
+      statusText = 'Moderate — Constrained';
       gradeEl.className = 'inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-forest-950 border-2 border-risk-medium font-display text-2xl font-black text-risk-medium';
     } else if (resilienceScore >= 25) {
       grade = 'C';
-      statusText = 'Vulnerable';
+      statusText = 'At Risk';
       gradeEl.className = 'inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-forest-950 border-2 border-risk-high font-display text-2xl font-black text-risk-high';
     } else {
-      grade = 'F';
+      grade = 'D';
       statusText = 'Severe Crop Failure';
       gradeEl.className = 'inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-forest-950 border-2 border-risk-high font-display text-2xl font-black text-risk-high shadow-[0_0_20px_rgba(231,106,106,0.5)]';
     }
@@ -552,14 +549,13 @@
     if (foodPctEl) foodPctEl.textContent = foodPct + '%';
     if (foodBar) foodBar.style.width = foodPct + '%';
 
-      // Commentary Reaction
       if (commentaryEl) {
         if (deltaMargin >= 50000) {
-          commentaryEl.textContent = "Superb outcome! Favourable climate and market tailwinds increased your net farm profits.";
+          commentaryEl.textContent = "Projection Summary: Under current parameters, net farm cashflow improves materially. Favourable climate and market conditions support positive seasonal outcomes.";
         } else if (totalSimMargin > 0) {
-          commentaryEl.textContent = "Weather shock absorbed! While yield dropped, your crop diversification preserved positive cashflow.";
+          commentaryEl.textContent = "Projection Summary: Cashflow remains positive despite adverse conditions. Crop diversification is absorbing the applied shocks and preserving farm viability.";
         } else {
-          commentaryEl.textContent = "Crisis Alert: Production expenditures exceed harvest earnings under this severe shock. Adjust allocations or invest in drought-tolerant seed.";
+          commentaryEl.textContent = "Risk Alert: Under current shock parameters, total production costs exceed projected harvest earnings. Consider reallocating to drought-tolerant varieties or reducing input exposure.";
         }
       }
 

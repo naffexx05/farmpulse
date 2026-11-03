@@ -56,8 +56,8 @@
             </div>
 
             <div class="flex items-center gap-2">
-              <a href="{% url 'planner:scenario_simulator' %}?plan={{ p.pk }}" class="fp-btn-ghost !px-3 !py-1.5 text-xs text-amber-300 hover:text-amber-200" title="Stress test this plan">
-                🎮 Simulator
+              <a href="{% url 'planner:scenario_simulator' %}?plan={{ p.pk }}" class="fp-btn-ghost !px-3 !py-1.5 text-xs text-amber-300 hover:text-amber-200" title="Run risk analysis on this plan">
+                <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 inline-block mr-0.5"></i> Risk Analysis
               </a>
               <a href="{% url 'planner:plan_detail' p.pk %}" class="fp-btn-ghost !px-3 !py-1.5 text-xs text-cream/80">
                 View Plan

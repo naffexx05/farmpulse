@@ -75,7 +75,7 @@
 
           <div class="flex items-center gap-2 pt-2 border-t border-white/5">
             <a href="{% url 'planner:scenario_simulator' %}?plan={{ p.pk }}" class="fp-btn-primary !px-3 !py-1.5 text-xs w-full text-center">
-              🎮 Test in Simulator
+              <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 inline-block mr-0.5"></i> Run Risk Analysis
             </a>
             <a href="{% url 'planner:plan_detail' p.pk %}" class="fp-btn-ghost !px-3 !py-1.5 text-xs text-center">
               Details

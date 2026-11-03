@@ -1,0 +1,347 @@
+/* =========================================================================
+   FarmPulse Malawi — Professional / National-Grade Design Layer
+   Purpose: Elevate visual hierarchy, institutional authority, and
+            data-first aesthetics. Think government intelligence portal.
+   ========================================================================= */
+
+/* -------------------------------------------------------------------------
+   1. Typography & Hierarchy Refinements
+   ------------------------------------------------------------------------- */
+
+/* Sharper, heavier page titles — ministerial weight */
+h1.font-display {
+  letter-spacing: -0.025em;
+}
+
+h2.font-display {
+  letter-spacing: -0.015em;
+}
+
+/* Section dividers — structural not decorative */
+.fp-section-rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08) 20%, rgba(255,255,255,0.08) 80%, transparent);
+  margin: 0;
+}
+
+/* -------------------------------------------------------------------------
+   2. Sidebar — More structured, less rounded
+   ------------------------------------------------------------------------- */
+
+aside#sidebar {
+  border-right: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Nav items — less pill-shaped, more structured row */
+.fp-nav-item {
+  border-radius: 8px !important;
+  font-size: 0.8125rem !important; /* 13px */
+  font-weight: 500 !important;
+  letter-spacing: 0.01em;
+  color: rgba(241,245,236,0.65) !important;
+  padding: 0.5rem 0.875rem !important;
+  transition: all 0.15s ease;
+  border-left: 2px solid transparent;
+}
+
+.fp-nav-item:hover {
+  color: rgba(241,245,236,0.95) !important;
+  background: rgba(255,255,255,0.04) !important;
+  border-left-color: rgba(143,203,98,0.4);
+}
+
+.fp-nav-item-active {
+  color: #8FCB62 !important;
+  background: rgba(143,203,98,0.08) !important;
+  border-left-color: #8FCB62 !important;
+  font-weight: 600 !important;
+}
+
+/* Sidebar category labels */
+.fp-nav-category {
+  font-size: 0.625rem !important; /* 10px */
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  color: rgba(168,189,176,0.5) !important;
+  padding: 1rem 0.875rem 0.25rem;
+}
+
+/* -------------------------------------------------------------------------
+   3. Cards — Sharper borders, more structured whitespace
+   ------------------------------------------------------------------------- */
+
+.fp-card {
+  border-radius: 12px !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  background: linear-gradient(135deg,
+    rgba(15,32,20,0.9) 0%,
+    rgba(12,26,17,0.95) 100%
+  ) !important;
+}
+
+.fp-glass {
+  border-radius: 14px !important;
+  background: linear-gradient(135deg,
+    rgba(20,42,28,0.85) 0%,
+    rgba(15,32,20,0.9) 100%
+  ) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+}
+
+/* -------------------------------------------------------------------------
+   4. Topbar — Denser, more data-focused
+   ------------------------------------------------------------------------- */
+
+header.sticky {
+  border-bottom: 1px solid rgba(255,255,255,0.04) !important;
+  background: rgba(10,22,14,0.92) !important;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+/* Topbar search — more utilitarian */
+.fp-input[type="search"] {
+  font-size: 0.8125rem !important;
+  border-radius: 8px !important;
+}
+
+/* Network telemetry pill — government system status style */
+#network-telemetry-pill {
+  font-size: 0.6875rem !important; /* 11px */
+  letter-spacing: 0.04em;
+  border-radius: 6px !important; /* square-ish, not pill */
+  font-weight: 600;
+}
+
+/* Demo pill — less colorful, more subtle */
+.fp-demo-pill {
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  color: rgba(168,189,176,0.6) !important;
+  font-size: 0.625rem !important;
+  border-radius: 4px !important;
+  padding: 0.2rem 0.5rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* -------------------------------------------------------------------------
+   5. Buttons — Crisp, decisive, institutional
+   ------------------------------------------------------------------------- */
+
+.fp-btn-primary {
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 0.8125rem !important;
+  letter-spacing: 0.02em !important;
+  padding: 0.5rem 1.125rem !important;
+  background: #8FCB62 !important;
+  color: #0A1A0E !important;
+  box-shadow:
+    0 1px 3px rgba(0,0,0,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.15) !important;
+  transition: all 0.15s ease !important;
+}
+
+.fp-btn-primary:hover {
+  background: #9ED672 !important;
+  transform: translateY(-1px) !important;
+  box-shadow:
+    0 4px 12px rgba(143,203,98,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.2) !important;
+}
+
+.fp-btn-primary:active {
+  transform: translateY(0) !important;
+}
+
+.fp-btn-ghost {
+  border-radius: 8px !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  color: rgba(241,245,236,0.7) !important;
+  transition: all 0.15s ease !important;
+}
+
+.fp-btn-ghost:hover {
+  background: rgba(255,255,255,0.05) !important;
+  border-color: rgba(255,255,255,0.15) !important;
+  color: rgba(241,245,236,0.95) !important;
+}
+
+/* -------------------------------------------------------------------------
+   6. Data Labels & Badges — Scientific notation feel
+   ------------------------------------------------------------------------- */
+
+.fp-label {
+  font-size: 0.625rem !important; /* 10px */
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.09em !important;
+  color: rgba(168,189,176,0.7) !important;
+  margin-bottom: 0.375rem !important;
+}
+
+/* Status badges — more rectangular, less pill */
+.fp-badge-low,
+.fp-badge,
+[class*="fp-badge"] {
+  border-radius: 4px !important;
+  font-size: 0.6rem !important;
+  letter-spacing: 0.08em !important;
+  padding: 0.175rem 0.5rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+}
+
+/* -------------------------------------------------------------------------
+   7. Scenario Simulator — Performance dashboard aesthetics
+   ------------------------------------------------------------------------- */
+
+/* Season Rating badge — more hexagonal, data terminal style */
+#hud-grade {
+  border-radius: 10px !important;
+  font-size: 1.5rem !important;
+  font-family: 'Plus Jakarta Sans', monospace !important;
+  letter-spacing: -0.02em;
+}
+
+/* Preset scenario cards — structured list items not game cards */
+.preset-card {
+  border-radius: 10px !important;
+  transition: all 0.15s ease !important;
+  border-left: 3px solid transparent !important;
+}
+
+.preset-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3) !important;
+}
+
+.preset-card .font-bold {
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em;
+}
+
+/* -------------------------------------------------------------------------
+   8. Sliders — Government data terminal style
+   ------------------------------------------------------------------------- */
+
+input[type="range"] {
+  height: 4px !important;
+  border-radius: 2px !important;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  border-radius: 3px !important;
+  width: 14px !important;
+  height: 14px !important;
+}
+
+/* -------------------------------------------------------------------------
+   9. Tables & Data grids — Dense, information-rich
+   ------------------------------------------------------------------------- */
+
+.font-mono {
+  font-feature-settings: "tnum" 1, "lnum" 1; /* tabular numerals */
+}
+
+/* Ensure data numbers are always tabular */
+[id*="hud-"],
+[id*="splitter-"],
+[id*="slider-"] {
+  font-feature-settings: "tnum" 1;
+}
+
+/* -------------------------------------------------------------------------
+   10. Hero Banner — National government portal aesthetic
+   ------------------------------------------------------------------------- */
+
+/* Tighten and formalize the hero section */
+.relative.rounded-3xl h1 {
+  font-size: clamp(1.75rem, 4vw, 3rem) !important;
+  letter-spacing: -0.03em !important;
+  line-height: 1.1 !important;
+}
+
+/* -------------------------------------------------------------------------
+   11. Map Container — Cartographic authority
+   ------------------------------------------------------------------------- */
+
+#farmpulse-national-map {
+  border-radius: 10px !important;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+/* Leaflet popup — professional tooltip */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* -------------------------------------------------------------------------
+   12. Scrollbar — Dark, minimal
+   ------------------------------------------------------------------------- */
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.02);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(143,203,98,0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(143,203,98,0.4);
+}
+
+/* -------------------------------------------------------------------------
+   13. Focus Rings — Accessible, branded
+   ------------------------------------------------------------------------- */
+
+*:focus-visible {
+  outline: 2px solid rgba(143,203,98,0.6) !important;
+  outline-offset: 2px !important;
+}
+
+/* -------------------------------------------------------------------------
+   14. Selection Colour
+   ------------------------------------------------------------------------- */
+
+::selection {
+  background: rgba(143,203,98,0.3);
+  color: #F1F5EC;
+}
+
+/* -------------------------------------------------------------------------
+   15. Print — Clean, no dark backgrounds
+   ------------------------------------------------------------------------- */
+
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .fp-card, .fp-glass {
+    background: white !important;
+    border: 1px solid #ccc !important;
+    color: black !important;
+  }
+  aside#sidebar, header.sticky {
+    display: none !important;
+  }
+}
+

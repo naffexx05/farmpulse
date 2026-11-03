@@ -120,7 +120,7 @@
   </section>
 
   <!-- ========================================================================= -->
-  <!-- Interactive Field Land Splitter Canvas (Real-Time Plot Allocator 🌾) -->
+  <!-- Interactive Field Land Allocator Canvas                                  -->
   <!-- ========================================================================= -->
   <section class="fp-card p-6 border-white/10 space-y-6 shadow-2xl relative overflow-hidden">
     <!-- Header -->
@@ -128,30 +128,32 @@
       <div>
         <div class="flex items-center gap-2">
           <span class="w-2.5 h-2.5 rounded-full bg-leaf animate-pulse"></span>
-          <h2 class="font-display text-xl font-bold text-cream">Interactive Field Land Splitter</h2>
-          <span class="fp-badge-low text-[10px]">Real-Time Sandbox</span>
+          <h2 class="font-display text-xl font-bold text-cream">Interactive Field Land Allocator</h2>
+          <span class="fp-badge-low text-[10px]">Real-Time</span>
         </div>
         <p class="text-xs text-cream/60 mt-1">
-          Directly partition your field by sliding crop boundaries. Financial margins, bag yields, and food security recalculate live at 60 FPS.
+          Directly partition your field by dragging crop boundaries. Financial margins, bag yields, and food security indicators recalculate in real time.
         </p>
       </div>
 
-      <!-- Oral Voiceover & Presets -->
+      <!-- Audio Advisory & Presets -->
       <div class="flex flex-wrap items-center gap-2">
         <button
           type="button"
           id="splitter-voice-btn"
           class="fp-btn-ghost !px-3 !py-1.5 text-xs text-leaf flex items-center gap-1.5"
-          title="Mvetserani mu Chichewa (Oral Voiceover)"
+          title="Audio Advisory in Chichewa"
         >
-          <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> Mvetserani (Chichewa)
+          <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> Audio Advisory (Chichewa)
         </button>
 
         <div class="inline-flex rounded-xl bg-forest-900/80 p-1 border border-white/10 text-xs">
-          <button type="button" onclick="window.farmPulseSplitter.applyPreset('food_security')" class="px-2.5 py-1 rounded-lg text-cream/80 hover:text-cream hover:bg-forest-700 transition-colors" title="70% Maize Staple First">🌽 Food First</button>
-          <button type="button" onclick="window.farmPulseSplitter.applyPreset('balanced')" class="px-2.5 py-1 rounded-lg text-cream/80 hover:text-cream hover:bg-forest-700 transition-colors" title="50% Maize + Legumes">⚖️ Balanced</button>
-          <button type="button" onclick="window.farmPulseSplitter.applyPreset('cash_crop')" class="px-2.5 py-1 rounded-lg text-cream/80 hover:text-cream hover:bg-forest-700 transition-colors" title="Maximize Cash Legumes">💰 Cash Focus</button>
-          <button type="button" onclick="window.farmPulseSplitter.autoBalance()" class="px-2.5 py-1 rounded-lg text-leaf hover:bg-forest-700 transition-colors" title="Evenly distribute remaining land">🔄 Auto-Balance</button>
+          <button type="button" onclick="window.farmPulseSplitter.applyPreset('food_security')" class="px-2.5 py-1 rounded-lg text-cream/80 hover:text-cream hover:bg-forest-700 transition-colors" title="70% Maize Staple First">Subsistence Priority</button>
+          <button type="button" onclick="window.farmPulseSplitter.applyPreset('balanced')" class="px-2.5 py-1 rounded-lg text-cream/80 hover:text-cream hover:bg-forest-700 transition-colors" title="50% Maize + Legumes">Balanced Portfolio</button>
+          <button type="button" onclick="window.farmPulseSplitter.applyPreset('cash_crop')" class="px-2.5 py-1 rounded-lg text-cream/80 hover:text-cream hover:bg-forest-700 transition-colors" title="Maximize Cash Legumes">Commercial Focus</button>
+          <button type="button" onclick="window.farmPulseSplitter.autoBalance()" class="px-2.5 py-1 rounded-lg text-leaf hover:bg-forest-700 transition-colors" title="Evenly distribute remaining land">
+            <i data-lucide="refresh-cw" class="w-3 h-3 inline-block mr-0.5"></i> Auto-Balance
+          </button>
         </div>
       </div>
     </div>

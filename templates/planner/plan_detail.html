@@ -28,10 +28,10 @@
         class="fp-btn-ghost text-leaf text-xs flex items-center gap-1.5"
         title="Mvetserani mu Chichewa (Audio Voiceover)"
       >
-        <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> Mvetserani
+        <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> Audio Advisory (Chichewa)
       </button>
       <a href="{% url 'planner:scenario_simulator' %}?plan={{ plan.pk }}" class="fp-btn-primary text-xs">
-        🎮 Stress-Test in Simulator
+        <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> Run Risk Analysis
       </a>
       <a href="{% url 'planner:plan_duplicate' plan.pk %}" class="fp-btn-ghost text-xs" title="Duplicate this plan">
         <i data-lucide="copy" class="w-3.5 h-3.5"></i> Duplicate
