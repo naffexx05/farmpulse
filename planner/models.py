@@ -8,6 +8,7 @@ class Plan(models.Model):
         ('balanced', 'Balanced Portfolio'),
         ('return_focused', 'Return-Focused Strategy'),
         ('risk_conscious', 'Risk-Conscious / Food Security'),
+        ('custom', 'Custom Field Split'),
     ]
 
     STATUS_CHOICES = [

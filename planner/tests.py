@@ -1,3 +1,4 @@
+import json
 from decimal import Decimal
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
@@ -158,6 +159,27 @@ class PlannerViewsTests(TestCase):
         plan = Plan.objects.filter(name='2024/25 Test Plan').first()
         self.assertIsNotNone(plan)
         self.assertEqual(plan.items.count(), 2)
+        self.assertTrue(plan.assumptions.exists())
+
+    def test_save_custom_plan_from_field_splitter(self):
+        self.client.login(username='viewfarmer', password='password123')
+        custom_payload = json.dumps([
+            {'slug': 'maize', 'area_ha': 1.2},
+            {'slug': 'groundnuts', 'area_ha': 0.8},
+        ])
+        response = self.client.post(reverse('planner:save_plan'), {
+            'custom_allocations_json': custom_payload,
+            'name': 'Custom Splitter Test Plan',
+            'total_budget_mwk': '450000.00',
+        })
+        self.assertEqual(response.status_code, 302)
+        plan = Plan.objects.filter(name='Custom Splitter Test Plan').first()
+        self.assertIsNotNone(plan)
+        self.assertEqual(plan.strategy_type, 'custom')
+        self.assertEqual(plan.total_land_ha, Decimal('2.00'))
+        self.assertEqual(plan.items.count(), 2)
+        self.assertTrue(plan.total_expected_cost_mwk > 0)
+        self.assertTrue(plan.total_expected_revenue_mwk > 0)
         self.assertTrue(plan.assumptions.exists())
 
     def test_scenario_simulator_view(self):

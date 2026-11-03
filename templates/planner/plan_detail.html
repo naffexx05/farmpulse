@@ -22,6 +22,14 @@
 
     <!-- Actions -->
     <div class="flex items-center gap-2 flex-wrap">
+      <button
+        type="button"
+        data-fp-speak="Ndondomeko yanu ya ulimi: Mwagawa maeka {{ plan.total_land_ha }}. Ndalama zofunika kugwiritsa ntchito ndi Kwacha {{ plan.total_expected_cost_mwk|floatformat:0 }}. Mukalandira mbewu zanu, phindu lanu loyembekezeka ndi Kwacha {{ plan.total_expected_margin_mwk|floatformat:0 }}."
+        class="fp-btn-ghost text-leaf text-xs flex items-center gap-1.5"
+        title="Mvetserani mu Chichewa (Audio Voiceover)"
+      >
+        <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> Mvetserani
+      </button>
       <a href="{% url 'planner:scenario_simulator' %}?plan={{ plan.pk }}" class="fp-btn-primary text-xs">
         🎮 Stress-Test in Simulator
       </a>
@@ -33,9 +41,6 @@
       </a>
       <a href="{% url 'planner:plan_delete' plan.pk %}" class="fp-btn-ghost text-risk-high text-xs" title="Delete Plan">
         <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-      </a>
-    </div>
-        <i data-lucide="trash-2" class="w-4 h-4"></i>
       </a>
     </div>
   </header>

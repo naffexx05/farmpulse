@@ -119,6 +119,140 @@
     </form>
   </section>
 
+  <!-- ========================================================================= -->
+  <!-- Interactive Field Land Splitter Canvas (Real-Time Plot Allocator 🌾) -->
+  <!-- ========================================================================= -->
+  <section class="fp-card p-6 border-white/10 space-y-6 shadow-2xl relative overflow-hidden">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-leaf animate-pulse"></span>
+          <h2 class="font-display text-xl font-bold text-cream">Interactive Field Land Splitter</h2>
+          <span class="fp-badge-low text-[10px]">Real-Time Sandbox</span>
+        </div>
+        <p class="text-xs text-cream/60 mt-1">
+          Directly partition your field by sliding crop boundaries. Financial margins, bag yields, and food security recalculate live at 60 FPS.
+        </p>
+      </div>
+
+      <!-- Oral Voiceover & Presets -->
+      <div class="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          id="splitter-voice-btn"
+          class="fp-btn-ghost !px-3 !py-1.5 text-xs text-leaf flex items-center gap-1.5"
+          title="Mvetserani mu Chichewa (Oral Voiceover)"
+        >
+          <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> Mvetserani (Chichewa)
+        </button>
+
+        <div class="inline-flex rounded-xl bg-forest-900/80 p-1 border border-white/10 text-xs">
+          <button type="button" onclick="window.farmPulseSplitter.applyPreset('food_security')" class="px-2.5 py-1 rounded-lg text-cream/80 hover:text-cream hover:bg-forest-700 transition-colors" title="70% Maize Staple First">🌽 Food First</button>
+          <button type="button" onclick="window.farmPulseSplitter.applyPreset('balanced')" class="px-2.5 py-1 rounded-lg text-cream/80 hover:text-cream hover:bg-forest-700 transition-colors" title="50% Maize + Legumes">⚖️ Balanced</button>
+          <button type="button" onclick="window.farmPulseSplitter.applyPreset('cash_crop')" class="px-2.5 py-1 rounded-lg text-cream/80 hover:text-cream hover:bg-forest-700 transition-colors" title="Maximize Cash Legumes">💰 Cash Focus</button>
+          <button type="button" onclick="window.farmPulseSplitter.autoBalance()" class="px-2.5 py-1 rounded-lg text-leaf hover:bg-forest-700 transition-colors" title="Evenly distribute remaining land">🔄 Auto-Balance</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visual Parcel Strip -->
+    <div class="space-y-2">
+      <div id="splitter-land-status"></div>
+      <div class="w-full h-14 rounded-2xl bg-forest-950 p-1 border border-white/15 overflow-hidden flex shadow-inner">
+        <div id="field-parcel-strip" class="w-full h-full flex rounded-xl overflow-hidden transition-all duration-300"></div>
+      </div>
+      <div class="flex items-center justify-between text-[11px] text-cream/50">
+        <span>Parcel Boundary (0.0 ha)</span>
+        <span>Total Farm Plot ({{ request.GET.land|default:default_land }} ha)</span>
+      </div>
+    </div>
+
+    <!-- Main Playground Grid: Left Sliders vs Right Financial HUD -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- Left Column: Crop Allocator Sliders (7 cols) -->
+      <div class="lg:col-span-7 space-y-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-cream/80 uppercase tracking-wider">Crop Boundaries &amp; Hectare Steppers</span>
+          <span class="text-[11px] text-muted">Adjust sliders or use +/- steppers</span>
+        </div>
+        <div id="splitter-controls-container" class="space-y-3"></div>
+      </div>
+
+      <!-- Right Column: Real-Time Financial & Agronomic HUD (5 cols) -->
+      <div class="lg:col-span-5 space-y-4">
+
+        <!-- Cashflow & Profit Card -->
+        <div class="p-5 rounded-2xl bg-forest-900/80 border border-white/10 space-y-4">
+          <div class="flex items-center justify-between border-b border-white/5 pb-2">
+            <span class="text-xs font-bold text-cream uppercase tracking-wider flex items-center gap-1.5">
+              <i data-lucide="coins" class="w-4 h-4 text-amber-400"></i> Net Farm Cashflow
+            </span>
+            <span id="splitter-resilience-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-leaf/20 text-leaf">
+              Resilience: <span id="splitter-resilience-score">75/100</span>
+            </span>
+          </div>
+
+          <div>
+            <div id="splitter-total-margin" class="font-display text-3xl font-bold font-mono text-leaf">
+              MWK 0
+            </div>
+            <div class="text-[11px] text-cream/60 flex items-center justify-between mt-1">
+              <span>Working Capital: <strong id="splitter-total-cost" class="text-cream">MWK 0</strong></span>
+              <span>Revenue: <strong id="splitter-total-revenue" class="text-cream">MWK 0</strong></span>
+            </div>
+            <div id="splitter-budget-diff" class="mt-1"></div>
+          </div>
+
+          <!-- Profit Speedometer Radial Dial -->
+          <div id="splitter-profit-speedometer" class="pt-2 border-t border-white/5"></div>
+        </div>
+
+        <!-- Breakeven 50kg Bags Visualizer Card -->
+        <div class="p-4 rounded-2xl bg-forest-900/80 border border-white/10 space-y-2">
+          <div class="text-xs font-bold text-cream uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="package" class="w-4 h-4 text-water"></i> 50 kg Bag Production &amp; Breakeven
+          </div>
+          <div id="splitter-breakeven-bags"></div>
+        </div>
+
+        <!-- Household Subsistence Food Security Meter -->
+        <div class="p-4 rounded-2xl bg-forest-900/80 border border-white/10 space-y-2">
+          <div class="flex items-center gap-1.5 text-xs font-bold text-cream uppercase tracking-wider">
+            <i data-lucide="shield-check" class="w-4 h-4 text-leaf"></i> Household Subsistence Safety
+          </div>
+          <div id="splitter-food-security"></div>
+          <div class="text-[10px] text-cream/50 pt-1">
+            Standard Malawi baseline requires 1,200 kg staple grain (24 bags) to feed a family of 5 for 12 months.
+          </div>
+        </div>
+
+        <!-- Save Custom Plan Action Form -->
+        <form method="post" action="{% url 'planner:save_plan' %}" class="space-y-2 pt-2">
+          {% csrf_token %}
+          <input type="hidden" name="custom_allocations_json" id="custom-allocations-json-input" value="[]">
+          <input type="hidden" name="total_budget_mwk" value="{{ request.GET.budget|default:default_budget }}">
+          <div class="flex items-center gap-2">
+            <input
+              type="text"
+              name="name"
+              value="{{ farm.name }} — Custom Field Split"
+              class="fp-input text-xs py-2"
+              placeholder="Custom Plan Name"
+              required
+            >
+            <button type="submit" class="fp-btn-primary shrink-0 text-xs py-2 px-3.5">
+              <i data-lucide="bookmark-check" class="w-4 h-4"></i> Save Custom Plan
+            </button>
+          </div>
+        </form>
+
+      </div>
+
+    </div>
+  </section>
+
   <!-- Generated Plans Results Section -->
   {% if plans_data %}
     <section class="space-y-6 pt-4">
@@ -318,5 +452,37 @@
     const modal = document.getElementById(`assumptions-modal-${strategy}`);
     modal?.classList.add('hidden');
   }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const benchmarks = JSON.parse('{{ crops_benchmarks_json|escapejs }}');
+    const totalLand = parseFloat("{{ request.GET.land|default:default_land }}") || 2.0;
+    const budget = parseFloat("{{ request.GET.budget|default:default_budget }}") || 450000;
+
+    let selectedCrops = [];
+    {% if request.GET.crops %}
+      selectedCrops = [{% for c in request.GET.getlist.crops %}'{{ c }}',{% endfor %}];
+    {% else %}
+      {% if preferred_crop_ids %}
+        selectedCrops = [{% for c in all_crops %}{% if c.id in preferred_crop_ids or c.slug in 'maize,groundnuts' %}'{{ c.slug }}',{% endif %}{% endfor %}];
+      {% else %}
+        selectedCrops = ['maize', 'groundnuts', 'soybeans'];
+      {% endif %}
+    {% endif %}
+
+    // Filter to crops present in benchmarks
+    selectedCrops = selectedCrops.filter(s => benchmarks[s]);
+    if (selectedCrops.length === 0) {
+      selectedCrops = Object.keys(benchmarks).slice(0, 3);
+    }
+
+    if (window.initFarmPulseSplitter) {
+      window.initFarmPulseSplitter({
+        totalLandHa: totalLand,
+        seasonalBudgetMwk: budget,
+        benchmarks: benchmarks,
+        selectedCrops: selectedCrops
+      });
+    }
+  });
 </script>
 {% endblock %}

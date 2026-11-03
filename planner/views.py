@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from farms.models import Crop, Farm
-from .engine import calculate_plan_allocations, simulate_game_shocks
+from .engine import calculate_plan_allocations, get_crop_benchmarks, simulate_game_shocks
 from .models import Plan, PlanItem, PlanAssumption
 
 
@@ -71,6 +71,32 @@ def planner_input(request):
             selected_crops=selected_crop_objs,
         )
 
+    crops_benchmarks = {}
+    for c in all_crops:
+        bm = get_crop_benchmarks(c, farm)
+        crops_benchmarks[c.slug] = {
+            'id': c.id,
+            'name': c.name,
+            'slug': c.slug,
+            'category': c.get_category_display(),
+            'yield_kg_ha': float(bm['yield_kg_ha']),
+            'cost_ha_mwk': float(bm['cost_ha_mwk']),
+            'price_kg_mwk': float(bm['price_kg_mwk']),
+            'break_even_price_mwk': float(bm['break_even_price_mwk']),
+            'is_staple': c.slug in ['maize', 'cassava', 'sorghum', 'rice'],
+            'drought_resilience': 'High' if c.slug in ['cassava', 'sorghum', 'groundnuts'] else ('Moderate' if c.slug in ['soybeans', 'common-beans'] else 'Standard'),
+            'color': {
+                'maize': '#8FCB62',
+                'groundnuts': '#F2B441',
+                'soybeans': '#4FB7D9',
+                'common-beans': '#C084FC',
+                'cassava': '#34D399',
+                'rice': '#38BDF8',
+                'sorghum': '#FB923C',
+                'tobacco': '#A3E635',
+            }.get(c.slug, '#8FCB62'),
+        }
+
     context = {
         'farm': farm,
         'farms': farms,
@@ -80,6 +106,7 @@ def planner_input(request):
         'default_budget': default_budget,
         'default_labour': default_labour,
         'plans_data': plans_data,
+        'crops_benchmarks_json': json.dumps(crops_benchmarks),
         'active_nav': 'planner',
     }
     return render(request, 'planner/planner.html', context)
@@ -95,11 +122,107 @@ def planner_result(request):
 @require_POST
 def save_plan(request):
     """
-    Saves a generated strategy option to the database (Plan, PlanItem, PlanAssumption).
+    Saves a generated strategy option or custom field allocation to the database (Plan, PlanItem, PlanAssumption).
     """
     farm = Farm.objects.filter(owner=request.user).first()
     if not farm:
         return redirect('farms:farm_edit')
+
+    # Support interactive custom field allocations
+    custom_allocations_raw = request.POST.get('custom_allocations_json')
+    if custom_allocations_raw:
+        try:
+            alloc_data = json.loads(custom_allocations_raw)
+            plan_name = request.POST.get('name') or f"{farm.name} Custom Field Plan"
+            total_budget = Decimal(request.POST.get('total_budget_mwk', '0.00')) if request.POST.get('total_budget_mwk') else None
+
+            plan_items_to_create = []
+            total_land = Decimal('0.00')
+            total_cost = Decimal('0.00')
+            total_rev = Decimal('0.00')
+
+            for entry in alloc_data:
+                slug = entry.get('slug')
+                area_ha = Decimal(str(entry.get('area_ha', '0.00')))
+                if area_ha <= 0:
+                    continue
+                crop = Crop.objects.filter(slug=slug).first()
+                if not crop:
+                    continue
+                bm = get_crop_benchmarks(crop, farm)
+                cost_item = area_ha * bm['cost_ha_mwk']
+                yield_total = area_ha * bm['yield_kg_ha']
+                rev_item = yield_total * bm['price_kg_mwk']
+                margin_item = rev_item - cost_item
+                be_price = cost_item / yield_total if yield_total > 0 else Decimal('0.00')
+
+                total_land += area_ha
+                total_cost += cost_item
+                total_rev += rev_item
+
+                plan_items_to_create.append({
+                    'crop': crop,
+                    'area_ha': area_ha,
+                    'yield_kg_ha': bm['yield_kg_ha'],
+                    'yield_total_kg': yield_total,
+                    'cost_ha_mwk': bm['cost_ha_mwk'],
+                    'total_cost_mwk': cost_item,
+                    'price_kg_mwk': bm['price_kg_mwk'],
+                    'revenue_mwk': rev_item,
+                    'gross_margin_mwk': margin_item,
+                    'break_even_price_mwk': round(be_price, 2),
+                    'bm': bm,
+                })
+
+            if plan_items_to_create:
+                total_margin = total_rev - total_cost
+                plan = Plan.objects.create(
+                    farm=farm,
+                    name=plan_name,
+                    strategy_type='custom',
+                    status='active',
+                    total_land_ha=total_land,
+                    total_budget_mwk=total_budget,
+                    total_expected_cost_mwk=round(total_cost, 2),
+                    total_expected_revenue_mwk=round(total_rev, 2),
+                    total_expected_margin_mwk=round(total_margin, 2),
+                    notes="Configured via interactive Field Land Splitter canvas.",
+                )
+
+                for item in plan_items_to_create:
+                    PlanItem.objects.create(
+                        plan=plan,
+                        crop=item['crop'],
+                        area_ha=item['area_ha'],
+                        expected_yield_kg_per_ha=item['yield_kg_ha'],
+                        expected_yield_kg_total=round(item['yield_total_kg'], 1),
+                        expected_cost_per_ha_mwk=round(item['cost_ha_mwk'], 2),
+                        expected_total_cost_mwk=round(item['total_cost_mwk'], 2),
+                        expected_selling_price_mwk_per_kg=round(item['price_kg_mwk'], 2),
+                        expected_revenue_mwk=round(item['revenue_mwk'], 2),
+                        expected_gross_margin_mwk=round(item['gross_margin_mwk'], 2),
+                        break_even_price_mwk_per_kg=item['break_even_price_mwk'],
+                    )
+                    PlanAssumption.objects.create(
+                        plan=plan,
+                        category='yield',
+                        parameter_name=f"{item['crop'].name} Yield Baseline",
+                        value_used=f"{item['yield_kg_ha']} kg/ha",
+                        source_note=item['bm']['yield_source'],
+                    )
+                    PlanAssumption.objects.create(
+                        plan=plan,
+                        category='price',
+                        parameter_name=f"{item['crop'].name} Price Baseline",
+                        value_used=f"{item['price_kg_mwk']} MWK/kg",
+                        source_note=item['bm']['price_source'],
+                    )
+
+                messages.success(request, f"Custom plan '{plan.name}' saved successfully with {total_land} ha allocated!")
+                return redirect('planner:plan_detail', pk=plan.pk)
+        except Exception as e:
+            messages.error(request, f"Failed to save custom plan: {str(e)}")
+            return redirect('planner:planner_input')
 
     strategy_type = request.POST.get('strategy_type', 'balanced')
     plan_name = request.POST.get('name', f"{farm.name} {strategy_type.replace('_', ' ').title()} Plan")

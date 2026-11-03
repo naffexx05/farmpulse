@@ -23,8 +23,38 @@
       >
     </form>
 
+    <!-- Live Network Sync Telemetry Pill -->
+    <div id="network-telemetry-pill" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all bg-leaf/15 text-leaf border-leaf/30">
+      <span class="w-1.5 h-1.5 rounded-full bg-leaf animate-pulse"></span>
+      <span class="hidden md:inline">Live Connected</span>
+      <span class="text-[10px] text-cream/60 hidden lg:inline">AMIS/DCCMS</span>
+    </div>
+
+    <!-- Sunlight Field Mode Toggle -->
+    <button
+      type="button"
+      id="theme-toggle-btn"
+      class="fp-btn-ghost !px-2.5 !py-2 text-xs flex items-center gap-1.5"
+      title="Toggle Sunlight Field Mode (Direct Sun Contrast)"
+      aria-label="Toggle Sunlight Field Mode"
+    >
+      <i data-lucide="sun" class="w-4 h-4 text-amber-300"></i>
+      <span class="theme-label hidden sm:inline text-[11px] font-medium">Sunlight</span>
+    </button>
+
+    <!-- Tactile Sound Toggle -->
+    <button
+      type="button"
+      id="sound-toggle-btn"
+      class="fp-btn-ghost !px-2.5 !py-2 text-xs hidden sm:flex items-center"
+      title="Toggle Micro-Audio Feedback"
+      aria-label="Toggle Sound"
+    >
+      <i data-lucide="volume-2" class="w-4 h-4 text-cream/70"></i>
+    </button>
+
     <!-- Demo indicator -->
-    <span class="fp-demo-pill hidden sm:inline-flex">
+    <span class="fp-demo-pill hidden xl:inline-flex">
       <i data-lucide="flask-conical" class="w-3 h-3"></i> Demo data
     </span>
 

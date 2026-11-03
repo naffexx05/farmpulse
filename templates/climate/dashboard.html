@@ -114,14 +114,24 @@
 
     <!-- Live Agrometeorological Advisory Box -->
     <div class="p-3.5 rounded-xl border {% if forecast_insights.level == 'warning' %}bg-amber-500/15 border-amber-500/30 text-amber-200{% elif forecast_insights.level == 'optimal' %}bg-emerald-500/15 border-emerald-500/30 text-emerald-200{% else %}bg-forest-800/80 border-white/10 text-cream/90{% endif %} flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-      <div class="flex items-center gap-2.5">
+      <div class="flex items-center gap-2.5 flex-1">
         <i data-lucide="sparkles" class="w-4 h-4 text-sky-400 shrink-0"></i>
         <span><strong>Agro-Advisory:</strong> {{ forecast_insights.advisory }}</span>
       </div>
-      <div class="flex items-center gap-3 shrink-0 font-mono text-[11px] text-cream/80">
-        <span>Total Rain: <strong>{{ forecast_insights.total_rain_mm }} mm</strong></span>
-        <span>&bull;</span>
-        <span>Rain Days: <strong>{{ forecast_insights.rainy_days }}</strong></span>
+      <div class="flex items-center gap-3 shrink-0">
+        <button
+          type="button"
+          data-fp-speak="Malangizo a ulimi wa nyengo: {{ forecast_insights.advisory }}. Mvula yoyembekezeka ndi mamilimita {{ forecast_insights.total_rain_mm }} m'masiku {{ forecast_insights.rainy_days }} otsatira."
+          class="fp-btn-ghost !px-2.5 !py-1 text-xs text-sky-300 inline-flex items-center gap-1.5"
+          title="Mvetserani mu Chichewa (Audio Voiceover)"
+        >
+          <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> <span>Mvetserani</span>
+        </button>
+        <div class="font-mono text-[11px] text-cream/80 flex items-center gap-2">
+          <span>Total Rain: <strong>{{ forecast_insights.total_rain_mm }} mm</strong></span>
+          <span>&bull;</span>
+          <span>Rain Days: <strong>{{ forecast_insights.rainy_days }}</strong></span>
+        </div>
       </div>
     </div>
 

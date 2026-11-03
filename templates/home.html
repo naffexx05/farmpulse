@@ -178,6 +178,60 @@
   </div>
 
   <!-- ========================================================================= -->
+  <!-- Interactive National Geospatial Agromet & Market Radar -->
+  <!-- ========================================================================= -->
+  <div class="fp-card p-5 sm:p-6 border-white/10 space-y-4 shadow-xl">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-leaf animate-pulse"></span>
+          <h2 class="text-lg font-bold text-cream">National Agromet & Market Flow Radar</h2>
+          <span class="fp-badge-low text-[10px]">Live Telemetry</span>
+        </div>
+        <p class="text-xs text-muted mt-1">
+          Interactive geospatial map connecting 8 DCCMS weather stations, 5 AMIS commodity trading hubs, and live spatial arbitrage routes across Malawi.
+        </p>
+      </div>
+
+      <!-- Action & Oral Voiceover buttons -->
+      <div class="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          data-fp-speak="Mapu a dziko la Malawi: Mukuona malo oyezerako nyengo okwana asanu ndi atatu ndi misika yayikulu isanu. Nthambi yobiriwira ikusonyeza phindu la mtengo wa chimanga mukanyamula kupita ku Limbe ndi Mchesi."
+          class="fp-btn-ghost !px-3 !py-1.5 text-xs text-leaf flex items-center gap-1.5"
+          title="Mvetserani mu Chichewa (Audio Voiceover)"
+        >
+          <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> Mvetserani (Chichewa)
+        </button>
+
+        <!-- Layer Filters -->
+        <div class="inline-flex rounded-xl bg-forest-900/80 p-1 border border-white/10 text-xs">
+          <button type="button" onclick="filterHomeMap('all', this)" class="map-filter-btn px-2.5 py-1 rounded-lg font-medium text-cream bg-forest-700">All</button>
+          <button type="button" onclick="filterHomeMap('stations', this)" class="map-filter-btn px-2.5 py-1 rounded-lg font-medium text-cream/70 hover:text-cream">Stations (8)</button>
+          <button type="button" onclick="filterHomeMap('markets', this)" class="map-filter-btn px-2.5 py-1 rounded-lg font-medium text-cream/70 hover:text-cream">Hubs (5)</button>
+          <button type="button" onclick="filterHomeMap('routes', this)" class="map-filter-btn px-2.5 py-1 rounded-lg font-medium text-cream/70 hover:text-cream">Arbitrage (3)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map Container -->
+    <div id="home-national-map" class="w-full h-80 sm:h-96 rounded-2xl overflow-hidden border border-white/10 relative z-0"></div>
+
+    <!-- Route Detail Drawer (Triggered on highway polyline click) -->
+    <div id="map-route-detail-panel" class="hidden transition-all duration-300"></div>
+
+    <!-- Map Legend -->
+    <div class="flex flex-wrap items-center justify-between gap-3 pt-2 text-[11px] text-cream/70 border-t border-white/5">
+      <div class="flex items-center gap-4">
+        <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full border border-water bg-water/20"></span> Weather Station (Rain &amp; Heat)</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full border border-leaf bg-leaf/20"></span> Agricultural Trading Hub</span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-4 h-0.5 bg-leaf border-b border-dashed border-leaf"></span> Highway Arbitrage Corridor</span>
+      </div>
+      <div class="text-[10px] text-muted italic">Click any highway or marker pin for instant price and climate insights</div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
   <!-- Phase 8.3 & 8.4: Climate Risk Overview & Recent Performance -->
   <!-- ========================================================================= -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -621,8 +675,30 @@
     });
   }
 
+  let homeMapInstance = null;
+
+  function filterHomeMap(filter, btn) {
+    if (homeMapInstance) {
+      homeMapInstance.setFilter(filter);
+    }
+    document.querySelectorAll('.map-filter-btn').forEach(b => {
+      b.classList.remove('bg-forest-700', 'text-cream');
+      b.classList.add('text-cream/70');
+    });
+    if (btn) {
+      btn.classList.add('bg-forest-700', 'text-cream');
+      btn.classList.remove('text-cream/70');
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     renderRainfallChart();
+    if (window.initFarmPulseMap) {
+      homeMapInstance = window.initFarmPulseMap('home-national-map', {
+        center: [-13.25, 34.2],
+        zoom: 7
+      });
+    }
   });
 </script>
 {% endblock %}

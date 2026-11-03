@@ -13,6 +13,7 @@
       radial-gradient(ellipse at top left, rgba(27,96,66,0.28), transparent 55%),
       radial-gradient(ellipse at bottom right, rgba(143,203,98,0.06), transparent 50%);
     background-attachment: fixed;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   ::selection {
@@ -32,22 +33,22 @@
 
   .fp-btn {
     @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold
-           transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-leaf/50;
+           transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-leaf/50 active:scale-[0.98];
   }
-  .fp-btn-primary { @apply fp-btn bg-leaf text-forest-900 hover:bg-leaf-soft; }
+  .fp-btn-primary { @apply fp-btn bg-leaf text-forest-900 hover:bg-leaf-soft font-bold shadow-md; }
   .fp-btn-ghost   { @apply fp-btn border border-white/15 text-cream/90 hover:bg-white/5; }
-  .fp-btn-danger  { @apply fp-btn bg-risk-high text-forest-900 hover:bg-risk-high/85; }
+  .fp-btn-danger  { @apply fp-btn bg-risk-high text-forest-900 hover:bg-risk-high/85 font-bold; }
 
   .fp-nav-item {
     @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-cream/75
            hover:text-cream hover:bg-white/5 transition-colors;
   }
   .fp-nav-item-active {
-    @apply bg-forest-700 text-cream border border-white/10;
+    @apply bg-forest-700 text-cream border border-white/10 font-medium;
   }
 
   .fp-badge {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium;
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold;
   }
   .fp-badge-low    { @apply fp-badge bg-risk-low/15    text-risk-low    border border-risk-low/30; }
   .fp-badge-medium { @apply fp-badge bg-risk-medium/15 text-risk-medium border border-risk-medium/30; }
@@ -61,7 +62,7 @@
   }
 
   .fp-label {
-    @apply block text-xs font-medium text-cream/70 mb-1.5 uppercase tracking-wider;
+    @apply block text-xs font-semibold text-cream/70 mb-1.5 uppercase tracking-wider;
   }
 
   .fp-demo-pill {
@@ -69,4 +70,133 @@
            font-semibold uppercase tracking-wider
            bg-risk-medium/20 text-risk-medium border border-risk-medium/40;
   }
+}
+
+/* =========================================================================
+   Sunlight Field Mode (High-Contrast Glare-Resistant Daylight Theme)
+   ========================================================================= */
+html.theme-sunlight {
+  color-scheme: light;
+}
+
+html.theme-sunlight body {
+  background-color: #F3F7F2 !important;
+  color: #0C281B !important;
+  background-image:
+    radial-gradient(ellipse at top left, rgba(143,203,98,0.15), transparent 60%),
+    radial-gradient(ellipse at bottom right, rgba(79,183,217,0.10), transparent 50%) !important;
+}
+
+html.theme-sunlight .bg-forest-900,
+html.theme-sunlight .bg-forest-950,
+html.theme-sunlight header {
+  background-color: #FFFFFF !important;
+  border-color: #CBD8CE !important;
+}
+
+html.theme-sunlight aside#sidebar {
+  background-color: #F8FAF7 !important;
+  border-color: #CBD8CE !important;
+}
+
+html.theme-sunlight .fp-card,
+html.theme-sunlight .fp-glass,
+html.theme-sunlight .bg-forest-800,
+html.theme-sunlight .bg-forest-850 {
+  background-color: #FFFFFF !important;
+  border-color: #CBD8CE !important;
+  color: #0C281B !important;
+  box-shadow: 0 4px 16px -2px rgba(12, 40, 27, 0.06);
+}
+
+html.theme-sunlight .bg-forest-700 {
+  background-color: #E6EFE6 !important;
+  border-color: #BACBBD !important;
+  color: #0C281B !important;
+}
+
+html.theme-sunlight .text-cream {
+  color: #0C281B !important;
+}
+
+html.theme-sunlight .text-cream\/80,
+html.theme-sunlight .text-cream\/75,
+html.theme-sunlight .text-cream\/70 {
+  color: #214332 !important;
+}
+
+html.theme-sunlight .text-cream\/60,
+html.theme-sunlight .text-cream\/50,
+html.theme-sunlight .text-muted {
+  color: #426351 !important;
+}
+
+html.theme-sunlight .border-white\/10,
+html.theme-sunlight .border-white\/5,
+html.theme-sunlight .border-white\/15,
+html.theme-sunlight .border-white\/20 {
+  border-color: #CBD8CE !important;
+}
+
+html.theme-sunlight .fp-input {
+  background-color: #FFFFFF !important;
+  border-color: #BACBBD !important;
+  color: #0C281B !important;
+}
+
+html.theme-sunlight .fp-input::placeholder {
+  color: #728D7C !important;
+}
+
+html.theme-sunlight .fp-nav-item {
+  color: #214332 !important;
+}
+
+html.theme-sunlight .fp-nav-item:hover {
+  background-color: #EAF1EA !important;
+  color: #0C281B !important;
+}
+
+html.theme-sunlight .fp-nav-item-active {
+  background-color: #E2ECE2 !important;
+  color: #0C281B !important;
+  border-color: #8FCB62 !important;
+}
+
+html.theme-sunlight .fp-btn-ghost {
+  border-color: #BACBBD !important;
+  color: #0C281B !important;
+}
+
+html.theme-sunlight .fp-btn-ghost:hover {
+  background-color: #EAF1EA !important;
+}
+
+/* Equalizer sound wave animation for audio voiceover */
+@keyframes eq-wave {
+  0%, 100% { height: 4px; }
+  50% { height: 16px; }
+}
+
+.fp-eq-bar {
+  display: inline-block;
+  width: 3px;
+  background-color: #8FCB62;
+  border-radius: 2px;
+  animation: eq-wave 0.8s ease-in-out infinite;
+}
+.fp-eq-bar:nth-child(2) { animation-delay: 0.2s; }
+.fp-eq-bar:nth-child(3) { animation-delay: 0.4s; }
+.fp-eq-bar:nth-child(4) { animation-delay: 0.1s; }
+
+/* Route Flow animated dash animation on Leaflet polylines */
+@keyframes flowDash {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+
+.fp-animated-route {
+  stroke-dasharray: 8, 8;
+  animation: flowDash 2.5s linear infinite;
 }

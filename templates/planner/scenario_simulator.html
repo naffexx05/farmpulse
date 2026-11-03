@@ -67,17 +67,21 @@
         </div>
       </div>
 
-      <!-- HUD 2: Net Profit / Loss Coin Meter -->
-      <div class="space-y-1 md:col-span-1 border-b md:border-b-0 md:border-r border-white/10 pb-4 md:pb-0 md:pr-4">
-        <div class="fp-label flex items-center gap-1.5">
-          <i data-lucide="coins" class="w-4 h-4 text-amber-400"></i> Net Farm Cashflow
+      <!-- HUD 2: Net Profit / Loss Coin Meter & Speedometer -->
+      <div class="space-y-1 md:col-span-1 border-b md:border-b-0 md:border-r border-white/10 pb-4 md:pb-0 md:pr-4 flex flex-col justify-between">
+        <div>
+          <div class="fp-label flex items-center gap-1.5">
+            <i data-lucide="coins" class="w-4 h-4 text-amber-400"></i> Net Farm Cashflow
+          </div>
+          <div id="hud-margin-val" class="font-display text-2xl lg:text-3xl font-bold text-leaf font-mono">
+            MWK {{ initial_sim.total_sim_margin|floatformat:0|intcomma }}
+          </div>
+          <div id="hud-margin-delta" class="text-xs font-mono text-cream/60">
+            Baseline: MWK {{ baseline_plan.total_margin_mwk|floatformat:0|intcomma }}
+          </div>
         </div>
-        <div id="hud-margin-val" class="font-display text-2xl lg:text-3xl font-bold text-leaf font-mono">
-          MWK {{ initial_sim.total_sim_margin|floatformat:0|intcomma }}
-        </div>
-        <div id="hud-margin-delta" class="text-xs font-mono text-cream/60">
-          Baseline: MWK {{ baseline_plan.total_margin_mwk|floatformat:0|intcomma }}
-        </div>
+        <!-- Profit Speedometer Gauge -->
+        <div id="scenario-profit-speedometer" class="w-full"></div>
       </div>
 
       <!-- HUD 3: Family Food Security Gauge -->
@@ -118,9 +122,20 @@
     </div>
 
     <!-- Dynamic Game Reaction Commentary Box -->
-    <div id="hud-commentary-box" class="mt-4 p-3 rounded-xl bg-forest-900/80 border border-white/10 flex items-start gap-2.5 text-xs text-cream/80">
-      <i data-lucide="message-square" class="w-4 h-4 text-leaf shrink-0 mt-0.5"></i>
-      <span id="hud-commentary-text">{{ initial_sim.commentary }}</span>
+    <div id="hud-commentary-box" class="mt-4 p-3 rounded-xl bg-forest-900/80 border border-white/10 flex items-start justify-between gap-3 text-xs text-cream/80">
+      <div class="flex items-start gap-2.5">
+        <i data-lucide="message-square" class="w-4 h-4 text-leaf shrink-0 mt-0.5"></i>
+        <span id="hud-commentary-text">{{ initial_sim.commentary }}</span>
+      </div>
+      <button
+        type="button"
+        id="commentary-voice-btn"
+        data-fp-speak="{{ initial_sim.commentary }}"
+        class="fp-btn-ghost !px-2.5 !py-1 text-[11px] text-leaf inline-flex items-center gap-1 shrink-0"
+        title="Mvetserani mu Chichewa (Oral Voiceover)"
+      >
+        <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> <span>Mvetserani</span>
+      </button>
     </div>
   </section>
 
@@ -537,16 +552,39 @@
     if (foodPctEl) foodPctEl.textContent = foodPct + '%';
     if (foodBar) foodBar.style.width = foodPct + '%';
 
-    // Commentary Reaction
-    if (commentaryEl) {
-      if (deltaMargin >= 50000) {
-        commentaryEl.textContent = "Superb outcome! Favourable climate and market tailwinds increased your net farm profits.";
-      } else if (totalSimMargin > 0) {
-        commentaryEl.textContent = "Weather shock absorbed! While yield dropped, your crop diversification preserved positive cashflow.";
-      } else {
-        commentaryEl.textContent = "Crisis Alert: Production expenditures exceed harvest earnings under this severe shock. Adjust allocations or invest in drought-tolerant seed.";
+      // Commentary Reaction
+      if (commentaryEl) {
+        if (deltaMargin >= 50000) {
+          commentaryEl.textContent = "Superb outcome! Favourable climate and market tailwinds increased your net farm profits.";
+        } else if (totalSimMargin > 0) {
+          commentaryEl.textContent = "Weather shock absorbed! While yield dropped, your crop diversification preserved positive cashflow.";
+        } else {
+          commentaryEl.textContent = "Crisis Alert: Production expenditures exceed harvest earnings under this severe shock. Adjust allocations or invest in drought-tolerant seed.";
+        }
+      }
+
+      // Update voiceover button text
+      const voiceBtn = document.getElementById('commentary-voice-btn');
+      if (voiceBtn && commentaryEl) {
+        voiceBtn.setAttribute('data-fp-speak', commentaryEl.textContent);
+      }
+
+      // Update Profit Speedometer Dial
+      const baseCost = baselinePlan.total_cost || 450000;
+      const roi = Math.round((totalSimMargin / baseCost) * 100);
+      if (window.FarmPulseGauges) {
+        window.FarmPulseGauges.renderSpeedometer('scenario-profit-speedometer', {
+          value: roi,
+          min: -40,
+          max: 80,
+          unit: '% ROI',
+          label: 'Profit Speedometer'
+        });
       }
     }
-  }
-</script>
-{% endblock %}
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updateSimulation();
+    });
+  </script>
+  {% endblock %}
