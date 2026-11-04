@@ -1,4 +1,4 @@
-from django.db import models
+﻿from django.db import models
 from django.utils import timezone
 
 
@@ -38,7 +38,7 @@ class Plan(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.name} ({self.get_strategy_type_display()}) — {self.farm.name}"
+        return f"{self.name} ({self.get_strategy_type_display()}) â€” {self.farm.name}"
 
 
 class PlanItem(models.Model):
@@ -70,7 +70,7 @@ class PlanItem(models.Model):
         ordering = ['crop__name']
 
     def __str__(self):
-        return f"{self.crop.name} — {self.area_ha} ha in {self.plan.name}"
+        return f"{self.crop.name} â€” {self.area_ha} ha in {self.plan.name}"
 
 
 class PlanAssumption(models.Model):
@@ -119,20 +119,22 @@ class InputCostBenchmark(models.Model):
     input_category = models.CharField(max_length=20, choices=INPUT_CATEGORIES)
     description = models.CharField(
         max_length=160,
-        help_text="E.g. 'SC403 hybrid seed, 25 kg/ha' or 'CAN 50kg bag × 4/ha'"
+        help_text="E.g. 'SC403 hybrid seed, 25 kg/ha' or 'CAN 50kg bag Ã— 4/ha'"
     )
     # Price per HECTARE (normalised) in MWK
     benchmark_price_mwk_per_ha = models.DecimalField(max_digits=12, decimal_places=2)
     season_year = models.PositiveSmallIntegerField(default=2025)
     source_note = models.CharField(max_length=200, blank=True,
         help_text="E.g. 'ADMARC Input Price Bulletin Oct 2025'")
+    data_source = models.CharField(max_length=20, choices=[('manual', 'Manual / Seeded'), ('wfp_vam', 'WFP VAM Data Bridges'), ('admarc', 'ADMARC Bulletin')], default='manual', help_text='Origin of this price record')
+    last_synced_at = models.DateTimeField(null=True, blank=True, help_text='When this price was last fetched from an external source')
 
     class Meta:
         ordering = ['crop__name', 'input_category']
         unique_together = [('crop', 'input_category', 'season_year')]
 
     def __str__(self):
-        return f"{self.crop.name} — {self.get_input_category_display()} ({self.season_year})"
+        return f"{self.crop.name} â€” {self.get_input_category_display()} ({self.season_year})"
 
 
 class SeasonalInputCost(models.Model):
@@ -152,7 +154,7 @@ class SeasonalInputCost(models.Model):
     )
     season_year = models.PositiveSmallIntegerField(default=2025)
 
-    # Six itemised cost fields (MWK per hectare) — nullable means "use benchmark"
+    # Six itemised cost fields (MWK per hectare) â€” nullable means "use benchmark"
     seed_cost_mwk_per_ha        = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     basal_fert_cost_mwk_per_ha  = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     top_dress_cost_mwk_per_ha   = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
@@ -168,7 +170,7 @@ class SeasonalInputCost(models.Model):
         unique_together = [('farm', 'crop', 'season_year')]
 
     def __str__(self):
-        return f"{self.farm.name} — {self.crop.name} input costs ({self.season_year})"
+        return f"{self.farm.name} â€” {self.crop.name} input costs ({self.season_year})"
 
     def total_cost_per_ha(self):
         """Sum of all non-null input fields."""

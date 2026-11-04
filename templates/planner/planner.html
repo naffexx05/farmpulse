@@ -130,15 +130,26 @@
           <i data-lucide="calculator" class="w-5 h-5 text-amber-400"></i>
           <h2 class="font-display text-xl font-bold text-cream">Input Cost Verification</h2>
           <span class="text-[10px] px-2 py-0.5 rounded bg-amber-400/15 text-amber-300 border border-amber-400/25 uppercase tracking-widest font-bold">2025 Season</span>
+          <span id="ledger-source-badge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            {{ data_source_display }} ({{ last_synced_date }})
+          </span>
         </div>
         <p class="text-xs text-cream/60 mt-1">
-          Verify your declared budget covers actual input costs. Prices pre-loaded from ADMARC/AGORA benchmarks — adjust to what you are actually being quoted.
+          Verify your declared budget covers actual input costs. Benchmarks pre-loaded from ADMARC/WFP surveillance — customize to your local agro-dealer quotes.
         </p>
       </div>
-      <!-- Affordability verdict badge -->
-      <div id="affordability-verdict" class="shrink-0 px-4 py-2.5 rounded-xl border text-xs font-semibold text-center min-w-[140px] transition-all duration-300 bg-forest-900/80 border-white/15 text-cream/60">
-        <div class="text-[10px] uppercase tracking-widest text-cream/40 mb-0.5">Budget Status</div>
-        <div id="verdict-text">— Select crops</div>
+      <div class="flex items-center gap-2.5 shrink-0">
+        <!-- Live Sync Button -->
+        <button type="button" id="btn-sync-live-prices" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-forest-800 hover:bg-forest-700 text-cream border border-white/10 transition-colors shadow-sm">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-leaf"></i>
+          <span>Sync Live Prices</span>
+        </button>
+        <!-- Affordability verdict badge -->
+        <div id="affordability-verdict" class="px-4 py-2.5 rounded-xl border text-xs font-semibold text-center min-w-[140px] transition-all duration-300 bg-forest-900/80 border-white/15 text-cream/60">
+          <div class="text-[10px] uppercase tracking-widest text-cream/40 mb-0.5">Budget Status</div>
+          <div id="verdict-text">— Select crops</div>
+        </div>
       </div>
     </div>
 
@@ -855,6 +866,65 @@
     } catch (e) {
       console.warn('Failed to save input costs:', e);
     }
+  }
+
+  // ── Sync Live Market Prices Handler ──────────────────────────────────────
+  const SYNC_URL = '{% url "planner:sync_input_prices" %}';
+  const syncBtn = document.getElementById('btn-sync-live-prices');
+  if (syncBtn) {
+    syncBtn.addEventListener('click', async function() {
+      const icon = syncBtn.querySelector('i');
+      const text = syncBtn.querySelector('span');
+      const originalText = text ? text.textContent : 'Sync Live Prices';
+
+      syncBtn.disabled = true;
+      if (text) text.textContent = 'Syncing...';
+      if (icon) icon.classList.add('animate-spin');
+
+      try {
+        const resp = await fetch(SYNC_URL, {
+          headers: { 'X-CSRFToken': CSRF_TOKEN }
+        });
+        const res = await resp.json();
+
+        if (res.benchmarks) {
+          // Merge refreshed benchmarks into ledger
+          Object.keys(res.benchmarks).forEach(cropSlug => {
+            LEDGER_DATA.benchmarks[cropSlug] = res.benchmarks[cropSlug];
+            if (ledgerPrices[cropSlug]) {
+              CATEGORIES.forEach(([catKey]) => {
+                const overrideVal = (LEDGER_DATA.farmer_overrides[cropSlug] || {})[catKey];
+                if (!overrideVal || overrideVal === 0) {
+                  ledgerPrices[cropSlug][catKey] = res.benchmarks[cropSlug][catKey]
+                    ? res.benchmarks[cropSlug][catKey].price
+                    : 0;
+                }
+              });
+            }
+          });
+
+          if (_activeCropSlug) showCropLedger(_activeCropSlug);
+          updateLedgerTotals();
+
+          const badge = document.getElementById('ledger-source-badge');
+          if (badge) {
+            badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ${res.source} (${res.timestamp || 'Just now'})`;
+          }
+        }
+
+        if (text) text.textContent = res.ok ? 'Synced!' : 'Preserved (Offline)';
+        setTimeout(() => {
+          if (text) text.textContent = originalText;
+          syncBtn.disabled = false;
+          if (icon) icon.classList.remove('animate-spin');
+        }, 2500);
+      } catch (err) {
+        console.warn('Sync error:', err);
+        if (text) text.textContent = 'Preserved';
+        syncBtn.disabled = false;
+        if (icon) icon.classList.remove('animate-spin');
+      }
+    });
   }
 </script>
 {% endblock %}

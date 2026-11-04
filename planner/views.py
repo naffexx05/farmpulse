@@ -11,6 +11,8 @@ from farms.models import Crop, Farm
 from .engine import calculate_plan_allocations, get_crop_benchmarks, simulate_game_shocks
 from .models import Plan, PlanItem, PlanAssumption, InputCostBenchmark, SeasonalInputCost
 
+CURRENT_SEASON = 2025
+
 
 @login_required
 def planner_input(request):
@@ -126,6 +128,10 @@ def planner_input(request):
                 'herbicide':  float(sic.herbicide_cost_mwk_per_ha or 0),
                 'transport':  float(sic.transport_cost_mwk_per_ha or 0),
             }
+    latest_benchmark = benchmarks_qs.filter(last_synced_at__isnull=False).order_by('-last_synced_at').first()
+    last_synced_date = latest_benchmark.last_synced_at.strftime('%d %b %Y, %H:%M') if latest_benchmark else "2025/26 Season"
+    data_source_display = "WFP / HDX Market Surveillance" if (latest_benchmark and latest_benchmark.data_source == 'wfp_vam') else "ADMARC / AGORA 2025 Benchmark"
+
     input_ledger_json = json.dumps({
         'categories': INPUT_CATEGORIES,
         'benchmarks': benchmarks_by_crop,
@@ -144,6 +150,8 @@ def planner_input(request):
         'plans_data': plans_data,
         'crops_benchmarks_json': json.dumps(crops_benchmarks),
         'input_ledger_json': input_ledger_json,
+        'last_synced_date': last_synced_date,
+        'data_source_display': data_source_display,
         'active_nav': 'planner',
     }
     return render(request, 'planner/planner.html', context)
@@ -324,7 +332,7 @@ def save_plan(request):
 
 
 # ==============================================================================
-# Game-Like Scenario Simulator 🎮 (Phase 5.7 & 5.8)
+# Game-Like Scenario Simulator ðŸŽ® (Phase 5.7 & 5.8)
 # ==============================================================================
 
 @login_required
@@ -576,7 +584,7 @@ def plan_export_csv(request, pk):
     response['Content-Disposition'] = f'attachment; filename="farmpulse_plan_{plan.pk}.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(['FarmPulse Malawi — Strategic Crop Plan Export'])
+    writer.writerow(['FarmPulse Malawi â€” Strategic Crop Plan Export'])
     writer.writerow(['Plan Name', plan.name])
     writer.writerow(['Farm', plan.farm.name])
     writer.writerow(['Strategy', plan.get_strategy_type_display()])
@@ -681,4 +689,35 @@ def save_input_costs(request):
         'ok': True,
         'total_per_ha': float(obj.total_cost_per_ha()),
         'crop_slug': crop_slug,
+    })
+
+
+@login_required
+def sync_input_prices(request):
+    """
+    AJAX / Web endpoint: Synchronizes InputCostBenchmark records with
+    live WFP/HDX market price surveillance.
+    Returns refreshed benchmark data for live JS ledger re-rendering.
+    """
+    from .sync_service import execute_hdx_price_sync
+
+    result = execute_hdx_price_sync(season_year=CURRENT_SEASON, dry_run=False)
+
+    # Fetch refreshed benchmarks
+    benchmarks_qs = InputCostBenchmark.objects.filter(season_year=CURRENT_SEASON).select_related('crop')
+    benchmarks_by_crop = {}
+    for _b in benchmarks_qs:
+        benchmarks_by_crop.setdefault(_b.crop.slug, {})[_b.input_category] = {
+            'description': _b.description,
+            'price': float(_b.benchmark_price_mwk_per_ha),
+        }
+
+    return JsonResponse({
+        'ok': result['ok'],
+        'status': result.get('status', 'synced'),
+        'updated': result.get('updated', 0),
+        'source': result.get('source', 'ADMARC Benchmark'),
+        'timestamp': result.get('timestamp', ''),
+        'message': result.get('message', 'Market prices updated.'),
+        'benchmarks': benchmarks_by_crop,
     })
