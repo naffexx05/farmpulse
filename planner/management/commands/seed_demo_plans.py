@@ -119,7 +119,7 @@ class Command(BaseCommand):
             farm=farm,
             name="2025/26 Climate-Resilient Legume Diversification",
             defaults={
-                'strategy_type': 'resilient',
+                'strategy_type': 'risk_conscious',
                 'status': 'draft',
                 'total_land_ha': Decimal("2.50"),
                 'total_budget_mwk': Decimal("450000.00"),
@@ -133,6 +133,9 @@ class Command(BaseCommand):
                 )
             }
         )
+        if plan2.strategy_type != 'risk_conscious':
+            plan2.strategy_type = 'risk_conscious'
+            plan2.save()
 
         if created2 or not plan2.items.exists():
             plan2.items.all().delete()
@@ -180,6 +183,84 @@ class Command(BaseCommand):
                 expected_gross_margin_mwk=Decimal("240600.00"),
                 break_even_price_mwk_per_kg=Decimal("110.91"),
                 notes="Early-maturing bush beans for rapid mid-season harvest and cash flow."
+            )
+
+        # ─── Plan 3: Commercial Return-Focused Strategy ──────────────────────
+        plan3, created3 = Plan.objects.get_or_create(
+            farm=farm,
+            name="2025/26 Commercial High-Return Strategy",
+            defaults={
+                'strategy_type': 'return_focused',
+                'status': 'active',
+                'total_land_ha': Decimal("2.50"),
+                'total_budget_mwk': Decimal("450000.00"),
+                'total_expected_cost_mwk': Decimal("353750.00"),
+                'total_expected_revenue_mwk': Decimal("2038750.00"),
+                'total_expected_margin_mwk': Decimal("1685000.00"),
+                'notes': (
+                    "High-return commercial allocation maximizing processor demand for Tikolore soybeans "
+                    "and export-quality CG7 groundnuts, while retaining a 0.5 ha hybrid maize buffer for food safety."
+                )
+            }
+        )
+
+        if created3 or not plan3.items.exists():
+            plan3.items.all().delete()
+            # Soybeans (1.20 ha)
+            PlanItem.objects.create(
+                plan=plan3,
+                crop=soybeans,
+                area_ha=Decimal("1.20"),
+                expected_yield_kg_per_ha=Decimal("1800.00"),
+                expected_yield_kg_total=Decimal("2160.00"),
+                expected_cost_per_ha_mwk=Decimal("148000.00"),
+                expected_total_cost_mwk=Decimal("177600.00"),
+                expected_selling_price_mwk_per_kg=Decimal("345.00"),
+                expected_revenue_mwk=Decimal("745200.00"),
+                expected_gross_margin_mwk=Decimal("567600.00"),
+                break_even_price_mwk_per_kg=Decimal("82.22"),
+                notes="Pre-season supply contract with poultry feed mill in Lilongwe."
+            )
+            # Groundnuts (0.80 ha)
+            PlanItem.objects.create(
+                plan=plan3,
+                crop=groundnuts,
+                area_ha=Decimal("0.80"),
+                expected_yield_kg_per_ha=Decimal("1350.00"),
+                expected_yield_kg_total=Decimal("1080.00"),
+                expected_cost_per_ha_mwk=Decimal("126000.00"),
+                expected_total_cost_mwk=Decimal("100800.00"),
+                expected_selling_price_mwk_per_kg=Decimal("460.00"),
+                expected_revenue_mwk=Decimal("496800.00"),
+                expected_gross_margin_mwk=Decimal("396000.00"),
+                break_even_price_mwk_per_kg=Decimal("93.33"),
+                notes="High-oil confectionery grade for regional wholesale off-taker."
+            )
+            # Maize (0.50 ha)
+            PlanItem.objects.create(
+                plan=plan3,
+                crop=maize,
+                area_ha=Decimal("0.50"),
+                expected_yield_kg_per_ha=Decimal("3500.00"),
+                expected_yield_kg_total=Decimal("1750.00"),
+                expected_cost_per_ha_mwk=Decimal("150700.00"),
+                expected_total_cost_mwk=Decimal("75350.00"),
+                expected_selling_price_mwk_per_kg=Decimal("280.00"),
+                expected_revenue_mwk=Decimal("490000.00"),
+                expected_gross_margin_mwk=Decimal("414650.00"),
+                break_even_price_mwk_per_kg=Decimal("43.06"),
+                notes="High-density hybrid maize for domestic food security."
+            )
+
+            PlanAssumption.objects.get_or_create(
+                plan=plan3,
+                parameter_name="Commercial Feed Mill Off-take (Lilongwe)",
+                defaults={'value_used': Decimal("345.00"), 'source_note': "Off-taker Pre-Planting Agreement"}
+            )
+            PlanAssumption.objects.get_or_create(
+                plan=plan3,
+                parameter_name="Confectionery Groundnut Export Price (Mitundu Hub)",
+                defaults={'value_used': Decimal("460.00"), 'source_note': "AMIS Price Bulletin 2025"}
             )
 
         # ─── Link or Create Season Review ─────────────────────────────────────
