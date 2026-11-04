@@ -58,7 +58,7 @@
         <div>
           <span class="font-bold text-cream text-sm">Benchmarked Against Plan: {{ plan.name }}</span>
           <p class="text-xs text-cream/65">
-            Formulated on {{ plan.created_at|date:"M d, Y" }} &bull; Strategy: <span class="capitalize font-semibold text-leaf">{{ plan.get_strategy_type_display|default:plan.strategy }}</span> &bull; Target Area: {{ plan.total_land_ha|default:plan.allocated_land_ha|floatformat:1 }} ha
+            Formulated on {{ plan.created_at|date:"M d, Y" }} &bull; Strategy: <span class="capitalize font-semibold text-leaf">{{ plan.get_strategy_type_display }}</span> &bull; Target Area: {{ plan.total_land_ha|floatformat:1 }} ha
           </p>
         </div>
       </div>
