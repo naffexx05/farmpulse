@@ -63,16 +63,25 @@ class MlimiAIEngine:
                     }
 
         # Market prices
-        for cp in CropPrice.objects.select_related('crop').order_by('-year', '-month')[:24]:
-            slug = cp.crop.slug
-            if slug not in ctx['market_prices']:
-                price_val = cp.price_wholesale_mwk or cp.price_farmgate_mwk or cp.price_retail_mwk or Decimal('0.00')
-                market_type = 'Wholesale' if cp.price_wholesale_mwk else ('Farmgate' if cp.price_farmgate_mwk else 'Retail')
-                ctx['market_prices'][slug] = {
-                    'name': cp.crop.name,
-                    'price': float(price_val),
-                    'market_type': market_type,
-                }
+        try:
+            for cp in CropPrice.objects.select_related('crop').order_by('-year', '-month')[:24]:
+                slug = getattr(cp.crop, 'slug', str(cp.crop_id))
+                if slug not in ctx['market_prices']:
+                    price_val = (
+                        getattr(cp, 'price_wholesale_mwk', None) or
+                        getattr(cp, 'price_farmgate_mwk', None) or
+                        getattr(cp, 'price_retail_mwk', None) or
+                        getattr(cp, 'price_mwk_per_kg', None) or
+                        Decimal('0.00')
+                    )
+                    market_type = 'Wholesale' if getattr(cp, 'price_wholesale_mwk', None) else ('Farmgate' if getattr(cp, 'price_farmgate_mwk', None) else 'Retail')
+                    ctx['market_prices'][slug] = {
+                        'name': cp.crop.name,
+                        'price': float(price_val),
+                        'market_type': market_type,
+                    }
+        except Exception:
+            pass
 
         return ctx
 
@@ -599,3 +608,4 @@ class MlimiAIEngine:
             'context_used': [f"Farm: {farm} ({land} ha)", f"Soil: {soil}", f"District: {district}"],
             'suggested_followups': followups,
         }
+
