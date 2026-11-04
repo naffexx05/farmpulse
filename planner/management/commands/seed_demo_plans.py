@@ -214,3 +214,4 @@ class Command(BaseCommand):
             f"  - '{plan2.name}' (Resilient Variant)\n"
             f"Ready for live comparison at /plans/compare/ and review at /season-review/."
         ))
+

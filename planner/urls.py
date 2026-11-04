@@ -11,7 +11,7 @@ urlpatterns = [
     path('planner/save-input-costs/', views.save_input_costs, name='save_input_costs'),
     path('planner/sync-input-prices/', views.sync_input_prices, name='sync_input_prices'),
 
-    # Module 5: Game-like Scenario Simulator 🎮
+    # Module 5: Risk & Scenario Simulator
     path('scenarios/', views.scenario_simulator, name='scenario_simulator'),
     path('scenarios/simulate-api/', views.simulate_scenario_api, name='simulate_scenario_api'),
 

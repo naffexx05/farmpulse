@@ -161,14 +161,16 @@
         ? (riskOrColor === 'low' ? '#4FB7D9' : (riskOrColor === 'medium' ? '#F2B441' : '#E76A6A'))
         : '#8FCB62';
 
-      const iconSymbol = type === 'climate' ? '🌦️' : '🏪';
+      const iconSvg = type === 'climate'
+        ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>`
+        : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/></svg>`;
 
       return L.divIcon({
         className: 'fp-custom-pin-wrapper',
         html: `
-          <div class="fp-map-pin relative" style="width: 28px; height: 28px; background-color: #0A3325; border: 2px solid ${color};">
+          <div class="fp-map-pin relative" style="width: 28px; height: 28px; background-color: #0A3325; border: 2px solid ${color}; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
             <span class="fp-pulse-ring" style="color: ${color};"></span>
-            <span style="font-size: 13px; line-height: 1;">${iconSymbol}</span>
+            ${iconSvg}
           </div>
         `,
         iconSize: [28, 28],

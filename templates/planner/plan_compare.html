@@ -1,28 +1,30 @@
 {% extends 'base.html' %}
 {% load humanize %}
-{% block title %}Compare Crop Plans — FarmPulse Malawi{% endblock %}
+{% block title %}Comparative Strategic Plan Analysis · FarmPulse Malawi{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto space-y-8">
+<div class="max-w-6xl mx-auto space-y-6">
 
   <!-- Header -->
-  <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  <header class="fp-page-header">
     <div>
-      <a href="{% url 'planner:plan_list' %}" class="text-sm text-cream/60 hover:text-cream inline-flex items-center gap-1.5 mb-2">
-        <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Back to My Plans
-      </a>
-      <h1 class="font-display text-3xl font-semibold text-cream">Compare Strategic Plans</h1>
-      <p class="mt-1 text-sm text-cream/60">
-        Side-by-side trade-off analysis of working capital, expected margins, and crop allocations.
+      <div class="fp-breadcrumb">
+        <a href="{% url 'planner:plan_list' %}">Saved Plans</a>
+        <span class="fp-breadcrumb-sep">/</span>
+        <span class="text-cream font-medium">Strategic Comparison</span>
+      </div>
+      <h1 class="font-display text-2xl sm:text-3xl font-bold text-cream tracking-tight">Compare Crop Plans</h1>
+      <p class="fp-page-header-desc">
+        Direct side-by-side trade-off evaluation of capital requirements, expected margins, and crop portfolio diversification.
       </p>
     </div>
 
     <!-- Quick Plan Switcher Form -->
-    <form method="get" class="flex items-center gap-2">
-      <div class="text-xs text-cream/50 mr-1">Select to compare:</div>
+    <form method="get" class="flex flex-col sm:flex-row sm:items-center gap-2 pt-1 shrink-0">
+      <span class="text-xs text-cream/60 font-semibold uppercase tracking-wider">Select plans:</span>
       <div class="flex items-center gap-1.5 flex-wrap">
         {% for p in all_user_plans %}
-          <label class="px-2.5 py-1 rounded-lg bg-forest-800/80 border border-white/10 text-xs text-cream hover:border-leaf/40 cursor-pointer flex items-center gap-1.5">
+          <label class="px-2.5 py-1 rounded bg-forest-900/80 border {% if p in selected_plans %}border-leaf text-leaf{% else %}border-white/10 text-cream/70{% endif %} text-xs hover:border-leaf/40 cursor-pointer flex items-center gap-1.5 transition-colors">
             <input
               type="checkbox"
               name="id"
@@ -40,45 +42,49 @@
 
   {% if selected_plans %}
     <!-- High-level Metric Comparison Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-{{ selected_plans|length }} gap-6 items-stretch">
+    <div class="grid grid-cols-1 md:grid-cols-{{ selected_plans|length }} gap-4 items-stretch">
       {% for p in selected_plans %}
-        <article class="fp-card border border-white/10 p-5 space-y-4 flex flex-col justify-between">
-          <div class="space-y-2">
+        <article class="fp-card p-5 space-y-4 flex flex-col justify-between">
+          <div class="space-y-3">
             <div class="flex items-start justify-between gap-2">
               <div>
-                <span class="fp-badge-low text-[10px]">{{ p.get_strategy_type_display }}</span>
-                <h2 class="font-display text-xl font-bold text-cream mt-1">{{ p.name }}</h2>
+                <span class="fp-badge {% if p.strategy_type == 'balanced' %}fp-badge-green{% elif p.strategy_type == 'cash' %}fp-badge-amber{% else %}fp-badge-blue{% endif %} text-[10px]">
+                  {{ p.get_strategy_type_display }}
+                </span>
+                <h2 class="font-display text-lg font-bold text-cream mt-1">{{ p.name }}</h2>
+                <p class="text-xs text-cream/60">{{ p.farm.name }}</p>
               </div>
-              <span class="text-xs font-mono text-cream/50">{{ p.total_land_ha }} ha</span>
+              <span class="text-xs font-mono text-cream/70 bg-forest-900/60 px-2 py-0.5 rounded border border-white/5">
+                {{ p.total_land_ha|floatformat:1 }} ha
+              </span>
             </div>
-            <p class="text-xs text-cream/60">{{ p.farm.name }}</p>
 
-            <!-- Metrics -->
+            <!-- Financials Grid -->
             <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/5 font-mono text-xs">
-              <div class="p-2.5 rounded-lg bg-forest-900/60">
-                <span class="text-[9px] uppercase tracking-wider text-cream/50 font-sans block">Working Capital</span>
-                <span class="text-cream font-medium">MWK {{ p.total_expected_cost_mwk|floatformat:0|intcomma }}</span>
+              <div class="p-2.5 rounded bg-forest-900/60 border border-white/5">
+                <span class="text-[9px] uppercase tracking-wider text-cream/50 font-sans block font-semibold">Working Capital</span>
+                <span class="text-cream font-bold">MWK {{ p.total_expected_cost_mwk|floatformat:0|intcomma }}</span>
               </div>
-              <div class="p-2.5 rounded-lg bg-forest-900/60">
-                <span class="text-[9px] uppercase tracking-wider text-cream/50 font-sans block">Gross Revenue</span>
-                <span class="text-cream font-medium">MWK {{ p.total_expected_revenue_mwk|floatformat:0|intcomma }}</span>
+              <div class="p-2.5 rounded bg-forest-900/60 border border-white/5">
+                <span class="text-[9px] uppercase tracking-wider text-cream/50 font-sans block font-semibold">Gross Revenue</span>
+                <span class="text-cream font-bold">MWK {{ p.total_expected_revenue_mwk|floatformat:0|intcomma }}</span>
               </div>
             </div>
 
-            <div class="p-3 rounded-xl bg-forest-900/80 border border-white/5 text-center">
-              <span class="text-[10px] uppercase tracking-wider text-cream/50 block font-sans">Net Expected Margin</span>
-              <span class="font-mono text-2xl font-bold {% if p.total_expected_margin_mwk >= 0 %}text-leaf{% else %}text-risk-high{% endif %}">
+            <div class="p-3.5 rounded-lg bg-forest-900/90 border border-white/5 text-center">
+              <span class="text-[10px] uppercase tracking-wider text-cream/50 block font-sans font-semibold mb-0.5">Net Expected Margin</span>
+              <span class="font-mono text-xl font-bold {% if p.total_expected_margin_mwk >= 0 %}text-leaf{% else %}text-risk-high{% endif %}">
                 MWK {{ p.total_expected_margin_mwk|floatformat:0|intcomma }}
               </span>
             </div>
           </div>
 
-          <div class="flex items-center gap-2 pt-2 border-t border-white/5">
-            <a href="{% url 'planner:scenario_simulator' %}?plan={{ p.pk }}" class="fp-btn-primary !px-3 !py-1.5 text-xs w-full text-center">
-              <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 inline-block mr-0.5"></i> Run Risk Analysis
+          <div class="flex items-center gap-2 pt-3 border-t border-white/5">
+            <a href="{% url 'planner:scenario_simulator' %}?plan={{ p.pk }}" class="fp-btn-primary !px-3 !py-1.5 text-xs w-full justify-center">
+              <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> Stress Test
             </a>
-            <a href="{% url 'planner:plan_detail' p.pk %}" class="fp-btn-ghost !px-3 !py-1.5 text-xs text-center">
-              Details
+            <a href="{% url 'planner:plan_detail' p.pk %}" class="fp-btn-ghost !px-3 !py-1.5 text-xs">
+              View
             </a>
           </div>
         </article>
@@ -87,32 +93,36 @@
 
     <!-- Per-Crop Comparative Matrix Table -->
     <section class="space-y-3">
-      <h2 class="font-display text-lg font-semibold text-cream">Per-Crop Allocation Matrix</h2>
-      <div class="overflow-x-auto rounded-xl border border-white/10">
-        <table class="w-full text-left text-xs font-mono">
-          <thead class="bg-forest-900/90 text-[10px] uppercase tracking-wider text-cream/60">
+      <div>
+        <h2 class="font-display text-base font-bold text-cream">Per-Crop Allocation Matrix</h2>
+        <p class="text-xs text-cream/60">Cross-comparison of land area, expected gross margins, and break-even points across chosen strategies.</p>
+      </div>
+
+      <div class="fp-table-wrap">
+        <table class="fp-table font-mono">
+          <thead>
             <tr>
-              <th class="py-3 px-4 font-sans font-medium">Crop</th>
+              <th class="font-sans font-medium text-left">Crop</th>
               {% for p in selected_plans %}
-                <th class="py-3 px-4 text-center border-l border-white/5">
+                <th class="text-center border-l border-white/5">
                   <div class="font-sans font-bold text-cream">{{ p.name }}</div>
                   <span class="text-[9px] text-cream/40 font-normal">Area &bull; Margin &bull; Break-Even</span>
                 </th>
               {% endfor %}
             </tr>
           </thead>
-          <tbody class="divide-y divide-white/5">
+          <tbody>
             {% for row in crop_comparison %}
-              <tr class="hover:bg-white/[0.02]">
-                <td class="py-3.5 px-4 font-sans font-medium text-cream flex items-center gap-1.5">
-                  <i data-lucide="sprout" class="w-3.5 h-3.5 text-leaf"></i>
+              <tr>
+                <td class="font-sans font-medium text-cream flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-leaf"></span>
                   {{ row.crop_name }}
                 </td>
                 {% for item in row.plans %}
-                  <td class="py-3.5 px-4 text-center border-l border-white/5">
+                  <td class="text-center border-l border-white/5">
                     {% if item %}
                       <div class="space-y-1">
-                        <div class="font-semibold text-cream">{{ item.area_ha }} ha <span class="text-cream/50 text-[10px]">({{ item.expected_yield_kg_total|floatformat:0 }} kg)</span></div>
+                        <div class="font-semibold text-cream">{{ item.area_ha|floatformat:1 }} ha <span class="text-cream/50 text-[10px]">({{ item.expected_yield_kg_total|floatformat:0 }} kg)</span></div>
                         <div class="text-[11px] {% if item.expected_gross_margin_mwk >= 0 %}text-leaf{% else %}text-risk-high{% endif %} font-semibold">
                           MWK {{ item.expected_gross_margin_mwk|floatformat:0|intcomma }}
                         </div>
@@ -121,7 +131,7 @@
                         </div>
                       </div>
                     {% else %}
-                      <span class="text-cream/30">— Not allocated —</span>
+                      <span class="text-cream/30 text-xs">— Not allocated —</span>
                     {% endif %}
                   </td>
                 {% endfor %}
@@ -133,13 +143,18 @@
     </section>
 
   {% else %}
-    <div class="fp-glass p-12 text-center">
-      <h2 class="font-display text-lg font-semibold text-cream">Select at least 2 plans to compare</h2>
-      <p class="mt-2 text-xs text-cream/60 max-w-sm mx-auto">
-        Create multiple alternative strategies in the Crop Planner to evaluate trade-offs side by side.
-      </p>
-      <a href="{% url 'planner:planner_input' %}" class="fp-btn-primary mt-4">
-        Go to Crop Planner
+    <div class="fp-card p-12 text-center space-y-4 max-w-lg mx-auto border-dashed border-white/15">
+      <div class="w-14 h-14 rounded-full bg-forest-800 text-leaf flex items-center justify-center mx-auto border border-white/10">
+        <i data-lucide="columns-2" class="w-6 h-6"></i>
+      </div>
+      <div>
+        <h2 class="font-display text-lg font-bold text-cream">Select at least 2 plans to compare</h2>
+        <p class="text-xs text-cream/60 mt-1 max-w-sm mx-auto leading-relaxed">
+          Select existing plans using the checkboxes above or generate alternative strategies in the Crop Planner to evaluate trade-offs side by side.
+        </p>
+      </div>
+      <a href="{% url 'planner:planner_input' %}" class="fp-btn-primary text-xs inline-flex items-center gap-1.5">
+        <i data-lucide="compass" class="w-4 h-4"></i> Go to Crop Planner
       </a>
     </div>
   {% endif %}

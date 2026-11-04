@@ -1,241 +1,774 @@
 /* =========================================================================
-   FarmPulse Malawi — Professional / National-Grade Design Layer
-   Purpose: Elevate visual hierarchy, institutional authority, and
-            data-first aesthetics. Think government intelligence portal.
+   FarmPulse Malawi — Institutional Grade Design System v2.0
+   National Presentation Edition
    ========================================================================= */
 
 /* -------------------------------------------------------------------------
-   1. Typography & Hierarchy Refinements
+   0. CSS Custom Properties — Single Source of Truth
    ------------------------------------------------------------------------- */
 
-/* Sharper, heavier page titles — ministerial weight */
-h1.font-display {
-  letter-spacing: -0.025em;
+:root {
+  /* Brand palette */
+  --fp-green:        #8FCB62;
+  --fp-green-dim:    rgba(143, 203, 98, 0.12);
+  --fp-green-border: rgba(143, 203, 98, 0.25);
+
+  /* Surface layers */
+  --fp-surface-0:    #060E08;   /* deepest */
+  --fp-surface-1:    #0A1A0E;   /* sidebar */
+  --fp-surface-2:    #0F2214;   /* cards */
+  --fp-surface-3:    #142C1A;   /* hover */
+
+  /* Text */
+  --fp-text-primary:   #F1F5EC;
+  --fp-text-secondary: rgba(241, 245, 236, 0.65);
+  --fp-text-muted:     rgba(168, 189, 176, 0.55);
+
+  /* Borders */
+  --fp-border:       rgba(255, 255, 255, 0.08);
+  --fp-border-hover: rgba(255, 255, 255, 0.16);
+
+  /* Semantic */
+  --fp-success: #8FCB62;
+  --fp-warning: #F59E0B;
+  --fp-danger:  #EF4444;
+  --fp-info:    #60A5FA;
+  --fp-water:   #60A5FA;
+
+  /* Typography scale */
+  --fp-font-display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  --fp-font-body:    'Inter', system-ui, sans-serif;
+  --fp-font-mono:    'JetBrains Mono', 'Courier New', monospace;
+
+  /* Radius */
+  --fp-radius-sm: 6px;
+  --fp-radius:    10px;
+  --fp-radius-lg: 14px;
+  --fp-radius-xl: 18px;
+
+  /* Shadows */
+  --fp-shadow-card: 0 1px 3px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.4);
+  --fp-shadow-drop: 0 8px 32px rgba(0,0,0,0.5);
 }
 
-h2.font-display {
-  letter-spacing: -0.015em;
+/* -------------------------------------------------------------------------
+   1. Document Baseline
+   ------------------------------------------------------------------------- */
+
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+body {
+  font-family: var(--fp-font-body);
+  font-size: 0.875rem;        /* 14px base */
+  line-height: 1.6;
+  color: var(--fp-text-primary);
 }
 
-/* Section dividers — structural not decorative */
+/* Tabular numerals everywhere it matters */
+.font-mono,
+[class*="fp-stat"],
+[class*="fp-kpi"],
+table { font-feature-settings: "tnum" 1, "lnum" 1; }
+
+/* -------------------------------------------------------------------------
+   2. Typography Hierarchy
+   ------------------------------------------------------------------------- */
+
+/* Page-level H1 — ministerial authority */
+h1.font-display, .fp-page-title {
+  font-family: var(--fp-font-display) !important;
+  font-size: clamp(1.5rem, 3vw, 2rem) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.025em !important;
+  line-height: 1.15 !important;
+  color: var(--fp-text-primary) !important;
+}
+
+/* Section H2 */
+h2.font-display, .fp-section-title {
+  font-family: var(--fp-font-display) !important;
+  font-size: 1.0625rem !important;  /* 17px */
+  font-weight: 650 !important;
+  letter-spacing: -0.015em !important;
+  line-height: 1.3 !important;
+  color: var(--fp-text-primary) !important;
+}
+
+/* Sub-section H3 */
+h3.font-display, .fp-subsection-title {
+  font-family: var(--fp-font-display) !important;
+  font-size: 0.9375rem !important;  /* 15px */
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Body lead text */
+.fp-lead {
+  font-size: 0.9375rem;
+  color: var(--fp-text-secondary);
+  line-height: 1.65;
+}
+
+/* -------------------------------------------------------------------------
+   3. Page Header Component
+   ------------------------------------------------------------------------- */
+
+.fp-page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--fp-border);
+}
+
+@media (min-width: 640px) {
+  .fp-page-header {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+}
+
+.fp-page-header-desc {
+  margin-top: 0.3rem;
+  font-size: 0.8125rem;
+  color: var(--fp-text-secondary);
+  max-width: 56ch;
+  line-height: 1.6;
+}
+
+/* Breadcrumb trail */
+.fp-breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--fp-text-secondary);
+  margin-bottom: 0.5rem;
+}
+.fp-breadcrumb a { color: var(--fp-text-secondary); text-decoration: none; }
+.fp-breadcrumb a:hover { color: var(--fp-text-primary); text-decoration: underline; }
+.fp-breadcrumb-sep { opacity: 0.4; }
+
+/* -------------------------------------------------------------------------
+   4. Section Divider
+   ------------------------------------------------------------------------- */
+
 .fp-section-rule {
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08) 20%, rgba(255,255,255,0.08) 80%, transparent);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,255,255,0.08) 20%,
+    rgba(255,255,255,0.08) 80%,
+    transparent 100%
+  );
   margin: 0;
+  border: none;
 }
 
-/* -------------------------------------------------------------------------
-   2. Sidebar — More structured, less rounded
-   ------------------------------------------------------------------------- */
-
-aside#sidebar {
-  border-right: 1px solid rgba(255,255,255,0.05);
-}
-
-/* Nav items — less pill-shaped, more structured row */
-.fp-nav-item {
-  border-radius: 8px !important;
-  font-size: 0.8125rem !important; /* 13px */
-  font-weight: 500 !important;
-  letter-spacing: 0.01em;
-  color: rgba(241,245,236,0.65) !important;
-  padding: 0.5rem 0.875rem !important;
-  transition: all 0.15s ease;
-  border-left: 2px solid transparent;
-}
-
-.fp-nav-item:hover {
-  color: rgba(241,245,236,0.95) !important;
-  background: rgba(255,255,255,0.04) !important;
-  border-left-color: rgba(143,203,98,0.4);
-}
-
-.fp-nav-item-active {
-  color: #8FCB62 !important;
-  background: rgba(143,203,98,0.08) !important;
-  border-left-color: #8FCB62 !important;
-  font-weight: 600 !important;
-}
-
-/* Sidebar category labels */
-.fp-nav-category {
-  font-size: 0.625rem !important; /* 10px */
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
+.fp-section-label {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 0.6875rem;
   font-weight: 700;
-  color: rgba(168,189,176,0.5) !important;
-  padding: 1rem 0.875rem 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+  color: var(--fp-text-muted);
+  margin-bottom: 1rem;
+}
+
+.fp-section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--fp-border);
 }
 
 /* -------------------------------------------------------------------------
-   3. Cards — Sharper borders, more structured whitespace
+   5. Card System
    ------------------------------------------------------------------------- */
 
 .fp-card {
-  border-radius: 12px !important;
-  border: 1px solid rgba(255,255,255,0.07) !important;
-  background: linear-gradient(135deg,
-    rgba(15,32,20,0.9) 0%,
-    rgba(12,26,17,0.95) 100%
+  border-radius: var(--fp-radius-lg) !important;
+  border: 1px solid var(--fp-border) !important;
+  background: linear-gradient(
+    145deg,
+    rgba(15, 34, 20, 0.95) 0%,
+    rgba(10, 26, 14, 0.98) 100%
   ) !important;
+  box-shadow: var(--fp-shadow-card) !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.fp-card:hover {
+  border-color: var(--fp-border-hover) !important;
 }
 
 .fp-glass {
-  border-radius: 14px !important;
-  background: linear-gradient(135deg,
-    rgba(20,42,28,0.85) 0%,
-    rgba(15,32,20,0.9) 100%
+  border-radius: var(--fp-radius-lg) !important;
+  background: linear-gradient(
+    145deg,
+    rgba(20, 44, 26, 0.88) 0%,
+    rgba(15, 34, 20, 0.92) 100%
   ) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
-  backdrop-filter: blur(20px) saturate(1.2);
-  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  border: 1px solid rgba(255,255,255,0.09) !important;
+  backdrop-filter: blur(24px) saturate(1.3) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.3) !important;
+  box-shadow: var(--fp-shadow-card) !important;
+}
+
+/* Elevated glass for modals / overlays */
+.fp-glass-elevated {
+  background: linear-gradient(
+    145deg,
+    rgba(28, 58, 36, 0.95) 0%,
+    rgba(20, 44, 26, 0.98) 100%
+  ) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  backdrop-filter: blur(32px) !important;
+  border-radius: var(--fp-radius-xl) !important;
 }
 
 /* -------------------------------------------------------------------------
-   4. Topbar — Denser, more data-focused
+   6. KPI / Stat Card
    ------------------------------------------------------------------------- */
 
-header.sticky {
-  border-bottom: 1px solid rgba(255,255,255,0.04) !important;
-  background: rgba(10,22,14,0.92) !important;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+.fp-stat-card {
+  border-radius: var(--fp-radius-lg);
+  border: 1px solid var(--fp-border);
+  background: linear-gradient(145deg, rgba(15,34,20,0.95), rgba(10,26,14,0.98));
+  padding: 1.125rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  transition: border-color 0.15s ease;
 }
 
-/* Topbar search — more utilitarian */
-.fp-input[type="search"] {
-  font-size: 0.8125rem !important;
-  border-radius: 8px !important;
-}
+.fp-stat-card:hover { border-color: var(--fp-border-hover); }
 
-/* Network telemetry pill — government system status style */
-#network-telemetry-pill {
-  font-size: 0.6875rem !important; /* 11px */
-  letter-spacing: 0.04em;
-  border-radius: 6px !important; /* square-ish, not pill */
-  font-weight: 600;
-}
-
-/* Demo pill — less colorful, more subtle */
-.fp-demo-pill {
-  background: rgba(255,255,255,0.04) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
-  color: rgba(168,189,176,0.6) !important;
-  font-size: 0.625rem !important;
-  border-radius: 4px !important;
-  padding: 0.2rem 0.5rem !important;
-  font-weight: 500 !important;
-  letter-spacing: 0.06em;
+.fp-stat-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--fp-text-muted);
+}
+
+.fp-stat-value {
+  font-family: var(--fp-font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  color: var(--fp-text-primary);
+}
+
+.fp-stat-unit {
+  font-family: var(--fp-font-body);
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--fp-text-muted);
+  margin-left: 0.3em;
+}
+
+.fp-stat-delta {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2em;
+}
+
+.fp-stat-delta.up   { color: var(--fp-success); }
+.fp-stat-delta.down { color: var(--fp-danger); }
+
+/* -------------------------------------------------------------------------
+   7. Data Labels & Badges
+   ------------------------------------------------------------------------- */
+
+.fp-label {
+  font-size: 0.6875rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.09em !important;
+  color: var(--fp-text-muted) !important;
+  margin-bottom: 0.3rem !important;
+  display: block;
+}
+
+/* Badge base */
+.fp-badge,
+[class^="fp-badge-"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  border-radius: 4px !important;
+  font-size: 0.625rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  padding: 0.2rem 0.55rem !important;
+  line-height: 1.4;
+}
+
+/* Semantic badge variants */
+.fp-badge-low, .fp-badge-green {
+  background: rgba(143,203,98,0.12) !important;
+  color: #8FCB62 !important;
+  border: 1px solid rgba(143,203,98,0.25) !important;
+}
+.fp-badge-medium, .fp-badge-amber {
+  background: rgba(245,158,11,0.12) !important;
+  color: #F59E0B !important;
+  border: 1px solid rgba(245,158,11,0.25) !important;
+}
+.fp-badge-high, .fp-badge-red {
+  background: rgba(239,68,68,0.12) !important;
+  color: #EF4444 !important;
+  border: 1px solid rgba(239,68,68,0.25) !important;
+}
+.fp-badge-water, .fp-badge-blue {
+  background: rgba(96,165,250,0.12) !important;
+  color: #60A5FA !important;
+  border: 1px solid rgba(96,165,250,0.25) !important;
+}
+.fp-badge-neutral {
+  background: rgba(255,255,255,0.05) !important;
+  color: rgba(241,245,236,0.70) !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
 }
 
 /* -------------------------------------------------------------------------
-   5. Buttons — Crisp, decisive, institutional
+   8. Table System — Dense, information-rich, legible
+   ------------------------------------------------------------------------- */
+
+.fp-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--fp-radius);
+  border: 1px solid var(--fp-border);
+}
+
+.fp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.fp-table thead {
+  background: rgba(6, 14, 8, 0.80);
+  border-bottom: 1px solid var(--fp-border);
+}
+
+.fp-table thead th {
+  padding: 0.7rem 1rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fp-text-muted);
+  white-space: nowrap;
+  font-family: var(--fp-font-body);
+}
+
+.fp-table thead th.text-right { text-align: right; }
+.fp-table thead th.text-center { text-align: center; }
+
+.fp-table tbody tr {
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  transition: background 0.1s ease;
+}
+
+.fp-table tbody tr:last-child { border-bottom: none; }
+
+.fp-table tbody tr:hover {
+  background: rgba(255,255,255,0.025);
+}
+
+.fp-table tbody td {
+  padding: 0.8rem 1rem;
+  color: var(--fp-text-primary);
+  vertical-align: middle;
+}
+
+.fp-table tbody td.text-right  { text-align: right; }
+.fp-table tbody td.text-center { text-align: center; }
+.fp-table tbody td.text-muted  { color: var(--fp-text-secondary); }
+
+/* Numeric columns: right-aligned monospace */
+.fp-table .fp-col-num {
+  text-align: right;
+  font-family: var(--fp-font-mono);
+  font-size: 0.8125rem;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Table footer / summary row */
+.fp-table tfoot tr {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  background: rgba(6,14,8,0.6);
+}
+
+.fp-table tfoot td {
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  color: var(--fp-text-primary);
+}
+
+/* -------------------------------------------------------------------------
+   9. Form System
+   ------------------------------------------------------------------------- */
+
+.fp-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.fp-form-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(241,245,236,0.85);
+  letter-spacing: 0.03em;
+}
+
+.fp-input {
+  width: 100%;
+  background: rgba(6,14,8,0.6) !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  border-radius: var(--fp-radius) !important;
+  color: var(--fp-text-primary) !important;
+  font-size: 0.875rem !important;
+  padding: 0.625rem 0.875rem !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+  font-family: var(--fp-font-body) !important;
+  line-height: 1.5 !important;
+}
+
+.fp-input:focus {
+  outline: none !important;
+  border-color: rgba(143,203,98,0.5) !important;
+  box-shadow: 0 0 0 3px rgba(143,203,98,0.10) !important;
+}
+
+.fp-input::placeholder {
+  color: rgba(168,189,176,0.40) !important;
+}
+
+.fp-input[type="search"] {
+  font-size: 0.8125rem !important;
+  border-radius: var(--fp-radius-sm) !important;
+}
+
+/* Select */
+.fp-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(168,189,176,0.6)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2.25rem !important;
+}
+
+/* Error message under field */
+.fp-field-error {
+  font-size: 0.75rem;
+  color: #FCA5A5;
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+}
+
+/* -------------------------------------------------------------------------
+   10. Button System
    ------------------------------------------------------------------------- */
 
 .fp-btn-primary {
-  border-radius: 8px !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  border-radius: var(--fp-radius-sm) !important;
   font-weight: 600 !important;
   font-size: 0.8125rem !important;
   letter-spacing: 0.02em !important;
-  padding: 0.5rem 1.125rem !important;
-  background: #8FCB62 !important;
+  padding: 0.5625rem 1.125rem !important;
+  background: var(--fp-green) !important;
   color: #0A1A0E !important;
+  border: none !important;
+  cursor: pointer;
   box-shadow:
-    0 1px 3px rgba(0,0,0,0.3),
-    inset 0 1px 0 rgba(255,255,255,0.15) !important;
-  transition: all 0.15s ease !important;
+    0 1px 3px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.18) !important;
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease !important;
+  text-decoration: none;
+  line-height: 1.4;
 }
 
 .fp-btn-primary:hover {
   background: #9ED672 !important;
   transform: translateY(-1px) !important;
   box-shadow:
-    0 4px 12px rgba(143,203,98,0.3),
-    inset 0 1px 0 rgba(255,255,255,0.2) !important;
+    0 4px 14px rgba(143,203,98,0.30),
+    inset 0 1px 0 rgba(255,255,255,0.22) !important;
 }
 
 .fp-btn-primary:active {
   transform: translateY(0) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.35) !important;
 }
 
 .fp-btn-ghost {
-  border-radius: 8px !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  border-radius: var(--fp-radius-sm) !important;
   font-size: 0.8125rem !important;
   font-weight: 500 !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
-  color: rgba(241,245,236,0.7) !important;
+  padding: 0.5rem 0.875rem !important;
+  border: 1px solid rgba(255,255,255,0.09) !important;
+  color: rgba(241,245,236,0.72) !important;
+  background: transparent !important;
+  cursor: pointer;
   transition: all 0.15s ease !important;
+  text-decoration: none;
+  line-height: 1.4;
 }
 
 .fp-btn-ghost:hover {
-  background: rgba(255,255,255,0.05) !important;
-  border-color: rgba(255,255,255,0.15) !important;
-  color: rgba(241,245,236,0.95) !important;
+  background: rgba(255,255,255,0.055) !important;
+  border-color: rgba(255,255,255,0.16) !important;
+  color: var(--fp-text-primary) !important;
+}
+
+.fp-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  border-radius: var(--fp-radius-sm) !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  padding: 0.5rem 0.875rem !important;
+  border: 1px solid var(--fp-border) !important;
+  color: var(--fp-text-secondary) !important;
+  background: transparent !important;
+  cursor: pointer;
+  transition: all 0.15s ease !important;
+  text-decoration: none;
+  line-height: 1.4;
+}
+
+.fp-btn-outline:hover {
+  border-color: var(--fp-border-hover) !important;
+  color: var(--fp-text-primary) !important;
+  background: rgba(255,255,255,0.03) !important;
+}
+
+/* Button size modifiers */
+.fp-btn-sm { padding: 0.375rem 0.75rem !important; font-size: 0.75rem !important; }
+.fp-btn-lg { padding: 0.75rem 1.5rem !important; font-size: 0.9375rem !important; }
+
+/* -------------------------------------------------------------------------
+   11. Sidebar — Structured, institutional
+   ------------------------------------------------------------------------- */
+
+aside#sidebar {
+  border-right: 1px solid rgba(255,255,255,0.05) !important;
+  background: linear-gradient(180deg, #060E08 0%, #0A1A0E 100%) !important;
+}
+
+/* Nav items */
+.fp-nav-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.625rem !important;
+  border-radius: 7px !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em !important;
+  color: rgba(241,245,236,0.60) !important;
+  padding: 0.5rem 0.75rem !important;
+  transition: all 0.14s ease !important;
+  border-left: 2px solid transparent !important;
+  text-decoration: none !important;
+}
+
+.fp-nav-item:hover {
+  color: rgba(241,245,236,0.92) !important;
+  background: rgba(255,255,255,0.045) !important;
+  border-left-color: rgba(143,203,98,0.35) !important;
+}
+
+.fp-nav-item-active {
+  color: #8FCB62 !important;
+  background: rgba(143,203,98,0.09) !important;
+  border-left-color: #8FCB62 !important;
+  font-weight: 600 !important;
+}
+
+/* Nav category separator */
+.fp-nav-category {
+  font-size: 0.625rem !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.14em !important;
+  color: rgba(168,189,176,0.42) !important;
+  padding: 1rem 0.75rem 0.3rem !important;
 }
 
 /* -------------------------------------------------------------------------
-   6. Data Labels & Badges — Scientific notation feel
+   12. Topbar — Government portal standard
    ------------------------------------------------------------------------- */
 
-.fp-label {
-  font-size: 0.625rem !important; /* 10px */
-  font-weight: 700 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.09em !important;
-  color: rgba(168,189,176,0.7) !important;
-  margin-bottom: 0.375rem !important;
+header.sticky {
+  border-bottom: 1px solid rgba(255,255,255,0.045) !important;
+  background: rgba(6,14,8,0.94) !important;
+  backdrop-filter: blur(28px) saturate(1.1) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.1) !important;
 }
 
-/* Status badges — more rectangular, less pill */
-.fp-badge-low,
-.fp-badge,
-[class*="fp-badge"] {
+/* Network status pill */
+#network-telemetry-pill {
+  font-size: 0.6875rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+  border-radius: 5px !important;
+  padding: 0.25rem 0.625rem !important;
+}
+
+/* Demo pill */
+.fp-demo-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.3em !important;
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  color: rgba(168,189,176,0.55) !important;
+  font-size: 0.625rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase !important;
   border-radius: 4px !important;
-  font-size: 0.6rem !important;
-  letter-spacing: 0.08em !important;
-  padding: 0.175rem 0.5rem !important;
-  font-weight: 700 !important;
-  text-transform: uppercase !important;
+  padding: 0.25rem 0.5rem !important;
 }
 
 /* -------------------------------------------------------------------------
-   7. Scenario Simulator — Performance dashboard aesthetics
+   13. Alert / Notice Blocks
    ------------------------------------------------------------------------- */
 
-/* Season Rating badge — more hexagonal, data terminal style */
+.fp-alert {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.875rem 1rem;
+  border-radius: var(--fp-radius);
+  border-left: 3px solid;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+}
+
+.fp-alert-icon {
+  flex-shrink: 0;
+  margin-top: 0.1em;
+  width: 1rem;
+  height: 1rem;
+}
+
+.fp-alert-info {
+  background: rgba(96,165,250,0.08);
+  border-color: rgba(96,165,250,0.5);
+  color: rgba(191,219,254,0.9);
+}
+
+.fp-alert-success {
+  background: rgba(143,203,98,0.08);
+  border-color: rgba(143,203,98,0.5);
+  color: rgba(187,225,145,0.9);
+}
+
+.fp-alert-warning {
+  background: rgba(245,158,11,0.08);
+  border-color: rgba(245,158,11,0.5);
+  color: rgba(252,211,77,0.9);
+}
+
+.fp-alert-danger {
+  background: rgba(239,68,68,0.08);
+  border-color: rgba(239,68,68,0.5);
+  color: rgba(252,165,165,0.9);
+}
+
+/* -------------------------------------------------------------------------
+   14. Empty State Component
+   ------------------------------------------------------------------------- */
+
+.fp-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  gap: 1rem;
+}
+
+.fp-empty-state-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--fp-border);
+  color: var(--fp-green);
+}
+
+.fp-empty-state h2 {
+  font-size: 1.0625rem;
+  font-weight: 650;
+  color: var(--fp-text-primary);
+  margin: 0;
+}
+
+.fp-empty-state p {
+  font-size: 0.875rem;
+  color: var(--fp-text-secondary);
+  max-width: 42ch;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* -------------------------------------------------------------------------
+   15. Scenario Simulator — Performance terminal
+   ------------------------------------------------------------------------- */
+
 #hud-grade {
   border-radius: 10px !important;
   font-size: 1.5rem !important;
-  font-family: 'Plus Jakarta Sans', monospace !important;
-  letter-spacing: -0.02em;
+  font-family: var(--fp-font-display) !important;
+  letter-spacing: -0.02em !important;
 }
 
-/* Preset scenario cards — structured list items not game cards */
 .preset-card {
   border-radius: 10px !important;
-  transition: all 0.15s ease !important;
+  transition: all 0.14s ease !important;
   border-left: 3px solid transparent !important;
 }
 
 .preset-card:hover {
   transform: translateY(-2px) !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3) !important;
-}
-
-.preset-card .font-bold {
-  font-size: 0.75rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.01em;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35) !important;
 }
 
 /* -------------------------------------------------------------------------
-   8. Sliders — Government data terminal style
+   16. Sliders — Data terminal style
    ------------------------------------------------------------------------- */
 
 input[type="range"] {
   height: 4px !important;
   border-radius: 2px !important;
+  cursor: pointer;
 }
 
 input[type="range"]::-webkit-slider-thumb {
@@ -245,71 +778,40 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 /* -------------------------------------------------------------------------
-   9. Tables & Data grids — Dense, information-rich
-   ------------------------------------------------------------------------- */
-
-.font-mono {
-  font-feature-settings: "tnum" 1, "lnum" 1; /* tabular numerals */
-}
-
-/* Ensure data numbers are always tabular */
-[id*="hud-"],
-[id*="splitter-"],
-[id*="slider-"] {
-  font-feature-settings: "tnum" 1;
-}
-
-/* -------------------------------------------------------------------------
-   10. Hero Banner — National government portal aesthetic
-   ------------------------------------------------------------------------- */
-
-/* Tighten and formalize the hero section */
-.relative.rounded-3xl h1 {
-  font-size: clamp(1.75rem, 4vw, 3rem) !important;
-  letter-spacing: -0.03em !important;
-  line-height: 1.1 !important;
-}
-
-/* -------------------------------------------------------------------------
-   11. Map Container — Cartographic authority
+   17. Map
    ------------------------------------------------------------------------- */
 
 #farmpulse-national-map {
-  border-radius: 10px !important;
-  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--fp-radius) !important;
+  border: 1px solid var(--fp-border) !important;
 }
 
-/* Leaflet popup — professional tooltip */
 .leaflet-popup-content-wrapper {
-  border-radius: 8px !important;
+  border-radius: var(--fp-radius-sm) !important;
   font-size: 12px !important;
-  font-family: 'Inter', sans-serif !important;
+  font-family: var(--fp-font-body) !important;
+  background: #0F2214 !important;
+  color: var(--fp-text-primary) !important;
+  border: 1px solid var(--fp-border) !important;
+  box-shadow: var(--fp-shadow-drop) !important;
 }
+
+.leaflet-popup-tip { background: #0F2214 !important; }
 
 /* -------------------------------------------------------------------------
-   12. Scrollbar — Dark, minimal
+   18. Scrollbar — Minimal dark
    ------------------------------------------------------------------------- */
 
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(255,255,255,0.02);
-}
-
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
 ::-webkit-scrollbar-thumb {
   background: rgba(143,203,98,0.2);
   border-radius: 3px;
 }
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(143,203,98,0.4);
-}
+::-webkit-scrollbar-thumb:hover { background: rgba(143,203,98,0.38); }
 
 /* -------------------------------------------------------------------------
-   13. Focus Rings — Accessible, branded
+   19. Focus & Accessibility
    ------------------------------------------------------------------------- */
 
 *:focus-visible {
@@ -317,31 +819,93 @@ input[type="range"]::-webkit-slider-thumb {
   outline-offset: 2px !important;
 }
 
-/* -------------------------------------------------------------------------
-   14. Selection Colour
-   ------------------------------------------------------------------------- */
-
 ::selection {
-  background: rgba(143,203,98,0.3);
+  background: rgba(143,203,98,0.28);
   color: #F1F5EC;
 }
 
 /* -------------------------------------------------------------------------
-   15. Print — Clean, no dark backgrounds
+   20. Print — Clean output, no dark backgrounds
    ------------------------------------------------------------------------- */
 
 @media print {
-  body {
-    background: white !important;
-    color: black !important;
+  body, main { background: #fff !important; color: #111 !important; }
+  .fp-card, .fp-glass, .fp-glass-elevated {
+    background: #fff !important;
+    border: 1px solid #ddd !important;
+    color: #111 !important;
+    box-shadow: none !important;
   }
-  .fp-card, .fp-glass {
-    background: white !important;
-    border: 1px solid #ccc !important;
-    color: black !important;
-  }
-  aside#sidebar, header.sticky {
-    display: none !important;
-  }
+  aside#sidebar, header.sticky, .fp-btn-primary, .fp-btn-ghost { display: none !important; }
 }
 
+/* -------------------------------------------------------------------------
+   21. Miscellaneous Utilities
+   ------------------------------------------------------------------------- */
+
+/* Animated status dot */
+.fp-live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--fp-green);
+  animation: fp-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes fp-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.85); }
+}
+
+/* Tight data row (for key-value lists) */
+.fp-data-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 0.8125rem;
+}
+.fp-data-row:last-child { border-bottom: none; }
+.fp-data-row-key   { color: var(--fp-text-secondary); }
+.fp-data-row-value { color: var(--fp-text-primary); font-weight: 600; }
+
+/* Source / timestamp pill */
+.fp-source-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--fp-text-muted);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 4px;
+  padding: 0.2rem 0.5rem;
+  letter-spacing: 0.03em;
+}
+
+/* Loading spinner */
+.fp-spinner {
+  width: 1em;
+  height: 1em;
+  border: 2px solid rgba(143,203,98,0.2);
+  border-top-color: var(--fp-green);
+  border-radius: 50%;
+  animation: fp-spin 0.7s linear infinite;
+}
+@keyframes fp-spin { to { transform: rotate(360deg); } }
+
+/* Metric highlight on hover */
+.fp-metric-hover {
+  transition: color 0.15s ease;
+}
+.fp-metric-hover:hover { color: var(--fp-green) !important; }
+
+/* Full-width divider */
+.fp-hr {
+  border: none;
+  border-top: 1px solid var(--fp-border);
+  margin: 1.5rem 0;
+}

@@ -8,103 +8,100 @@
 {% endblock %}
 
 {% block content %}
-<div class="space-y-6">
+<div class="max-w-6xl mx-auto space-y-6">
 
   <!-- Header -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  <header class="fp-page-header">
     <div>
-      <div class="flex items-center gap-2">
-        <a href="{% url 'farms:season_review_index' %}" class="text-xs text-earth-muted hover:text-leaf inline-flex items-center gap-1">
-          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> All Season Reviews
-        </a>
-        <span class="text-xs text-earth-muted">/</span>
-        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-leaf/10 text-leaf">
-          {{ season.name }}
-        </span>
+      <div class="fp-breadcrumb">
+        <a href="{% url 'farms:season_review_index' %}">Season Reviews</a>
+        <span class="fp-breadcrumb-sep">/</span>
+        <span class="text-cream font-medium">{{ season.name }}</span>
       </div>
-      <div class="flex items-center gap-3 mt-1">
-        <h1 class="text-2xl font-bold text-earth-heading">{{ season.name }} Review</h1>
+
+      <div class="flex flex-wrap items-center gap-2.5">
+        <h1 class="font-display text-2xl sm:text-3xl font-bold text-cream tracking-tight">{{ season.name }} Review</h1>
         {% if review %}
-          <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+          <span class="fp-badge-green text-xs">
             <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Reviewed
-          </div>
+          </span>
         {% else %}
-          <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
-            <i data-lucide="clock" class="w-3.5 h-3.5"></i> Pending Notes
-          </div>
+          <span class="fp-badge-amber text-xs">
+            <i data-lucide="clock" class="w-3.5 h-3.5"></i> Pending Reflection
+          </span>
         {% endif %}
       </div>
-      <p class="text-sm text-earth-muted mt-1">
-        {{ season.farm.name }} • {{ season.start_date|date:"F Y" }} to {{ season.end_date|date:"F Y" }}
+
+      <p class="fp-page-header-desc">
+        {{ season.farm.name }} &bull; {{ season.start_date|date:"F Y" }} to {{ season.end_date|date:"F Y" }} &bull; Retrospective Variance Analysis.
       </p>
     </div>
 
     <!-- Actions -->
-    <div class="flex items-center gap-3">
-      <a href="{% url 'farms:season_review_edit' season.id %}" class="fp-btn-primary inline-flex items-center gap-2 text-sm">
-        <i data-lucide="edit" class="w-4 h-4"></i> {% if review %}Edit Review & Plan Link{% else %}Add Review Reflections{% endif %}
+    <div class="flex items-center gap-2.5 pt-1 shrink-0">
+      <a href="{% url 'farms:season_review_edit' season.id %}" class="fp-btn-primary text-xs">
+        <i data-lucide="edit" class="w-3.5 h-3.5"></i> {% if review %}Edit Review &amp; Link{% else %}Add Review Reflections{% endif %}
       </a>
-      <a href="{% url 'farms:farm_history' %}" class="fp-btn-outline inline-flex items-center gap-2 text-sm">
-        <i data-lucide="history" class="w-4 h-4"></i> Season Plantings
+      <a href="{% url 'farms:farm_history' %}" class="fp-btn-ghost text-xs">
+        <i data-lucide="history" class="w-3.5 h-3.5"></i> Plantings History
       </a>
     </div>
-  </div>
+  </header>
 
   <!-- Plan Link Status Banner -->
   {% if plan %}
-    <div class="bg-leaf/10 border border-leaf/30 rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 text-sm">
+    <div class="fp-card p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-3 border-leaf/30 bg-leaf/5">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-full bg-leaf text-white flex items-center justify-center shrink-0">
+        <div class="w-9 h-9 rounded-lg bg-leaf/20 text-leaf flex items-center justify-center shrink-0 border border-leaf/30">
           <i data-lucide="bookmark-check" class="w-5 h-5"></i>
         </div>
         <div>
-          <span class="font-semibold text-earth-heading">Benchmarked Against Plan: {{ plan.name }}</span>
-          <p class="text-xs text-earth-muted">
-            Formulated on {{ plan.created_at|date:"M d, Y" }} · Strategy: <span class="capitalize font-medium">{{ plan.strategy }}</span> · Target Area: {{ plan.allocated_land_ha|floatformat:2 }} ha
+          <span class="font-bold text-cream text-sm">Benchmarked Against Plan: {{ plan.name }}</span>
+          <p class="text-xs text-cream/65">
+            Formulated on {{ plan.created_at|date:"M d, Y" }} &bull; Strategy: <span class="capitalize font-semibold text-leaf">{{ plan.get_strategy_type_display|default:plan.strategy }}</span> &bull; Target Area: {{ plan.total_land_ha|default:plan.allocated_land_ha|floatformat:1 }} ha
           </p>
         </div>
       </div>
-      <a href="{% url 'planner:plan_detail' plan.id %}" class="text-xs font-semibold text-leaf hover:underline inline-flex items-center gap-1">
-        Inspect Original Plan <i data-lucide="external-link" class="w-3 h-3"></i>
+      <a href="{% url 'planner:plan_detail' plan.id %}" class="fp-btn-ghost text-xs text-leaf hover:text-leaf shrink-0">
+        Inspect Original Plan <i data-lucide="external-link" class="w-3.5 h-3.5 ml-1"></i>
       </a>
     </div>
   {% else %}
-    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 text-sm">
+    <div class="fp-card p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-3 border-amber-500/30 bg-amber-500/5">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0">
+        <div class="w-9 h-9 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/30">
           <i data-lucide="alert-triangle" class="w-5 h-5"></i>
         </div>
         <div>
-          <span class="font-semibold text-amber-900">No Planned Baseline Associated</span>
-          <p class="text-xs text-amber-700">
+          <span class="font-bold text-cream text-sm">No Planned Baseline Associated</span>
+          <p class="text-xs text-cream/65">
             Link an existing saved crop plan to view side-by-side variances for area, production cost, yield, and revenue.
           </p>
         </div>
       </div>
-      <a href="{% url 'farms:season_review_edit' season.id %}" class="fp-btn-outline border-amber-400 text-amber-900 bg-white text-xs font-semibold">
+      <a href="{% url 'farms:season_review_edit' season.id %}" class="fp-btn-ghost text-amber-300 border-amber-400/40 hover:bg-amber-400/10 text-xs shrink-0 font-semibold">
         Link Crop Plan
       </a>
     </div>
   {% endif %}
 
   <!-- KPI Planned vs Actual Summary Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 font-mono">
 
     <!-- Cultivated Area -->
-    <div class="fp-card p-4 space-y-2">
+    <div class="fp-card p-4 space-y-1.5">
       <div class="flex items-center justify-between">
-        <span class="text-xs font-semibold text-earth-muted uppercase tracking-wider">Cultivated Area</span>
+        <span class="fp-label font-sans">Cultivated Area</span>
         <i data-lucide="pie-chart" class="w-4 h-4 text-leaf"></i>
       </div>
-      <div class="flex items-baseline gap-2">
-        <span class="text-xl font-bold text-earth-heading">{{ totals.actual_area|floatformat:2 }} ha</span>
-        <span class="text-xs text-earth-muted">act.</span>
+      <div class="text-xl font-bold text-cream">
+        {{ totals.actual_area|floatformat:1 }}<span class="text-xs font-normal text-cream/50 ml-1 font-sans">ha</span>
       </div>
       {% if plan %}
-        <div class="text-xs flex items-center justify-between pt-1 border-t border-earth-border/40">
-          <span class="text-earth-muted">Plan: {{ totals.planned_area|floatformat:2 }} ha</span>
+        <div class="text-[11px] flex items-center justify-between pt-1 border-t border-white/5 font-sans">
+          <span class="text-cream/50">Plan: {{ totals.planned_area|floatformat:1 }} ha</span>
           {% if totals.area_pct is not None %}
-            <span class="font-semibold {% if totals.area_pct >= 0 %}text-emerald-700{% else %}text-amber-700{% endif %}">
+            <span class="font-bold font-mono {% if totals.area_pct >= 0 %}text-leaf{% else %}text-amber-300{% endif %}">
               {% if totals.area_pct > 0 %}+{% endif %}{{ totals.area_pct|floatformat:1 }}%
             </span>
           {% endif %}
@@ -113,20 +110,19 @@
     </div>
 
     <!-- Harvested Yield -->
-    <div class="fp-card p-4 space-y-2">
+    <div class="fp-card p-4 space-y-1.5">
       <div class="flex items-center justify-between">
-        <span class="text-xs font-semibold text-earth-muted uppercase tracking-wider">Harvested Yield</span>
+        <span class="fp-label font-sans">Harvested Yield</span>
         <i data-lucide="scale" class="w-4 h-4 text-leaf"></i>
       </div>
-      <div class="flex items-baseline gap-2">
-        <span class="text-xl font-bold text-earth-heading">{{ totals.actual_yield|floatformat:0|intcomma }} kg</span>
-        <span class="text-xs text-earth-muted">act.</span>
+      <div class="text-xl font-bold text-cream">
+        {{ totals.actual_yield|floatformat:0|intcomma }}<span class="text-xs font-normal text-cream/50 ml-1 font-sans">kg</span>
       </div>
       {% if plan %}
-        <div class="text-xs flex items-center justify-between pt-1 border-t border-earth-border/40">
-          <span class="text-earth-muted">Plan: {{ totals.planned_yield|floatformat:0|intcomma }} kg</span>
+        <div class="text-[11px] flex items-center justify-between pt-1 border-t border-white/5 font-sans">
+          <span class="text-cream/50">Plan: {{ totals.planned_yield|floatformat:0|intcomma }} kg</span>
           {% if totals.yield_pct is not None %}
-            <span class="font-semibold {% if totals.yield_pct >= 0 %}text-emerald-700{% else %}text-rose-700{% endif %}">
+            <span class="font-bold font-mono {% if totals.yield_pct >= 0 %}text-leaf{% else %}text-risk-high{% endif %}">
               {% if totals.yield_pct > 0 %}+{% endif %}{{ totals.yield_pct|floatformat:1 }}%
             </span>
           {% endif %}
@@ -135,21 +131,20 @@
     </div>
 
     <!-- Production Cost -->
-    <div class="fp-card p-4 space-y-2">
+    <div class="fp-card p-4 space-y-1.5">
       <div class="flex items-center justify-between">
-        <span class="text-xs font-semibold text-earth-muted uppercase tracking-wider">Total Cost</span>
+        <span class="fp-label font-sans">Production Cost</span>
         <i data-lucide="receipt" class="w-4 h-4 text-leaf"></i>
       </div>
-      <div class="flex items-baseline gap-2">
-        <span class="text-xl font-bold text-earth-heading">MWK {{ totals.actual_cost|floatformat:0|intcomma }}</span>
-        <span class="text-xs text-earth-muted">act.</span>
+      <div class="text-lg sm:text-xl font-bold text-cream">
+        MWK {{ totals.actual_cost|floatformat:0|intcomma }}
       </div>
       {% if plan %}
-        <div class="text-xs flex items-center justify-between pt-1 border-t border-earth-border/40">
-          <span class="text-earth-muted">Plan: MWK {{ totals.planned_cost|floatformat:0|intcomma }}</span>
+        <div class="text-[11px] flex items-center justify-between pt-1 border-t border-white/5 font-sans">
+          <span class="text-cream/50">Plan: {{ totals.planned_cost|floatformat:0|intcomma }}</span>
           {% if totals.cost_pct is not None %}
             <!-- For cost: higher than plan is red, lower than plan is green -->
-            <span class="font-semibold {% if totals.cost_pct <= 0 %}text-emerald-700{% else %}text-rose-700{% endif %}">
+            <span class="font-bold font-mono {% if totals.cost_pct <= 0 %}text-leaf{% else %}text-risk-high{% endif %}">
               {% if totals.cost_pct > 0 %}+{% endif %}{{ totals.cost_pct|floatformat:1 }}%
             </span>
           {% endif %}
@@ -158,20 +153,19 @@
     </div>
 
     <!-- Revenue -->
-    <div class="fp-card p-4 space-y-2">
+    <div class="fp-card p-4 space-y-1.5">
       <div class="flex items-center justify-between">
-        <span class="text-xs font-semibold text-earth-muted uppercase tracking-wider">Total Revenue</span>
+        <span class="fp-label font-sans">Gross Revenue</span>
         <i data-lucide="dollar-sign" class="w-4 h-4 text-leaf"></i>
       </div>
-      <div class="flex items-baseline gap-2">
-        <span class="text-xl font-bold text-earth-heading">MWK {{ totals.actual_rev|floatformat:0|intcomma }}</span>
-        <span class="text-xs text-earth-muted">act.</span>
+      <div class="text-lg sm:text-xl font-bold text-cream">
+        MWK {{ totals.actual_rev|floatformat:0|intcomma }}
       </div>
       {% if plan %}
-        <div class="text-xs flex items-center justify-between pt-1 border-t border-earth-border/40">
-          <span class="text-earth-muted">Plan: MWK {{ totals.planned_rev|floatformat:0|intcomma }}</span>
+        <div class="text-[11px] flex items-center justify-between pt-1 border-t border-white/5 font-sans">
+          <span class="text-cream/50">Plan: {{ totals.planned_rev|floatformat:0|intcomma }}</span>
           {% if totals.rev_pct is not None %}
-            <span class="font-semibold {% if totals.rev_pct >= 0 %}text-emerald-700{% else %}text-rose-700{% endif %}">
+            <span class="font-bold font-mono {% if totals.rev_pct >= 0 %}text-leaf{% else %}text-risk-high{% endif %}">
               {% if totals.rev_pct > 0 %}+{% endif %}{{ totals.rev_pct|floatformat:1 }}%
             </span>
           {% endif %}
@@ -180,22 +174,19 @@
     </div>
 
     <!-- Gross Margin -->
-    <div class="fp-card p-4 space-y-2">
+    <div class="fp-card p-4 space-y-1.5 col-span-2 md:col-span-1">
       <div class="flex items-center justify-between">
-        <span class="text-xs font-semibold text-earth-muted uppercase tracking-wider">Gross Margin</span>
+        <span class="fp-label font-sans">Net Margin</span>
         <i data-lucide="trending-up" class="w-4 h-4 text-leaf"></i>
       </div>
-      <div class="flex items-baseline gap-2">
-        <span class="text-xl font-bold {% if totals.actual_margin >= 0 %}text-emerald-700{% else %}text-rose-700{% endif %}">
-          MWK {{ totals.actual_margin|floatformat:0|intcomma }}
-        </span>
-        <span class="text-xs text-earth-muted">act.</span>
+      <div class="text-lg sm:text-xl font-bold {% if totals.actual_margin >= 0 %}text-leaf{% else %}text-risk-high{% endif %}">
+        MWK {{ totals.actual_margin|floatformat:0|intcomma }}
       </div>
       {% if plan %}
-        <div class="text-xs flex items-center justify-between pt-1 border-t border-earth-border/40">
-          <span class="text-earth-muted">Plan: MWK {{ totals.planned_margin|floatformat:0|intcomma }}</span>
+        <div class="text-[11px] flex items-center justify-between pt-1 border-t border-white/5 font-sans">
+          <span class="text-cream/50">Plan: {{ totals.planned_margin|floatformat:0|intcomma }}</span>
           {% if totals.margin_pct is not None %}
-            <span class="font-semibold {% if totals.margin_pct >= 0 %}text-emerald-700{% else %}text-rose-700{% endif %}">
+            <span class="font-bold font-mono {% if totals.margin_pct >= 0 %}text-leaf{% else %}text-risk-high{% endif %}">
               {% if totals.margin_pct > 0 %}+{% endif %}{{ totals.margin_pct|floatformat:1 }}%
             </span>
           {% endif %}
@@ -207,147 +198,150 @@
 
   <!-- Chart & Per-Crop Comparison Grid -->
   {% if plan and crop_comparisons %}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
       <!-- Chart: Margin Planned vs Actual -->
-      <div class="fp-card p-5 lg:col-span-1">
-        <h3 class="text-sm font-bold text-earth-heading mb-1">Gross Margin Variance by Crop</h3>
-        <p class="text-xs text-earth-muted mb-4">Planned benchmark (MWK) vs Actual realized return.</p>
+      <div class="fp-card p-5 lg:col-span-5 space-y-3">
+        <div>
+          <h3 class="font-display text-sm font-bold text-cream">Gross Margin Variance by Crop</h3>
+          <p class="text-xs text-cream/60">Planned benchmark vs Actual realized returns (MWK).</p>
+        </div>
         <div class="h-64 relative">
           <canvas id="marginCompareChart"></canvas>
         </div>
       </div>
 
       <!-- Per-Crop Comparison Table -->
-      <div class="fp-card p-5 lg:col-span-2 overflow-x-auto">
-        <h3 class="text-sm font-bold text-earth-heading mb-1">Crop-by-Crop Performance Breakdown</h3>
-        <p class="text-xs text-earth-muted mb-4">Detailed side-by-side targets vs field observations.</p>
+      <div class="fp-card p-5 lg:col-span-7 space-y-3">
+        <div>
+          <h3 class="font-display text-sm font-bold text-cream">Crop-by-Crop Performance Breakdown</h3>
+          <p class="text-xs text-cream/60">Direct comparison of planned allocations against harvest logs.</p>
+        </div>
         
-        <table class="w-full text-xs text-left">
-          <thead class="text-earth-muted border-b border-earth-border bg-earth-subtle/50">
-            <tr>
-              <th class="py-2.5 px-3">Crop</th>
-              <th class="py-2.5 px-2 text-right">Area (Plan/Act)</th>
-              <th class="py-2.5 px-2 text-right">Yield (Plan/Act)</th>
-              <th class="py-2.5 px-2 text-right">Cost (Plan/Act)</th>
-              <th class="py-2.5 px-2 text-right">Revenue (Plan/Act)</th>
-              <th class="py-2.5 px-2 text-right">Margin Variance</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-earth-border/40 text-earth-text">
-            {% for item in crop_comparisons %}
-              <tr class="hover:bg-earth-subtle/30">
-                <td class="py-2.5 px-3 font-semibold text-earth-heading">
-                  {{ item.crop.name }}
-                  {% if not item.has_planned %}
-                    <span class="text-[10px] bg-amber-100 text-amber-800 px-1 py-0.5 rounded font-normal ml-1">Unplanned</span>
-                  {% endif %}
-                  {% if not item.has_actual %}
-                    <span class="text-[10px] bg-rose-100 text-rose-800 px-1 py-0.5 rounded font-normal ml-1">Not Planted</span>
-                  {% endif %}
-                </td>
-                <td class="py-2.5 px-2 text-right">
-                  <span class="text-earth-muted">{{ item.planned_area|floatformat:1 }}</span> /
-                  <span class="font-medium text-earth-heading">{{ item.actual_area|floatformat:1 }} ha</span>
-                </td>
-                <td class="py-2.5 px-2 text-right">
-                  <span class="text-earth-muted">{{ item.planned_yield|floatformat:0|intcomma }}</span> /
-                  <span class="font-medium text-earth-heading">{{ item.actual_yield|floatformat:0|intcomma }} kg</span>
-                </td>
-                <td class="py-2.5 px-2 text-right">
-                  <span class="text-earth-muted">{{ item.planned_cost|floatformat:0|intcomma }}</span> /
-                  <span class="font-medium text-earth-heading">{{ item.actual_cost|floatformat:0|intcomma }}</span>
-                </td>
-                <td class="py-2.5 px-2 text-right">
-                  <span class="text-earth-muted">{{ item.planned_rev|floatformat:0|intcomma }}</span> /
-                  <span class="font-medium text-earth-heading">{{ item.actual_rev|floatformat:0|intcomma }}</span>
-                </td>
-                <td class="py-2.5 px-2 text-right">
-                  {% if item.margin_diff is not None %}
-                    <div class="font-bold {% if item.margin_diff >= 0 %}text-emerald-700{% else %}text-rose-700{% endif %}">
-                      {% if item.margin_diff > 0 %}+{% endif %}MWK {{ item.margin_diff|floatformat:0|intcomma }}
-                    </div>
-                    {% if item.margin_pct is not None %}
-                      <div class="text-[10px] text-earth-muted">
-                        ({% if item.margin_pct > 0 %}+{% endif %}{{ item.margin_pct|floatformat:1 }}%)
-                      </div>
-                    {% endif %}
-                  {% else %}
-                    <span class="text-earth-muted">—</span>
-                  {% endif %}
-                </td>
+        <div class="fp-table-wrap">
+          <table class="fp-table font-mono">
+            <thead>
+              <tr>
+                <th class="font-sans font-medium text-left">Crop</th>
+                <th class="text-right">Area (Plan/Act)</th>
+                <th class="text-right">Yield (Plan/Act)</th>
+                <th class="text-right">Cost (Plan/Act)</th>
+                <th class="text-right">Gross Margin Variance</th>
               </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {% for item in crop_comparisons %}
+                <tr>
+                  <td class="font-sans font-medium text-cream flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-leaf"></span>
+                    {{ item.crop.name }}
+                    {% if not item.has_planned %}
+                      <span class="fp-badge-amber text-[9px] ml-1">Unplanned</span>
+                    {% endif %}
+                    {% if not item.has_actual %}
+                      <span class="fp-badge-red text-[9px] ml-1">Not Planted</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-right">
+                    <span class="text-cream/50">{{ item.planned_area|floatformat:1 }}</span> /
+                    <span class="font-semibold text-cream">{{ item.actual_area|floatformat:1 }} ha</span>
+                  </td>
+                  <td class="text-right">
+                    <span class="text-cream/50">{{ item.planned_yield|floatformat:0|intcomma }}</span> /
+                    <span class="font-semibold text-cream">{{ item.actual_yield|floatformat:0|intcomma }} kg</span>
+                  </td>
+                  <td class="text-right">
+                    <span class="text-cream/50">{{ item.planned_cost|floatformat:0|intcomma }}</span> /
+                    <span class="font-semibold text-cream">{{ item.actual_cost|floatformat:0|intcomma }}</span>
+                  </td>
+                  <td class="text-right">
+                    {% if item.margin_diff is not None %}
+                      <div class="font-bold {% if item.margin_diff >= 0 %}text-leaf{% else %}text-risk-high{% endif %}">
+                        {% if item.margin_diff > 0 %}+{% endif %}MWK {{ item.margin_diff|floatformat:0|intcomma }}
+                      </div>
+                      {% if item.margin_pct is not None %}
+                        <div class="text-[10px] text-cream/50 font-sans">
+                          ({% if item.margin_pct > 0 %}+{% endif %}{{ item.margin_pct|floatformat:1 }}%)
+                        </div>
+                      {% endif %}
+                    {% else %}
+                      <span class="text-cream/40">—</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
       </div>
 
     </div>
   {% endif %}
 
   <!-- Qualitative Post-Mortem & Agronomic Reflection Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
     <!-- Overall Satisfaction -->
     <div class="fp-card p-5 space-y-3">
       <div class="flex items-center justify-between">
-        <h4 class="text-xs font-bold text-earth-muted uppercase tracking-wider">Overall Satisfaction</h4>
-        <i data-lucide="award" class="w-4 h-4 text-amber-500"></i>
+        <h4 class="fp-label">Overall Satisfaction</h4>
+        <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
       </div>
       {% if review %}
         <div class="flex items-center gap-2">
-          <span class="text-3xl font-extrabold text-earth-heading">{{ review.overall_satisfaction }}</span>
-          <span class="text-sm text-earth-muted">/ 5</span>
+          <span class="text-3xl font-extrabold text-cream font-mono">{{ review.overall_satisfaction }}</span>
+          <span class="text-sm text-cream/50">/ 5</span>
           <div class="flex items-center text-amber-400 ml-1">
             {% for i in "12345" %}
-              <i data-lucide="star" class="w-4 h-4 {% if forloop.counter <= review.overall_satisfaction %}fill-amber-400 text-amber-400{% else %}text-earth-border{% endif %}"></i>
+              <i data-lucide="star" class="w-4 h-4 {% if forloop.counter <= review.overall_satisfaction %}fill-amber-400 text-amber-400{% else %}text-white/10{% endif %}"></i>
             {% endfor %}
           </div>
         </div>
-        <p class="text-xs text-earth-muted">
+        <p class="text-xs text-cream/70">
           {{ review.get_overall_satisfaction_display }}
         </p>
       {% else %}
-        <p class="text-xs text-earth-muted italic">Not rated yet. Complete review notes to record satisfaction score.</p>
+        <p class="text-xs text-cream/50 italic">Not rated yet. Complete review notes to record satisfaction score.</p>
       {% endif %}
     </div>
 
     <!-- Agronomic Lessons Learned -->
     <div class="fp-card p-5 space-y-2">
       <div class="flex items-center justify-between">
-        <h4 class="text-xs font-bold text-earth-muted uppercase tracking-wider">Lessons Learned</h4>
+        <h4 class="fp-label">Lessons Learned</h4>
         <i data-lucide="book-open" class="w-4 h-4 text-leaf"></i>
       </div>
       {% if review and review.lessons_learned %}
-        <p class="text-xs text-earth-text leading-relaxed whitespace-pre-line">{{ review.lessons_learned }}</p>
+        <p class="text-xs text-cream/80 leading-relaxed whitespace-pre-line">{{ review.lessons_learned }}</p>
       {% else %}
-        <p class="text-xs text-earth-muted italic">No agronomic takeaways recorded yet.</p>
+        <p class="text-xs text-cream/50 italic">No agronomic takeaways recorded yet.</p>
       {% endif %}
     </div>
 
     <!-- Weather & Climate Assessment -->
     <div class="fp-card p-5 space-y-2">
       <div class="flex items-center justify-between">
-        <h4 class="text-xs font-bold text-earth-muted uppercase tracking-wider">Weather Dynamics</h4>
+        <h4 class="fp-label">Weather Dynamics</h4>
         <i data-lucide="cloud-sun" class="w-4 h-4 text-water"></i>
       </div>
       {% if review and review.weather_assessment %}
-        <p class="text-xs text-earth-text leading-relaxed whitespace-pre-line">{{ review.weather_assessment }}</p>
+        <p class="text-xs text-cream/80 leading-relaxed whitespace-pre-line">{{ review.weather_assessment }}</p>
       {% else %}
-        <p class="text-xs text-earth-muted italic">No rainfall or dry-spell notes recorded.</p>
+        <p class="text-xs text-cream/50 italic">No rainfall or dry-spell notes recorded.</p>
       {% endif %}
     </div>
 
     <!-- Market Realization -->
     <div class="fp-card p-5 space-y-2">
       <div class="flex items-center justify-between">
-        <h4 class="text-xs font-bold text-earth-muted uppercase tracking-wider">Market Dynamics</h4>
-        <i data-lucide="shopping-bag" class="w-4 h-4 text-amber-600"></i>
+        <h4 class="fp-label">Market Dynamics</h4>
+        <i data-lucide="shopping-bag" class="w-4 h-4 text-amber-400"></i>
       </div>
       {% if review and review.market_assessment %}
-        <p class="text-xs text-earth-text leading-relaxed whitespace-pre-line">{{ review.market_assessment }}</p>
+        <p class="text-xs text-cream/80 leading-relaxed whitespace-pre-line">{{ review.market_assessment }}</p>
       {% else %}
-        <p class="text-xs text-earth-muted italic">No price realization or channel notes recorded.</p>
+        <p class="text-xs text-cream/50 italic">No price realization or channel notes recorded.</p>
       {% endif %}
     </div>
 
@@ -372,13 +366,17 @@
             {
               label: 'Planned Margin',
               data: plannedMargin,
-              backgroundColor: '#9ca3af',
+              backgroundColor: 'rgba(255, 255, 255, 0.25)',
+              borderColor: 'rgba(255, 255, 255, 0.4)',
+              borderWidth: 1,
               borderRadius: 4,
             },
             {
               label: 'Actual Margin',
               data: actualMargin,
-              backgroundColor: '#2e7d32',
+              backgroundColor: '#8FCB62',
+              borderColor: '#8FCB62',
+              borderWidth: 1,
               borderRadius: 4,
             }
           ]
@@ -389,7 +387,7 @@
           plugins: {
             legend: {
               position: 'bottom',
-              labels: { boxWidth: 12, font: { size: 10 } }
+              labels: { boxWidth: 12, color: 'rgba(241, 245, 236, 0.7)', font: { size: 10, family: 'Inter' } }
             },
             tooltip: {
               callbacks: {
@@ -401,15 +399,18 @@
           },
           scales: {
             y: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
               ticks: {
+                color: 'rgba(241, 245, 236, 0.5)',
                 callback: function(val) {
                   return 'MWK ' + (val >= 1000000 ? (val/1000000).toFixed(1) + 'M' : (val/1000).toFixed(0) + 'k');
                 },
-                font: { size: 10 }
+                font: { size: 10, family: 'Inter' }
               }
             },
             x: {
-              ticks: { font: { size: 10 } }
+              grid: { display: false },
+              ticks: { color: 'rgba(241, 245, 236, 0.7)', font: { size: 10, family: 'Inter' } }
             }
           }
         }
