@@ -15,218 +15,642 @@
         <span class="text-xs text-cream/60">Bilingual (Chichewa / English)</span>
       </div>
       <h1 class="text-2xl sm:text-3xl font-extrabold text-cream mt-1 flex items-center gap-2">
-        <i data-lucide="bot" class="w-7 h-7 text-purple-400"></i> Mlimi AI: Intelligent Field Copilot
+        <i data-lucide="bot" class="w-7 h-7 text-purple-400"></i>
+        {% if lang == 'ch' %}Mlimi AI: Mlangizi Wanzeru wa pa Munda{% else %}Mlimi AI: Intelligent Field Copilot{% endif %}
       </h1>
       <p class="text-xs sm:text-sm text-cream/70 mt-1 max-w-2xl">
-        Autonomous agronomic intelligence tailored to your specific farm soil horizons, district microclimate, and planting schedule.
+        {% if lang == 'ch' %}
+          Uphungu wa ulimi wodziyimira pawokha wochokera ku nthaka ya munda wanu, nyengo ya m'boma mwanu, ndi mitengo yanu yosapindula (break-even).
+        {% else %}
+          Autonomous agronomic intelligence tailored to your specific soil horizon, district agrometeorology, and active break-even plan economics.
+        {% endif %}
       </p>
     </div>
 
     <!-- Language Switcher -->
-    <div class="flex items-center gap-2 bg-forest-800 p-1 rounded-xl border border-white/10 text-xs font-semibold">
-      <a href="?lang=ch" class="px-3 py-1.5 rounded-lg transition-colors {% if lang == 'ch' %}bg-purple-600 text-white font-bold{% else %}text-cream/70 hover:text-cream{% endif %}">
-        Chichewa
+    <div class="flex items-center gap-1.5 bg-forest-800 p-1 rounded-xl border border-white/10 text-xs font-semibold shrink-0">
+      <a href="?lang=ch" class="px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 {% if lang == 'ch' %}bg-purple-600 text-white font-bold shadow-sm{% else %}text-cream/70 hover:text-cream{% endif %}">
+        <i data-lucide="languages" class="w-3.5 h-3.5"></i>
+        <span>Chichewa</span>
       </a>
-      <a href="?lang=en" class="px-3 py-1.5 rounded-lg transition-colors {% if lang == 'en' %}bg-purple-600 text-white font-bold{% else %}text-cream/70 hover:text-cream{% endif %}">
-        English
+      <a href="?lang=en" class="px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 {% if lang == 'en' %}bg-purple-600 text-white font-bold shadow-sm{% else %}text-cream/70 hover:text-cream{% endif %}">
+        <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+        <span>English</span>
       </a>
     </div>
   </div>
 
-  <!-- Farm Context Ingestion Banner -->
-  <div class="bg-purple-950/40 border border-purple-500/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center shrink-0">
-        <i data-lucide="cpu" class="w-5 h-5"></i>
+  <!-- Farm Telemetry Ingestion Banner -->
+  <div class="fp-card p-4 sm:p-5 border-purple-500/30 bg-purple-950/30 space-y-3">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-purple-500/20 pb-3">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center shrink-0 border border-purple-500/30">
+          <i data-lucide="cpu" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-cream text-sm">Farm Telemetry Ingested</span>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              Live Pipeline Active
+            </span>
+          </div>
+          <p class="text-xs text-cream/70">
+            {{ farm.name }} &bull; {{ farm.location_description }} &bull; {{ farm.total_land_ha|floatformat:1 }} ha ({{ farm.get_soil_type_display }}) &bull; Irrigation: {{ farm.get_irrigation_type_display }}
+          </p>
+        </div>
       </div>
-      <div>
-        <span class="font-bold text-cream">Farm Telemetry Ingested:</span>
-        <p class="text-purple-200/70 text-[11px]">
-          {{ farm.name }} • {{ farm.location_description }} • {{ farm.total_land_ha|floatformat:1 }} ha ({{ farm.get_soil_type_display }}) • Irrigation: {{ farm.get_irrigation_type_display }}
-        </p>
+      <div class="flex items-center gap-2 self-start md:self-auto">
+        <span class="text-[11px] font-mono text-purple-300 bg-purple-500/15 border border-purple-500/30 px-2.5 py-1 rounded-lg">
+          Model: AgroGPT-Malawi-v4
+        </span>
       </div>
     </div>
-    <span class="text-[10px] font-mono text-purple-300 bg-purple-500/10 px-2.5 py-1 rounded-full shrink-0">
-      Model: AgroGPT-Malawi-v4
-    </span>
+
+    <!-- Active Plan & Break-Even Metric Chips -->
+    <div class="flex flex-wrap items-center gap-2 pt-1 text-xs">
+      <span class="text-cream/60 text-[11px] uppercase tracking-wider font-semibold mr-1">Active Benchmark Floors:</span>
+      {% if break_evens %}
+        {% for be in break_evens %}
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-forest-800/80 border border-white/10 text-cream/90 font-mono text-[11px]">
+            <span class="text-purple-300 font-bold font-sans">{{ be.crop_name }}:</span>
+            <span class="font-bold text-cream">MWK {{ be.break_even_price|floatformat:2 }}/kg</span>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-forest-800/80 border border-white/10 text-cream/90 font-mono text-[11px]">
+          <span class="text-purple-300 font-bold font-sans">Maize:</span>
+          <span class="font-bold text-cream">MWK 47.50/kg</span>
+        </div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-forest-800/80 border border-white/10 text-cream/90 font-mono text-[11px]">
+          <span class="text-purple-300 font-bold font-sans">Soybeans:</span>
+          <span class="font-bold text-cream">MWK 96.56/kg</span>
+        </div>
+      {% endif %}
+      {% if active_plan %}
+        <span class="text-[11px] text-cream/50 ml-auto hidden lg:inline">
+          Plan: {{ active_plan.name }}
+        </span>
+      {% endif %}
+    </div>
   </div>
 
-  <!-- 4 Agronomic Strategy Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <!-- 4 Agronomic Foundation Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
 
     <!-- Card 1: Soil & Moisture -->
-    <div class="fp-card p-6 space-y-3 hover:border-purple-500/40 transition-colors">
-      <div class="flex items-center gap-2.5 text-leaf">
-        <div class="w-8 h-8 rounded-lg bg-leaf/15 flex items-center justify-center">
-          <i data-lucide="layers" class="w-4 h-4"></i>
+    <div class="fp-card p-5 sm:p-6 space-y-3 hover:border-purple-500/40 transition-colors">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5 text-leaf">
+          <div class="w-8 h-8 rounded-lg bg-leaf/15 flex items-center justify-center shrink-0">
+            <i data-lucide="layers" class="w-4 h-4"></i>
+          </div>
+          <h3 class="text-sm font-bold text-cream">
+            {% if lang == 'ch' %}1. Kusamalira Nthaka ndi Chinyezi{% else %}1. Soil Health & Moisture Preservation{% endif %}
+          </h3>
         </div>
-        <h3 class="text-sm font-bold text-cream">
-          {% if lang == 'ch' %}1. Kusamalira Nthaka ndi Chinyezi{% else %}1. Soil Health & Moisture Preservation{% endif %}
-        </h3>
+        <span class="text-[10px] uppercase font-bold text-leaf bg-leaf/10 px-2 py-0.5 rounded border border-leaf/20">
+          Conservation
+        </span>
       </div>
       <p class="text-xs text-cream/80 leading-relaxed">
         {{ insights.soil_strategy }}
       </p>
-      <div class="pt-2 text-[11px] text-muted flex items-center gap-2">
+      <div class="pt-2 text-[11px] text-muted flex items-center gap-2 border-t border-white/5">
         <i data-lucide="check" class="w-3.5 h-3.5 text-leaf"></i>
-        <span>{% if lang == 'ch' %}Tetezani nthaka isatengedwe ndi madzi{% else %}Tied ridging reduces runoff by 40%{% endif %}</span>
+        <span>{% if lang == 'ch' %}Tetezani nthaka isatengedwe ndi madzi mwa maenje a Sasakawa{% else %}Tied ridging reduces surface runoff by 40% on sandy loam{% endif %}</span>
       </div>
     </div>
 
     <!-- Card 2: Split Fertilizer Micro-Dosing -->
-    <div class="fp-card p-6 space-y-3 hover:border-purple-500/40 transition-colors">
-      <div class="flex items-center gap-2.5 text-sky-400">
-        <div class="w-8 h-8 rounded-lg bg-sky-400/15 flex items-center justify-center">
-          <i data-lucide="flask-round" class="w-4 h-4"></i>
+    <div class="fp-card p-5 sm:p-6 space-y-3 hover:border-purple-500/40 transition-colors">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5 text-sky-400">
+          <div class="w-8 h-8 rounded-lg bg-sky-400/15 flex items-center justify-center shrink-0">
+            <i data-lucide="flask-round" class="w-4 h-4"></i>
+          </div>
+          <h3 class="text-sm font-bold text-cream">
+            {% if lang == 'ch' %}2. Kuthira Fetereza Mwaluso (Split-Dosing){% else %}2. Precision Split Fertilizer Schedule{% endif %}
+          </h3>
         </div>
-        <h3 class="text-sm font-bold text-cream">
-          {% if lang == 'ch' %}2. Kuthira Fetereza Mwaluso (Micro-Dosing){% else %}2. Split Fertilizer Application Schedule{% endif %}
-        </h3>
+        <span class="text-[10px] uppercase font-bold text-sky-400 bg-sky-400/10 px-2 py-0.5 rounded border border-sky-400/20">
+          Nutrients
+        </span>
       </div>
       <p class="text-xs text-cream/80 leading-relaxed">
         {{ insights.fertilizer_schedule }}
       </p>
-      <div class="pt-2 text-[11px] text-muted flex items-center gap-2">
+      <div class="pt-2 text-[11px] text-muted flex items-center gap-2 border-t border-white/5">
         <i data-lucide="check" class="w-3.5 h-3.5 text-sky-400"></i>
-        <span>{% if lang == 'ch' %}Thirani nthawi ya m'mawa kapena mvula ikangoyamba{% else %}Prevents nitrogen volatilization & leaching losses{% endif %}</span>
+        <span>{% if lang == 'ch' %}Thirani nthawi ya m'mawa mvula ikangoyamba kugwa{% else %}Prevents nitrogen volatilization and nitrate leaching losses{% endif %}</span>
       </div>
     </div>
 
     <!-- Card 3: Fall Armyworm Early Warning & Defense -->
-    <div class="fp-card p-6 space-y-3 hover:border-purple-500/40 transition-colors">
-      <div class="flex items-center gap-2.5 text-rose-400">
-        <div class="w-8 h-8 rounded-lg bg-rose-400/15 flex items-center justify-center">
-          <i data-lucide="bug" class="w-4 h-4"></i>
+    <div class="fp-card p-5 sm:p-6 space-y-3 hover:border-purple-500/40 transition-colors">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5 text-rose-400">
+          <div class="w-8 h-8 rounded-lg bg-rose-400/15 flex items-center justify-center shrink-0">
+            <i data-lucide="bug" class="w-4 h-4"></i>
+          </div>
+          <h3 class="text-sm font-bold text-cream">
+            {% if lang == 'ch' %}3. Chenjezo la Mbozi ya Fall Armyworm{% else %}3. Fall Armyworm Integrated Defense{% endif %}
+          </h3>
         </div>
-        <h3 class="text-sm font-bold text-cream">
-          {% if lang == 'ch' %}3. Chenjezo la Mbozi ya Fall Armyworm{% else %}3. Fall Armyworm Integrated Pest Defense{% endif %}
-        </h3>
+        <span class="text-[10px] uppercase font-bold text-rose-400 bg-rose-400/10 px-2 py-0.5 rounded border border-rose-400/20">
+          Biosecurity
+        </span>
       </div>
       <p class="text-xs text-cream/80 leading-relaxed">
         {{ insights.pest_alert }}
       </p>
-      <div class="pt-2 text-[11px] text-muted flex items-center gap-2">
+      <div class="pt-2 text-[11px] text-muted flex items-center gap-2 border-t border-white/5">
         <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-rose-400"></i>
-        <span>{% if lang == 'ch' %}Chitapo kanthu mbozi isanalowe m'kati mwa tsinde{% else %}Intervene during Instar 1–2 before whorl burrowing{% endif %}</span>
+        <span>{% if lang == 'ch' %}Chitapo kanthu mbozi isanalowe m'kati mwenimweni mwa mphuno{% else %}Intervene during Instar 1-2 before deep funnel boring{% endif %}</span>
       </div>
     </div>
 
     <!-- Card 4: Intercropping & Biological Insurance -->
-    <div class="fp-card p-6 space-y-3 hover:border-purple-500/40 transition-colors">
-      <div class="flex items-center gap-2.5 text-amber-400">
-        <div class="w-8 h-8 rounded-lg bg-amber-400/15 flex items-center justify-center">
-          <i data-lucide="sprout" class="w-4 h-4"></i>
+    <div class="fp-card p-5 sm:p-6 space-y-3 hover:border-purple-500/40 transition-colors">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5 text-amber-400">
+          <div class="w-8 h-8 rounded-lg bg-amber-400/15 flex items-center justify-center shrink-0">
+            <i data-lucide="sprout" class="w-4 h-4"></i>
+          </div>
+          <h3 class="text-sm font-bold text-cream">
+            {% if lang == 'ch' %}4. Kusakaniza Mbewu (Intercropping){% else %}4. Intercropping & Biological De-Risking{% endif %}
+          </h3>
         </div>
-        <h3 class="text-sm font-bold text-cream">
-          {% if lang == 'ch' %}4. Kusakaniza Mbewu Kuti Muchepetse Chiwopsezo{% else %}4. Intercropping & Biological Drought Insurance{% endif %}
-        </h3>
+        <span class="text-[10px] uppercase font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">
+          Diversification
+        </span>
       </div>
       <p class="text-xs text-cream/80 leading-relaxed">
         {{ insights.intercropping }}
       </p>
-      <div class="pt-2 text-[11px] text-muted flex items-center gap-2">
+      <div class="pt-2 text-[11px] text-muted flex items-center gap-2 border-t border-white/5">
         <i data-lucide="check" class="w-3.5 h-3.5 text-amber-400"></i>
-        <span>{% if lang == 'ch' %}Mtedza umapatsa chimanga nayitrojeni waulere{% else %}Fixes up to 40 kg N/ha into root zone naturally{% endif %}</span>
+        <span>{% if lang == 'ch' %}Mtedza umapatsa chimanga nayitrojeni waulere m'munda{% else %}Fixes up to 40 kg N/ha naturally and suppresses Striga weed{% endif %}</span>
       </div>
     </div>
 
   </div>
 
-  <!-- Interactive Q&A Copilot Simulator -->
-  <div class="fp-card p-6 sm:p-8 space-y-4 border-purple-500/30">
-    <div class="flex items-center justify-between border-b border-white/10 pb-3">
-      <h3 class="text-sm font-bold text-cream flex items-center gap-2">
-        <i data-lucide="message-square" class="w-4 h-4 text-purple-400"></i>
-        {% if lang == 'ch' %}Funsani Mlimi AI Mafunso ena a Ulimi{% else %}Ask Mlimi AI an Agronomic Question{% endif %}
-      </h3>
-      <span class="text-[10px] text-muted">Instant Agronomic Guidance</span>
+  <!-- Interactive Mlimi AI Console Workspace -->
+  <div class="fp-card border-purple-500/30 overflow-hidden shadow-2xl">
+
+    <!-- Console Header -->
+    <div class="bg-forest-950/80 border-b border-white/10 px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-purple-600/20 text-purple-300 flex items-center justify-center font-bold border border-purple-500/30 shrink-0">
+          <i data-lucide="message-square" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="text-sm font-bold text-cream">
+              {% if lang == 'ch' %}Mlimi AI Console: Kambiranani ndi Mlangizi Wanu{% else %}Mlimi AI Console: Interactive Agronomic Copilot{% endif %}
+            </h2>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-leaf/20 text-leaf border border-leaf/30">
+              <span class="w-1.5 h-1.5 rounded-full bg-leaf"></span>
+              Ready
+            </span>
+          </div>
+          <p class="text-xs text-cream/60">
+            {% if lang == 'ch' %}
+              Funsani mafunso okhudza nthawi yodzala, fetereza, mbozi, kapena mtengo wogulitsira.
+            {% else %}
+              Ask questions regarding planting dates, fertilizer protocols, pest management, or market margins.
+            {% endif %}
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="clearChatThread()" class="fp-btn-ghost text-xs text-cream/70 hover:text-cream flex items-center gap-1.5 py-1.5 px-2.5">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          <span>Clear Thread</span>
+        </button>
+      </div>
     </div>
 
-    <div class="space-y-3" id="chatArea">
-      <!-- Chat bubbles -->
-      <div class="flex items-start gap-3">
-        <div class="w-8 h-8 rounded-full bg-purple-500/20 text-purple-300 flex items-center justify-center font-bold text-xs shrink-0">
-          AI
+    <!-- Quick Categorized Topic Ribbon -->
+    <div class="bg-forest-900/60 border-b border-white/5 px-4 sm:px-6 py-2.5 overflow-x-auto">
+      <div class="flex items-center gap-2 min-w-max">
+        <span class="text-[11px] font-semibold text-cream/50 uppercase tracking-wider mr-1">
+          {% if lang == 'ch' %}Mitundu ya Mafunso:{% else %}Quick Topics:{% endif %}
+        </span>
+        <button type="button" onclick="submitQuickQuestion(this.getAttribute('data-query'))"
+                data-query="{% if lang == 'ch' %}Ndidzale liti chimanga ngati mvula yacedwa?{% else %}When should I plant maize if rains are delayed?{% endif %}"
+                class="text-[11px] font-medium bg-forest-800 hover:bg-forest-700 hover:border-purple-500/40 border border-white/10 px-3 py-1.5 rounded-lg text-cream/80 transition-colors flex items-center gap-1.5">
+          <i data-lucide="calendar" class="w-3 h-3 text-leaf"></i>
+          <span>{% if lang == 'ch' %}Nthawi Yodzala (Rains){% else %}Planting Dates{% endif %}</span>
+        </button>
+        <button type="button" onclick="submitQuickQuestion(this.getAttribute('data-query'))"
+                data-query="{% if lang == 'ch' %}Ndondomeko yothira fetereza wa Urea ndi NPK ndi iti?{% else %}What is the scientific fertilizer schedule for NPK and Urea?{% endif %}"
+                class="text-[11px] font-medium bg-forest-800 hover:bg-forest-700 hover:border-purple-500/40 border border-white/10 px-3 py-1.5 rounded-lg text-cream/80 transition-colors flex items-center gap-1.5">
+          <i data-lucide="flask-round" class="w-3 h-3 text-sky-400"></i>
+          <span>{% if lang == 'ch' %}Fetereza (Split-Urea){% else %}Fertilizer Protocol{% endif %}</span>
+        </button>
+        <button type="button" onclick="submitQuickQuestion(this.getAttribute('data-query'))"
+                data-query="{% if lang == 'ch' %}Nditani ngati mbozi ya Fall Armyworm ioneka m'munda?{% else %}How do I control Fall Armyworm organically and chemically?{% endif %}"
+                class="text-[11px] font-medium bg-forest-800 hover:bg-forest-700 hover:border-purple-500/40 border border-white/10 px-3 py-1.5 rounded-lg text-cream/80 transition-colors flex items-center gap-1.5">
+          <i data-lucide="bug" class="w-3 h-3 text-rose-400"></i>
+          <span>{% if lang == 'ch' %}Mbozi ya FAW (Pests){% else %}Pest Defense{% endif %}</span>
+        </button>
+        <button type="button" onclick="submitQuickQuestion(this.getAttribute('data-query'))"
+                data-query="{% if lang == 'ch' %}Kodi mtengo wa MWK 750/kg ndi wopindulitsa poyerekeza ndi ndalama zomwe ndinawononga?{% else %}Is an offered price of MWK 750/kg profitable against my break-even floor?{% endif %}"
+                class="text-[11px] font-medium bg-forest-800 hover:bg-forest-700 hover:border-purple-500/40 border border-white/10 px-3 py-1.5 rounded-lg text-cream/80 transition-colors flex items-center gap-1.5">
+          <i data-lucide="dollar-sign" class="w-3 h-3 text-emerald-400"></i>
+          <span>{% if lang == 'ch' %}Kusanthula Mtengo 750/kg{% else %}Break-Even Check (750/kg){% endif %}</span>
+        </button>
+        <button type="button" onclick="submitQuickQuestion(this.getAttribute('data-query'))"
+                data-query="{% if lang == 'ch' %}Ndigulitse kuti chimanga pakati pa Mitundu ndi Limbe?{% else %}Where is the best market to sell maize between Mitundu and Limbe?{% endif %}"
+                class="text-[11px] font-medium bg-forest-800 hover:bg-forest-700 hover:border-purple-500/40 border border-white/10 px-3 py-1.5 rounded-lg text-cream/80 transition-colors flex items-center gap-1.5">
+          <i data-lucide="trending-up" class="w-3 h-3 text-amber-400"></i>
+          <span>{% if lang == 'ch' %}Misika (Mitundu vs Limbe){% else %}Market Arbitrage{% endif %}</span>
+        </button>
+        <button type="button" onclick="submitQuickQuestion(this.getAttribute('data-query'))"
+                data-query="{% if lang == 'ch' %}Kodi kusakaniza chimanga ndi mtedza wa CG7 kumandipatsa phindu lanji?{% else %}What are the nitrogen and economic benefits of intercropping maize with groundnuts?{% endif %}"
+                class="text-[11px] font-medium bg-forest-800 hover:bg-forest-700 hover:border-purple-500/40 border border-white/10 px-3 py-1.5 rounded-lg text-cream/80 transition-colors flex items-center gap-1.5">
+          <i data-lucide="sprout" class="w-3 h-3 text-leaf"></i>
+          <span>{% if lang == 'ch' %}Kusakaniza Mbewu{% else %}Intercropping{% endif %}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Live Conversation Thread -->
+    <div id="chatArea" class="p-4 sm:p-6 space-y-5 min-h-[380px] max-h-[540px] overflow-y-auto">
+
+      <!-- Initial Welcome Message from Mlimi AI -->
+      <div class="flex items-start gap-3 sm:gap-4 max-w-3xl">
+        <div class="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-md">
+          <i data-lucide="bot" class="w-5 h-5"></i>
         </div>
-        <div class="bg-forest-900/80 rounded-2xl p-3.5 text-xs text-cream/90 max-w-xl border border-white/5 space-y-1">
-          <span class="font-bold text-purple-300 block">Mlimi AI:</span>
-          {% if lang == 'ch' %}
-            Moni! Ndine Mlimi AI. Ndili wokonzeka kukuthandizani pa nkhani za nthawi yodzala, fetereza, matenda a mbewu, kapena mitengo ya msika. Mukufuna kudziwa chiyani lero?
-          {% else %}
-            Hello! I am Mlimi AI. I am calibrated with your farm records and ready to assist with planting schedules, fertilizer timing, pest management, or break-even price thresholds. What would you like to explore today?
-          {% endif %}
+        <div class="flex-1 space-y-2">
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-purple-300 text-xs">Mlimi AI Copilot</span>
+            <span class="text-[10px] text-cream/50 font-mono">AgroGPT-Malawi-v4</span>
+          </div>
+
+          <div class="bg-forest-800/90 rounded-2xl rounded-tl-sm p-4 sm:p-5 text-xs text-cream/90 border border-white/10 space-y-3 shadow-md leading-relaxed">
+            {% if lang == 'ch' %}
+              <p class="font-semibold text-cream">
+                Moni! Ndine Mlimi AI, mlangizi wanu wanzeru wa ulimi pa {{ farm.name|default:"Munda Wanu" }}.
+              </p>
+              <p>
+                Ndili ndi deta yonse ya munda wanu: hekitala {{ farm.total_land_ha|floatformat:1 }} ha, nthaka ya {{ farm.get_soil_type_display }}, ndi ndalama zomwe munakonzekera pogwiritsa ntchito Dongosolo la Ulimi.
+              </p>
+              <p>
+                Mukhoza kundifunsa za <strong>nthawi yodzala ngati mvula yachedwa</strong>, <strong>ndondomeko yothira Urea</strong>, <strong>kupewa mbozi ya Fall Armyworm</strong>, kapena <strong>kuwunika ngati mtengo wamalonda ukubweza ndalama zanu</strong>.
+              </p>
+            {% else %}
+              <p class="font-semibold text-cream">
+                Hello! I am Mlimi AI, your autonomous agricultural copilot calibrated for {{ farm.name|default:"Your Farm" }}.
+              </p>
+              <p>
+                I have fully ingested your operational telemetry: {{ farm.total_land_ha|floatformat:1 }} ha holding, {{ farm.get_soil_type_display }} horizon in {{ farm.location_description }}, and your active seasonal crop plan break-even cost floors.
+              </p>
+              <p>
+                Feel free to ask about <strong>effective rainfall planting windows</strong>, <strong>split-nitrogen top-dressing</strong>, <strong>integrated pest thresholds</strong>, or <strong>margin evaluations against market bids</strong>.
+              </p>
+            {% endif %}
+
+            <!-- Speech Listen Button -->
+            <div class="pt-2 flex items-center gap-3 border-t border-white/10">
+              <button type="button"
+                      onclick="speakAdvisoryText(this, `{% if lang == 'ch' %}Moni, ndine Mlimi AI. Ndili wokonzeka kukuthandizani pa nkhani za nthawi yodzala, fetereza, matenda a mbewu, ndi mitengo ya msika pa munda wanu wa {{ farm.name }}.{% else %}Hello, I am Mlimi AI. I am ready to assist with planting schedules, split fertilizer timing, pest management, and break-even pricing for {{ farm.name }}.{% endif %}`, '{{ lang }}')"
+                      class="fp-btn-ghost text-xs text-purple-300 hover:text-purple-200 py-1 px-2.5 rounded-lg border border-purple-500/30 flex items-center gap-1.5">
+                <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
+                <span>{% if lang == 'ch' %}Mvetserani Uthenga (Audio){% else %}Listen to Advisory (Audio){% endif %}</span>
+              </button>
+              <span class="text-[10px] text-cream/50">Oral speech synthesizer ready</span>
+            </div>
+          </div>
+
+          <!-- Starter Suggestion Chips -->
+          <div class="flex flex-wrap gap-1.5 pt-1">
+            <button type="button" onclick="submitQuickQuestion(this.innerText)"
+                    class="text-[11px] bg-forest-900/80 hover:bg-forest-700 border border-white/10 hover:border-purple-500/40 px-2.5 py-1 rounded-md text-cream/75 transition-colors">
+              {% if lang == 'ch' %}Ndidzale liti chimanga ngati mvula yacedwa?{% else %}When should I plant maize if rains are delayed?{% endif %}
+            </button>
+            <button type="button" onclick="submitQuickQuestion(this.innerText)"
+                    class="text-[11px] bg-forest-900/80 hover:bg-forest-700 border border-white/10 hover:border-purple-500/40 px-2.5 py-1 rounded-md text-cream/75 transition-colors">
+              {% if lang == 'ch' %}Kodi mtedza wa CG7 umafunika fetereza wanji?{% else %}What fertilizer is recommended for CG7 groundnuts?{% endif %}
+            </button>
+            <button type="button" onclick="submitQuickQuestion(this.innerText)"
+                    class="text-[11px] bg-forest-900/80 hover:bg-forest-700 border border-white/10 hover:border-purple-500/40 px-2.5 py-1 rounded-md text-cream/75 transition-colors">
+              {% if lang == 'ch' %}Kodi mtengo wa MWK 750/kg ndi wopindulitsa?{% else %}Is an offered price of MWK 750/kg profitable for me?{% endif %}
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Real-time Loading / Thinking Indicator -->
+    <div id="typingIndicator" class="hidden px-6 py-3 border-t border-white/5 bg-forest-950/40">
+      <div class="flex items-center gap-3">
+        <div class="w-7 h-7 rounded-lg bg-purple-600/30 text-purple-300 flex items-center justify-center shrink-0">
+          <i data-lucide="loader" class="w-4 h-4 animate-spin"></i>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-cream/70 font-medium">
+            {% if lang == 'ch' %}Mlimi AI ikuwerengera mayankho a pa munda...{% else %}Mlimi AI is calculating agronomic response from farm telemetry...{% endif %}
+          </span>
+          <div class="flex gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce [animation-delay:0.2s]"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce [animation-delay:0.4s]"></span>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Suggested Quick Prompts -->
-    <div class="flex flex-wrap gap-2 pt-2">
-      <button type="button" onclick="askQuestion(this.innerText)"
-              class="text-[11px] bg-forest-700/60 hover:bg-forest-700 border border-white/10 px-3 py-1.5 rounded-lg text-cream/80 transition-colors">
-        {% if lang == 'ch' %}Ndidzale liti chimanga ngati mvula yacedwa?{% else %}When should I plant maize if rains are delayed?{% endif %}
-      </button>
-      <button type="button" onclick="askQuestion(this.innerText)"
-              class="text-[11px] bg-forest-700/60 hover:bg-forest-700 border border-white/10 px-3 py-1.5 rounded-lg text-cream/80 transition-colors">
-        {% if lang == 'ch' %}Kodi mtedza wa CG7 umafunika fetereza wanji?{% else %}What fertilizer is recommended for CG7 groundnuts?{% endif %}
-      </button>
-      <button type="button" onclick="askQuestion(this.innerText)"
-              class="text-[11px] bg-forest-700/60 hover:bg-forest-700 border border-white/10 px-3 py-1.5 rounded-lg text-cream/80 transition-colors">
-        {% if lang == 'ch' %}Kodi mtengo wa MWK 750/kg ndi wopindulitsa?{% else %}Is a selling price of MWK 750/kg profitable for me?{% endif %}
-      </button>
+    <!-- Interactive Prompt Bar Form -->
+    <div class="bg-forest-950 p-4 sm:p-5 border-t border-white/10">
+      <form id="mlimiChatForm" onsubmit="handleChatSubmit(event)" class="space-y-2">
+        {% csrf_token %}
+        <div class="flex items-center gap-2">
+          <div class="relative flex-1">
+            <input type="text"
+                   id="userMessageInput"
+                   autocomplete="off"
+                   placeholder="{% if lang == 'ch' %}Funsani funso lililonse la ulimi (mwachitsanzo: Kodi ndingapewe bwanji mbozi ya Fall Armyworm?)...{% else %}Ask any agronomic question (e.g., What is my maize break-even price?)...{% endif %}"
+                   class="w-full bg-forest-900 border border-white/15 focus:border-purple-500 rounded-xl px-4 py-3 text-xs sm:text-sm text-cream placeholder-cream/40 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-colors">
+          </div>
+
+          <button type="submit"
+                  id="sendBtn"
+                  class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-4 sm:px-6 py-3 rounded-xl text-xs sm:text-sm flex items-center gap-2 transition-all shrink-0 shadow-lg hover:shadow-purple-600/30 disabled:opacity-50 disabled:cursor-not-allowed">
+            <span>{% if lang == 'ch' %}Funsani{% else %}Ask AI{% endif %}</span>
+            <i data-lucide="send" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between text-[11px] text-cream/50 px-1 pt-1">
+          <div class="flex items-center gap-3">
+            <span>Press <kbd class="px-1.5 py-0.5 rounded bg-forest-800 border border-white/10 text-cream/70 font-mono text-[10px]">Enter</kbd> to send</span>
+            <span class="hidden sm:inline">&bull;</span>
+            <span class="hidden sm:inline">Chitedze Agricultural Research Standards</span>
+          </div>
+          <span class="text-purple-300/80 font-mono text-[10px]">
+            Lang: <span class="uppercase font-bold">{% if lang == 'ch' %}Chichewa{% else %}English{% endif %}</span>
+          </span>
+        </div>
+      </form>
     </div>
+
   </div>
 
 </div>
 
+<!-- Interactive Client-side Scripting -->
 <script>
-  function askQuestion(q) {
-    const chat = document.getElementById('chatArea');
+  const CURRENT_LANG = "{{ lang|default:'ch' }}";
+  const CHAT_API_URL = "{% url 'innovation:mlimi_chat_api' %}";
 
-    // Add user bubble
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  function escapeHtml(text) {
+    const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+  }
+
+  function formatMarkdown(text) {
+    if (!text) return '';
+    let html = escapeHtml(text);
+
+    // Bold text: **text**
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-cream">$1</strong>');
+
+    // Italics text: *text*
+    html = html.replace(/\*(.*?)\*/g, '<em class="italic text-cream/90">$1</em>');
+
+    // Bullet lists: - item or * item
+    const lines = html.split('\n');
+    let inList = false;
+    let formattedLines = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i];
+      let trimmed = line.trim();
+
+      if (trimmed.startsWith('- ') || trimmed.startsWith('&bull; ')) {
+        if (!inList) {
+          formattedLines.push('<ul class="list-disc pl-5 space-y-1 my-2">');
+          inList = true;
+        }
+        formattedLines.push(`<li>${trimmed.substring(2)}</li>`);
+      } else {
+        if (inList) {
+          formattedLines.push('</ul>');
+          inList = false;
+        }
+        if (trimmed.length > 0) {
+          formattedLines.push(`<p class="my-1.5">${line}</p>`);
+        } else {
+          formattedLines.push('<div class="h-2"></div>');
+        }
+      }
+    }
+    if (inList) {
+      formattedLines.push('</ul>');
+    }
+
+    return formattedLines.join('');
+  }
+
+  function scrollToBottom() {
+    const chat = document.getElementById('chatArea');
+    if (chat) {
+      chat.scrollTop = chat.scrollHeight;
+    }
+  }
+
+  function submitQuickQuestion(query) {
+    const input = document.getElementById('userMessageInput');
+    if (!input || !query) return;
+    input.value = query;
+    handleChatSubmit(new Event('submit'));
+  }
+
+  function clearChatThread() {
+    window.location.reload();
+  }
+
+  function speakAdvisoryText(btn, audioText, lang) {
+    if (window.FarmPulseAudio && typeof window.FarmPulseAudio.speak === 'function') {
+      window.FarmPulseAudio.speak(audioText, lang || CURRENT_LANG, btn);
+    } else {
+      alert("Audio speech synthesis is initializing. Please try again.");
+    }
+  }
+
+  async function handleChatSubmit(e) {
+    if (e && e.preventDefault) e.preventDefault();
+
+    const input = document.getElementById('userMessageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const chatArea = document.getElementById('chatArea');
+    const indicator = document.getElementById('typingIndicator');
+
+    const message = input.value.trim();
+    if (!message) return;
+
+    // Disable input while processing
+    input.value = '';
+    input.disabled = true;
+    sendBtn.disabled = true;
+
+    // Append User Message Bubble
     const userDiv = document.createElement('div');
-    userDiv.className = "flex items-start gap-3 justify-end";
+    userDiv.className = "flex items-start gap-3 justify-end max-w-3xl ml-auto";
     userDiv.innerHTML = `
-      <div class="bg-purple-600/30 border border-purple-500/40 rounded-2xl p-3 text-xs text-cream max-w-xl">
-        ${q}
+      <div class="space-y-1 text-right">
+        <span class="text-[10px] text-cream/50 mr-2">You (Farmer)</span>
+        <div class="bg-purple-600 text-white rounded-2xl rounded-tr-sm p-3.5 text-xs sm:text-sm max-w-xl shadow-md text-left leading-relaxed">
+          ${escapeHtml(message)}
+        </div>
       </div>
-      <div class="w-8 h-8 rounded-full bg-leaf text-forest-900 flex items-center justify-center font-bold text-xs shrink-0">
-        You
+      <div class="w-8 h-8 rounded-xl bg-leaf text-forest-900 flex items-center justify-center font-bold text-xs shrink-0 shadow">
+        <i data-lucide="user" class="w-4 h-4"></i>
       </div>
     `;
-    chat.appendChild(userDiv);
+    chatArea.appendChild(userDiv);
+    if (window.lucide) lucide.createIcons();
+    scrollToBottom();
 
-    // Simulated instant reply
-    setTimeout(() => {
-      const isCh = "{{ lang }}" === "ch";
-      let answer = "";
+    // Show thinking indicator
+    indicator.classList.remove('hidden');
+    scrollToBottom();
 
-      if (q.includes("liti") || q.includes("delayed") || q.includes("mvula")) {
-        answer = isCh
-          ? "Ngati mvula yacedwa kufika kumapeto kwa December, osadzala mitundu yachedwa (late-maturing). Sankhani mbewu zazifupi monga SC 403, SC 537, kapena Kanyani zomwe zimatenga masiku 90-110 kuti zichepetse kuwonongeka ndi chilala."
-          : "If rains are delayed into late December, avoid long-season hybrids. Switch to early-maturing varieties like SC 403 or SC 537 (90–110 days) to escape end-of-season drought stress.";
-      } else if (q.includes("CG7") || q.includes("Groundnuts") || q.includes("mtedza")) {
-        answer = isCh
-          ? "Mtedza wa CG7 sufuna fetereza wambiri wa nayitrojeni (Urea) chifukwa uli ndi tizirombo tozipangira nayitrojeni wokha. Koma mutha kuthira Gypsum panthawi ya maluwa kuti zipolopolo zikhale zolimba komanso zisasweke m'nthaka."
-          : "CG7 groundnuts do not require heavy nitrogen top-dressing as they fix their own atmospheric nitrogen. Instead, apply Gypsum (calcium sulfate) at flowering to prevent 'pops' (empty pods) and promote strong shell development.";
-      } else {
-        answer = isCh
-          ? "Kutengera ndalama zomwe munagwiritsa ntchito (Break-Even Price ya MWK 145/kg pa chimanga), mtengo wa MWK 750/kg ndi wapamwamba kwambiri kuposa mtengo wanu wosapindula! Uku ndiye kupeza phindu lalikulu la pafupifupi 400% pa kilogalamu iliyonse."
-          : "Based on your calculated Lilongwe break-even benchmark (MWK 145/kg for maize), an offered price of MWK 750/kg exceeds your cost floor by over 400%! This represents strong gross margin realization.";
+    try {
+      const csrfToken = getCookie('csrftoken') || (document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '');
+
+      const response = await fetch(CHAT_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken,
+        },
+        body: JSON.stringify({
+          message: message,
+          lang: CURRENT_LANG
+        })
+      });
+
+      const data = await response.json();
+      indicator.classList.add('hidden');
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to reach Mlimi AI engine.');
+      }
+
+      // Format AI Reply
+      const formattedContent = formatMarkdown(data.reply);
+      const audioTextClean = (data.audio_text || data.reply || '').replace(/[\r\n]+/g, ' ').replace(/[*_#]/g, '');
+
+      // Build Context Tags HTML
+      let contextTagsHtml = '';
+      if (data.context_used && data.context_used.length > 0) {
+        contextTagsHtml = `
+          <div class="pt-2 border-t border-white/10 flex flex-wrap items-center gap-1.5 text-[10px] text-cream/60">
+            <span class="font-mono text-purple-300 font-semibold">Evidence:</span>
+            ${data.context_used.map(c => `<span class="bg-forest-900 px-2 py-0.5 rounded border border-white/5">${escapeHtml(c)}</span>`).join('')}
+          </div>
+        `;
+      }
+
+      // Build Follow-up buttons HTML
+      let followupsHtml = '';
+      if (data.suggested_followups && data.suggested_followups.length > 0) {
+        followupsHtml = `
+          <div class="flex flex-wrap gap-1.5 pt-1.5">
+            ${data.suggested_followups.map(f => `
+              <button type="button" onclick="submitQuickQuestion(this.getAttribute('data-q'))"
+                      data-q="${escapeHtml(f)}"
+                      class="text-[11px] bg-forest-900/80 hover:bg-forest-700 border border-white/10 hover:border-purple-500/40 px-2.5 py-1 rounded-md text-cream/75 transition-colors">
+                ${escapeHtml(f)}
+              </button>
+            `).join('')}
+          </div>
+        `;
       }
 
       const botDiv = document.createElement('div');
-      botDiv.className = "flex items-start gap-3";
+      botDiv.className = "flex items-start gap-3 sm:gap-4 max-w-3xl";
       botDiv.innerHTML = `
-        <div class="w-8 h-8 rounded-full bg-purple-500/20 text-purple-300 flex items-center justify-center font-bold text-xs shrink-0">
-          AI
+        <div class="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-md">
+          <i data-lucide="bot" class="w-5 h-5"></i>
         </div>
-        <div class="bg-forest-900/80 rounded-2xl p-3.5 text-xs text-cream/90 max-w-xl border border-white/5 space-y-1">
-          <span class="font-bold text-purple-300 block">Mlimi AI:</span>
-          ${answer}
+        <div class="flex-1 space-y-2">
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-purple-300 text-xs">Mlimi AI Copilot</span>
+            <span class="text-[10px] text-cream/50 font-mono">Verified Agronomic Model</span>
+          </div>
+
+          <div class="bg-forest-800/90 rounded-2xl rounded-tl-sm p-4 sm:p-5 text-xs text-cream/90 border border-white/10 space-y-3 shadow-md leading-relaxed">
+            <div>${formattedContent}</div>
+
+            ${contextTagsHtml}
+
+            <!-- Speech Listen Button -->
+            <div class="pt-2 flex items-center gap-3 border-t border-white/10">
+              <button type="button"
+                      onclick="speakAdvisoryText(this, ${JSON.stringify(audioTextClean)}, '${CURRENT_LANG}')"
+                      class="fp-btn-ghost text-xs text-purple-300 hover:text-purple-200 py-1 px-2.5 rounded-lg border border-purple-500/30 flex items-center gap-1.5">
+                <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
+                <span>${CURRENT_LANG === 'ch' ? 'Mvetserani Uthenga (Audio)' : 'Listen to Advisory (Audio)'}</span>
+              </button>
+              <span class="text-[10px] text-cream/50 font-mono uppercase">${data.category || 'Agronomic Advisory'}</span>
+            </div>
+          </div>
+
+          ${followupsHtml}
         </div>
       `;
-      chat.appendChild(botDiv);
-    }, 400);
+
+      chatArea.appendChild(botDiv);
+      if (window.lucide) lucide.createIcons();
+      scrollToBottom();
+
+    } catch (err) {
+      indicator.classList.add('hidden');
+      const errDiv = document.createElement('div');
+      errDiv.className = "p-3 rounded-xl bg-risk-high/15 border border-risk-high/30 text-risk-high text-xs";
+      errDiv.innerText = "Pepani! Pakhala vuto polumikizana ndi Mlimi AI. Chonde yesaninso. (" + err.message + ")";
+      chatArea.appendChild(errDiv);
+      scrollToBottom();
+    } finally {
+      input.disabled = false;
+      sendBtn.disabled = false;
+      input.focus();
+    }
   }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.lucide) lucide.createIcons();
+    const input = document.getElementById('userMessageInput');
+    if (input) input.focus();
+  });
 </script>
 {% endblock %}

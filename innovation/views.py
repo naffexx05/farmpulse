@@ -8,7 +8,9 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import SatelliteParcel, ParametricInsurancePolicy
+from .mlimi_engine import MlimiAIEngine
 from farms.models import Farm, Crop
+from planner.models import Plan
 from climate.models import District
 from climate.risk import calculate_climate_risks
 from market.models import CropPrice
@@ -221,6 +223,18 @@ def mlimi_advisor(request):
     soil_display = farm.get_soil_type_display() if farm else "Sandy Clay Loam"
     district_name = farm.location_description.split(',')[0].strip() if farm else "Lilongwe"
 
+    # Active plan benchmarks for telemetry banner
+    active_plan = Plan.objects.filter(farm=farm).order_by('-created_at').first() if farm else None
+    break_evens = []
+    if active_plan:
+        for item in active_plan.items.select_related('crop').all():
+            break_evens.append({
+                'crop_name': item.crop.name,
+                'break_even_price': item.break_even_price_mwk_per_kg,
+                'expected_yield': item.expected_yield_kg_total,
+                'area_ha': item.area_ha,
+            })
+
     insights = {
         'en': {
             'greeting': f"Agronomic Advisory for {farm.name if farm else 'Your Farm'}",
@@ -244,5 +258,43 @@ def mlimi_advisor(request):
         'farm': farm,
         'lang': lang,
         'insights': selected_insights,
+        'active_plan': active_plan,
+        'break_evens': break_evens,
         'active_nav': 'mlimi_advisor',
+    })
+
+
+@login_required
+def mlimi_chat_api(request):
+    """
+    AJAX endpoint for Mlimi AI autonomous agronomic copilot queries.
+    Accepts JSON or form POST with 'message' and optional 'lang'.
+    Returns structured recommendations, audio transcript, context, and follow-ups.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    try:
+        if request.content_type == 'application/json':
+            payload = json.loads(request.body.decode('utf-8'))
+        else:
+            payload = request.POST
+    except Exception:
+        payload = {}
+
+    user_message = payload.get('message', '').strip()
+    force_lang = payload.get('lang', None)
+
+    if not user_message:
+        return JsonResponse({'error': 'Message content cannot be blank'}, status=400)
+
+    farm = Farm.objects.filter(owner=request.user).first() or Farm.objects.first()
+    engine = MlimiAIEngine(farm=farm, user=request.user)
+    result = engine.process_query(user_message, force_lang=force_lang)
+
+    return JsonResponse({
+        'success': True,
+        'query': user_message,
+        'farm_name': farm.name if farm else 'Farm',
+        **result,
     })

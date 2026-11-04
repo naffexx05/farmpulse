@@ -10,4 +10,5 @@ urlpatterns = [
     path('ussd/api/', views.ussd_api, name='ussd_api'),
     path('insurance/', views.parametric_insurance, name='parametric_insurance'),
     path('advisor/', views.mlimi_advisor, name='mlimi_advisor'),
+    path('advisor/chat/', views.mlimi_chat_api, name='mlimi_chat_api'),
 ]

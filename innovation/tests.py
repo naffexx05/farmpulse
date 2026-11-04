@@ -103,3 +103,33 @@ class InnovationTests(TestCase):
         res_en = self.client.get(reverse('innovation:mlimi_advisor') + '?lang=en')
         self.assertEqual(res_en.status_code, 200)
         self.assertContains(res_en, 'Soil Health')
+
+    def test_mlimi_chat_api_chichewa_and_english(self):
+        self.client.login(username='innovator', password='password123')
+
+        # Test Chichewa planting query
+        res_ch = self.client.post(
+            reverse('innovation:mlimi_chat_api'),
+            data={'message': 'Ndidzale liti chimanga ngati mvula yachedwa?', 'lang': 'ch'},
+            content_type='application/json',
+        )
+        self.assertEqual(res_ch.status_code, 200)
+        data_ch = res_ch.json()
+        self.assertTrue(data_ch['success'])
+        self.assertEqual(data_ch['category'], 'planting_dates')
+        self.assertIn('Malangizo', data_ch['reply'])
+        self.assertIn('SC 403', data_ch['reply'])
+        self.assertTrue(len(data_ch['suggested_followups']) > 0)
+
+        # Test English Break-Even query
+        res_en = self.client.post(
+            reverse('innovation:mlimi_chat_api'),
+            data={'message': 'Is an offered price of MWK 750/kg profitable for my maize crop?', 'lang': 'en'},
+            content_type='application/json',
+        )
+        self.assertEqual(res_en.status_code, 200)
+        data_en = res_en.json()
+        self.assertTrue(data_en['success'])
+        self.assertEqual(data_en['category'], 'break_even_pricing')
+        self.assertIn('Economic Verdict', data_en['reply'])
+        self.assertIn('750', data_en['reply'])
