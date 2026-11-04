@@ -554,6 +554,16 @@
 
     // ── Input Cost Ledger ──────────────────────────────────────────────────
     initInputCostLedger(selectedCrops, budget, benchmarks);
+
+    // Wire parameter budget field to ledger in real time
+    const budgetInputEl = document.getElementById('budget-input');
+    if (budgetInputEl) {
+      budgetInputEl.addEventListener('input', function (e) {
+        if (typeof window.updateLedgerBudget === 'function') {
+          window.updateLedgerBudget(e.target.value);
+        }
+      });
+    }
   });
 
   // =========================================================================

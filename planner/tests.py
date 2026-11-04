@@ -220,3 +220,56 @@ class PlannerViewsTests(TestCase):
         self.assertEqual(detail_resp.status_code, 200)
         self.assertContains(detail_resp, 'Saved Harvest Plan')
         self.assertContains(detail_resp, 'Run Risk Analysis')
+
+    def test_input_cost_ledger_in_planner(self):
+        self.client.login(username='viewfarmer', password='password123')
+        response = self.client.get(reverse('planner:planner_input'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Input Cost Verification')
+        self.assertIn('input_ledger_json', response.context)
+
+    def test_save_input_costs_endpoint(self):
+        self.client.login(username='viewfarmer', password='password123')
+        payload = {
+            'crop_slug': 'maize',
+            'season_year': 2025,
+            'seed': 14500,
+            'basal_fert': 42000,
+            'top_dress': 38000,
+            'labour': 28000,
+            'herbicide': 4200,
+            'transport': 3500,
+        }
+        response = self.client.post(
+            reverse('planner:save_input_costs'),
+            data=json.dumps(payload),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['ok'])
+        self.assertIn('total_per_ha', data)
+        self.assertEqual(data['crop_slug'], 'maize')
+
+    def test_plan_compare_view(self):
+        self.client.login(username='viewfarmer', password='password123')
+        p1 = Plan.objects.create(
+            farm=self.farm,
+            name='Plan Alpha',
+            total_land_ha=Decimal('2.00'),
+            total_expected_cost_mwk=Decimal('300000.00'),
+            total_expected_revenue_mwk=Decimal('800000.00'),
+            total_expected_margin_mwk=Decimal('500000.00'),
+        )
+        p2 = Plan.objects.create(
+            farm=self.farm,
+            name='Plan Beta',
+            total_land_ha=Decimal('2.00'),
+            total_expected_cost_mwk=Decimal('250000.00'),
+            total_expected_revenue_mwk=Decimal('700000.00'),
+            total_expected_margin_mwk=Decimal('450000.00'),
+        )
+        resp = self.client.get(reverse('planner:plan_compare'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'Plan Alpha')
+        self.assertContains(resp, 'Plan Beta')

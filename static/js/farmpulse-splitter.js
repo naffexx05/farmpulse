@@ -433,6 +433,15 @@
         const chichewaText = `Ndondomeko yanu ya munda: Mwagawa maeka ${totals.totalAllocatedHa} pa malo okwana maeka ${this.totalLandHa}. Ndalama zofunika poyambira ndi Kwacha ${totals.totalCostMwk.toLocaleString()}. Mukakolola, phindu lanu loyembekezeka ndi Kwacha ${totals.totalMarginMwk.toLocaleString()}. Mbewu ya chakudya idzakwanira mabanja anu pa zana limodzi mwa zana.`;
         voiceBtn.setAttribute('data-fp-speak', chichewaText);
       }
+
+      // 9. Sync with Real Input Cost Ledger if active
+      if (typeof window.updateLedgerLandAreas === 'function' && totals.items) {
+        const areaMap = {};
+        totals.items.forEach(i => {
+          areaMap[i.slug] = i.areaHa;
+        });
+        window.updateLedgerLandAreas(areaMap);
+      }
     }
   }
 
