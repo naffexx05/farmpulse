@@ -80,43 +80,43 @@ html.theme-sunlight {
 }
 
 html.theme-sunlight body {
-  background-color: #F3F7F2 !important;
-  color: #0C281B !important;
-  background-image:
-    radial-gradient(ellipse at top left, rgba(143,203,98,0.15), transparent 60%),
-    radial-gradient(ellipse at bottom right, rgba(79,183,217,0.10), transparent 50%) !important;
+  background-color: #F8FAF9 !important;
+  color: #0F172A !important;
+  background-image: none !important;
 }
 
 html.theme-sunlight .bg-forest-900,
 html.theme-sunlight .bg-forest-950,
 html.theme-sunlight header {
   background-color: #FFFFFF !important;
-  border-color: #CBD8CE !important;
+  border-color: #E2E8F0 !important;
 }
 
 html.theme-sunlight aside#sidebar {
-  background-color: #F8FAF7 !important;
-  border-color: #CBD8CE !important;
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+  border-color: #E2E8F0 !important;
 }
 
 html.theme-sunlight .fp-card,
 html.theme-sunlight .fp-glass,
 html.theme-sunlight .bg-forest-800,
 html.theme-sunlight .bg-forest-850 {
-  background-color: #FFFFFF !important;
-  border-color: #CBD8CE !important;
-  color: #0C281B !important;
-  box-shadow: 0 4px 16px -2px rgba(12, 40, 27, 0.06);
+  background: #FFFFFF !important;
+  background-image: none !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
 }
 
 html.theme-sunlight .bg-forest-700 {
-  background-color: #E6EFE6 !important;
-  border-color: #BACBBD !important;
-  color: #0C281B !important;
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
 }
 
 html.theme-sunlight .text-cream {
-  color: #0C281B !important;
+  color: #0F172A !important;
 }
 
 html.theme-sunlight .text-cream\/80,
