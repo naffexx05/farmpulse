@@ -909,3 +909,329 @@ input[type="range"]::-webkit-slider-thumb {
   border-top: 1px solid var(--fp-border);
   margin: 1.5rem 0;
 }
+
+/* =========================================================================
+   ENHANCEMENT SUITE v3.0 — National Presentation Edition
+   Added: 2026-11-05
+   ========================================================================= */
+
+/* -------------------------------------------------------------------------
+   E1. Hero Banner — Animated Gradient Drift
+   ------------------------------------------------------------------------- */
+@keyframes fp-hero-drift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.fp-hero-animated {
+  background-size: 220% 220%;
+  animation: fp-hero-drift 18s ease infinite;
+}
+
+/* -------------------------------------------------------------------------
+   E2. Market Ticker Strip
+   ------------------------------------------------------------------------- */
+.fp-ticker-wrap {
+  overflow: hidden;
+  position: relative;
+}
+
+.fp-ticker-wrap::before,
+.fp-ticker-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2.5rem;
+  z-index: 2;
+  pointer-events: none;
+}
+.fp-ticker-wrap::before {
+  left: 0;
+  background: linear-gradient(to right, var(--fp-surface-2), transparent);
+}
+.fp-ticker-wrap::after {
+  right: 0;
+  background: linear-gradient(to left, var(--fp-surface-2), transparent);
+}
+
+html.theme-sunlight .fp-ticker-wrap::before {
+  background: linear-gradient(to right, #FFFFFF, transparent);
+}
+html.theme-sunlight .fp-ticker-wrap::after {
+  background: linear-gradient(to left, #FFFFFF, transparent);
+}
+
+/* -------------------------------------------------------------------------
+   E3. Smooth Global Transitions for Theme Switch
+   ------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 0.25s;
+  transition-timing-function: ease;
+}
+
+/* Override: layout / transform / opacity transitions should NOT be caught */
+.fp-animate-in,
+.fp-animate-in * {
+  transition-property: opacity, transform, background-color, border-color, color, box-shadow;
+}
+
+/* Suppress on hover-sensitive elements to avoid jank */
+a, button, .fp-nav-item, [role="button"] {
+  transition-duration: 0.18s;
+}
+
+/* -------------------------------------------------------------------------
+   E4. Improved Typography — JetBrains Mono metric values
+   ------------------------------------------------------------------------- */
+.fp-mono,
+[data-fp-counter],
+.font-mono,
+td.font-mono {
+  font-family: var(--fp-font-mono);
+  font-feature-settings: "tnum" 1, "zero" 1;
+  letter-spacing: 0.01em;
+}
+
+/* -------------------------------------------------------------------------
+   E5. Section Header Rules
+   ------------------------------------------------------------------------- */
+.fp-section-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fp-text-muted);
+  margin-bottom: 0.75rem;
+}
+
+/* -------------------------------------------------------------------------
+   E6. Stat Cell Improvement
+   ------------------------------------------------------------------------- */
+.fp-stat-cell {
+  padding: 0.875rem 1rem;
+  border-radius: var(--fp-radius-lg);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--fp-border);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.fp-stat-cell:hover {
+  border-color: var(--fp-green-border);
+  background: var(--fp-green-dim);
+}
+
+html.theme-sunlight .fp-stat-cell {
+  background: rgba(10,41,26,0.03);
+  border-color: rgba(10,41,26,0.08);
+}
+
+html.theme-sunlight .fp-stat-cell:hover {
+  border-color: rgba(61,122,20,0.25);
+  background: rgba(61,122,20,0.06);
+}
+
+/* -------------------------------------------------------------------------
+   E7. Topbar Clock + Pill Styling
+   ------------------------------------------------------------------------- */
+.fp-clock-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--fp-border);
+  font-family: var(--fp-font-mono);
+  font-size: 0.6875rem;
+  color: var(--fp-text-secondary);
+}
+
+html.theme-sunlight .fp-clock-pill {
+  border-color: rgba(10,41,26,0.12);
+  color: #3A4A2A;
+}
+
+/* -------------------------------------------------------------------------
+   E8. Active nav glow left border
+   ------------------------------------------------------------------------- */
+.fp-nav-item-active {
+  position: relative;
+}
+
+.fp-nav-item-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--fp-green);
+}
+
+/* -------------------------------------------------------------------------
+   E9. Table Enhancement
+   ------------------------------------------------------------------------- */
+.fp-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.fp-table tbody tr {
+  transition: background-color 0.14s ease;
+}
+
+/* -------------------------------------------------------------------------
+   E10. Sunlight mode — body background override
+        The <body> has a Tailwind class `bg-forest-900` that compiles to a
+        hardcoded background. We override via inline style in JS, but add this
+        as a belt-and-suspenders fallback using `data-theme`.
+   ------------------------------------------------------------------------- */
+html.theme-sunlight body,
+body[data-theme="sunlight"] {
+  background-color: #F4F8F3 !important;
+  color: #0A291A !important;
+  background-image:
+    radial-gradient(ellipse at top left, rgba(143,203,98,0.12), transparent 60%),
+    radial-gradient(ellipse at bottom right, rgba(79,183,217,0.08), transparent 50%) !important;
+}
+
+/* -------------------------------------------------------------------------
+   E11. Notification badge pulse
+   ------------------------------------------------------------------------- */
+@keyframes fp-badge-ping {
+  75%, 100% { transform: scale(1.4); opacity: 0; }
+}
+
+.fp-notify-dot {
+  position: relative;
+}
+.fp-notify-dot::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--fp-warning);
+  animation: fp-badge-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* -------------------------------------------------------------------------
+   E12. Innovation / Beta module cards — gradient border treatment
+   ------------------------------------------------------------------------- */
+.fp-card-innovation {
+  position: relative;
+  overflow: visible;
+}
+
+.fp-card-innovation::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: calc(var(--fp-radius-lg) + 1px);
+  background: linear-gradient(
+    135deg,
+    rgba(143,203,98,0.35) 0%,
+    rgba(96,165,250,0.18) 40%,
+    rgba(167,139,250,0.18) 70%,
+    rgba(143,203,98,0.12) 100%
+  );
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  opacity: 0.6;
+}
+
+.fp-card-innovation:hover::after {
+  opacity: 1;
+}
+
+html.theme-sunlight .fp-card-innovation::after {
+  background: linear-gradient(
+    135deg,
+    rgba(61,122,20,0.3) 0%,
+    rgba(14,165,233,0.18) 40%,
+    rgba(126,34,206,0.14) 70%,
+    rgba(61,122,20,0.1) 100%
+  );
+}
+
+/* -------------------------------------------------------------------------
+   E13. Skip-to-content accessibility link
+   ------------------------------------------------------------------------- */
+.fp-skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.5rem 1rem;
+  background: var(--fp-green);
+  color: #060E08;
+  font-weight: 700;
+  border-radius: var(--fp-radius);
+  text-decoration: none;
+  transition: top 0.2s;
+}
+.fp-skip-link:focus {
+  top: 0.5rem;
+}
+
+/* -------------------------------------------------------------------------
+   E14. Print improvements
+   ------------------------------------------------------------------------- */
+@media print {
+  .fp-card {
+    page-break-inside: avoid;
+    border: 1px solid #ccc !important;
+    background: white !important;
+    box-shadow: none !important;
+  }
+
+  aside#sidebar,
+  header,
+  .fp-btn-primary,
+  .fp-btn-outline,
+  .fp-btn-ghost,
+  #fp-market-ticker,
+  .fp-demo-pill {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 10pt;
+  }
+
+  .text-cream,
+  .text-muted {
+    color: black !important;
+  }
+
+  .text-leaf {
+    color: #2d6a0a !important;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   E15. Responsive content area improvements
+   ------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+  .fp-card {
+    border-radius: var(--fp-radius) !important;
+  }
+
+  .fp-page-title {
+    font-size: 1.25rem !important;
+  }
+}
+

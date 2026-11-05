@@ -23,6 +23,13 @@
       >
     </form>
 
+    <!-- Malawi Live Clock -->
+    <div class="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-white/8 text-[11px] font-mono text-cream/60" title="Malawi Standard Time (UTC+2)">
+      <i data-lucide="clock" class="w-3 h-3 text-cream/40"></i>
+      <span id="malawi-clock" class="font-medium text-cream/70 tabular-nums">--:--</span>
+      <span class="text-[9px] text-cream/35 uppercase tracking-wider">MST</span>
+    </div>
+
     <!-- Live Network Sync Telemetry Pill -->
     <div id="network-telemetry-pill" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all bg-leaf/15 text-leaf border-leaf/30">
       <span class="w-1.5 h-1.5 rounded-full bg-leaf animate-pulse"></span>
@@ -175,4 +182,18 @@
       menu.classList.toggle('hidden');
     }
   }
+
+  // Malawi Standard Time (UTC+2) live clock
+  function updateMalawiClock() {
+    const el = document.getElementById('malawi-clock');
+    if (!el) return;
+    const now = new Date();
+    const mst = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Blantyre' }));
+    const h = String(mst.getHours()).padStart(2, '0');
+    const m = String(mst.getMinutes()).padStart(2, '0');
+    const s = String(mst.getSeconds()).padStart(2, '0');
+    el.textContent = h + ':' + m + ':' + s;
+  }
+  updateMalawiClock();
+  setInterval(updateMalawiClock, 1000);
 </script>

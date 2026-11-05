@@ -14,8 +14,11 @@
   <!-- Phase 8.1: Hero Banner -->
   <!-- ========================================================================= -->
   <div class="relative rounded-3xl overflow-hidden border border-white/10 bg-forest-900 shadow-2xl">
+    <!-- Animated gradient overlay -->
+    <div class="absolute inset-0 fp-hero-animated opacity-60"
+         style="background: linear-gradient(135deg, #060E08 0%, #0a2a14 25%, #0d3318 50%, #0a2a14 75%, #060E08 100%);"></div>
     <!-- Background Image with Gradient Overlay -->
-    <div class="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-25"
+    <div class="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-20"
          style="background-image: url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1600&q=80');">
     </div>
     <div class="absolute inset-0 bg-gradient-to-r from-forest-950 via-forest-900/95 to-forest-850/80"></div>
@@ -107,6 +110,27 @@
   </div>
 
   <!-- ========================================================================= -->
+  <!-- Market Price Ticker Strip -->
+  <!-- ========================================================================= -->
+  <div class="fp-card overflow-hidden border-white/8 !p-0">
+    <div class="flex items-center gap-0 h-10">
+      <div class="shrink-0 h-full px-4 flex items-center gap-2 bg-leaf/10 border-r border-leaf/20 text-xs font-bold text-leaf">
+        <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+        <span class="hidden sm:inline whitespace-nowrap">Live Prices</span>
+      </div>
+      <div class="flex-1 overflow-hidden relative h-full flex items-center">
+        <div id="fp-market-ticker" class="w-full overflow-hidden text-xs"
+             data-src="{% url 'market:ticker_api' %}">
+          <div class="px-4 text-muted text-[11px] italic">Loading commodity prices...</div>
+        </div>
+      </div>
+      <a href="{% url 'market:dashboard' %}" class="shrink-0 h-full px-3 flex items-center border-l border-white/8 text-leaf hover:bg-leaf/5 transition-colors" title="Open Market Intelligence">
+        <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
   <!-- Phase 8.2: Farm Summary Cards (Links to My Farm) -->
   <!-- ========================================================================= -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -117,7 +141,8 @@
         <span class="font-semibold uppercase tracking-wider">Enterprise Land</span>
         <i data-lucide="map-pin" class="w-4 h-4 text-leaf"></i>
       </div>
-      <div class="text-2xl font-bold text-cream">
+      <div class="text-2xl font-bold text-cream"
+           {% if farm %}data-fp-counter="{{ farm.total_land_ha|floatformat:1 }}" data-fp-decimals="1" data-fp-suffix=" ha"{% endif %}>
         {% if farm %}{{ farm.total_land_ha|floatformat:1 }} ha{% else %}—{% endif %}
       </div>
       <div class="text-[11px] text-muted mt-1 flex items-center justify-between">
@@ -132,7 +157,8 @@
         <span class="font-semibold uppercase tracking-wider">Operating Budget</span>
         <i data-lucide="wallet" class="w-4 h-4 text-leaf"></i>
       </div>
-      <div class="text-2xl font-bold text-cream">
+      <div class="text-2xl font-bold text-cream"
+           {% if farm and farm.seasonal_budget_mwk %}data-fp-counter="{{ farm.seasonal_budget_mwk|floatformat:0 }}" data-fp-prefix="MWK "{% endif %}>
         {% if farm and farm.seasonal_budget_mwk %}
           MWK {{ farm.seasonal_budget_mwk|floatformat:0|intcomma }}
         {% else %}
@@ -341,7 +367,9 @@
 
         <div class="p-3.5 rounded-2xl bg-forest-700/50 border border-white/5 space-y-1">
           <span class="text-[10px] font-semibold text-muted uppercase tracking-wider block">Harvested Yield</span>
-          <div class="text-xl font-bold text-cream">
+          <div class="text-xl font-bold text-cream"
+               data-fp-counter="{{ recent_perf.yield|floatformat:0 }}"
+               data-fp-suffix=" kg">
             {{ recent_perf.yield|floatformat:0|intcomma }} kg
           </div>
           <span class="text-[10px] text-muted block">{{ recent_perf.area|floatformat:1 }} ha cultivated</span>
@@ -349,7 +377,9 @@
 
         <div class="p-3.5 rounded-2xl bg-forest-700/50 border border-white/5 space-y-1">
           <span class="text-[10px] font-semibold text-muted uppercase tracking-wider block">Gross Margin</span>
-          <div class="text-xl font-bold {% if recent_perf.margin >= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}">
+          <div class="text-xl font-bold {% if recent_perf.margin >= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}"
+               data-fp-counter="{{ recent_perf.margin|floatformat:0 }}"
+               data-fp-prefix="MWK ">
             MWK {{ recent_perf.margin|floatformat:0|intcomma }}
           </div>
           <span class="text-[10px] text-muted block">Realized return</span>
@@ -357,7 +387,9 @@
 
         <div class="p-3.5 rounded-2xl bg-forest-700/50 border border-white/5 space-y-1">
           <span class="text-[10px] font-semibold text-muted uppercase tracking-wider block">Production Cost</span>
-          <div class="text-xl font-bold text-cream">
+          <div class="text-xl font-bold text-cream"
+               data-fp-counter="{{ recent_perf.cost|floatformat:0 }}"
+               data-fp-prefix="MWK ">
             MWK {{ recent_perf.cost|floatformat:0|intcomma }}
           </div>
           <span class="text-[10px] text-muted block">Observed expenditure</span>
@@ -365,7 +397,9 @@
 
         <div class="p-3.5 rounded-2xl bg-forest-700/50 border border-white/5 space-y-1">
           <span class="text-[10px] font-semibold text-muted uppercase tracking-wider block">Total Revenue</span>
-          <div class="text-xl font-bold text-cream">
+          <div class="text-xl font-bold text-cream"
+               data-fp-counter="{{ recent_perf.revenue|floatformat:0 }}"
+               data-fp-prefix="MWK ">
             MWK {{ recent_perf.revenue|floatformat:0|intcomma }}
           </div>
           <span class="text-[10px] text-muted block">Harvest sales</span>
@@ -522,7 +556,7 @@
   <!-- ========================================================================= -->
   <!-- Phase 8.9: Bottom Advisory Panel ("Better records improve plans") -->
   <!-- ========================================================================= -->
-  <div class="rounded-3xl border border-leaf/30 bg-gradient-to-r from-forest-850 via-forest-800 to-forest-850 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl">
+  <div class="fp-card fp-card-innovation rounded-3xl border border-leaf/30 bg-gradient-to-r from-forest-850 via-forest-800 to-forest-850 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl">
     <div class="flex items-start gap-4">
       <div class="w-12 h-12 rounded-2xl bg-leaf/20 text-leaf border border-leaf/30 flex items-center justify-center shrink-0">
         <i data-lucide="sparkles" class="w-6 h-6"></i>

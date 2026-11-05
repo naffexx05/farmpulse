@@ -50,14 +50,16 @@
     btn.setAttribute('aria-label', isSunlight ? 'Switch to Midnight Forest Mode' : 'Switch to Sunlight Field Mode');
     btn.setAttribute('title', isSunlight ? 'Switch to Midnight Forest (Low Glare)' : 'Switch to Sunlight Field Mode (Direct Sun)');
 
-    const icon = btn.querySelector('[data-lucide]');
-    if (icon) {
-      icon.setAttribute('data-lucide', isSunlight ? 'moon' : 'sun');
-      if (window.lucide) lucide.createIcons();
-    }
-    const label = btn.querySelector('.theme-label');
-    if (label) {
-      label.textContent = isSunlight ? 'Forest' : 'Sunlight';
+    const iconName = isSunlight ? 'moon' : 'sun';
+    const iconColor = isSunlight ? 'text-sky-300' : 'text-amber-300';
+    const labelText = isSunlight ? 'Forest' : 'Sunlight';
+
+    btn.innerHTML = `
+      <i data-lucide="${iconName}" class="w-4 h-4 ${iconColor}"></i>
+      <span class="theme-label hidden sm:inline text-[11px] font-medium">${labelText}</span>
+    `;
+    if (window.lucide && typeof lucide.createIcons === 'function') {
+      lucide.createIcons();
     }
   }
 
@@ -194,10 +196,9 @@
     if (soundBtn) {
       soundBtn.addEventListener('click', function () {
         const enabled = FarmPulseSound.toggleSound();
-        const icon = soundBtn.querySelector('[data-lucide]');
-        if (icon) {
-          icon.setAttribute('data-lucide', enabled ? 'volume-2' : 'volume-x');
-          if (window.lucide) lucide.createIcons();
+        soundBtn.innerHTML = `<i data-lucide="${enabled ? 'volume-2' : 'volume-x'}" class="w-4 h-4 text-cream/70"></i>`;
+        if (window.lucide && typeof lucide.createIcons === 'function') {
+          lucide.createIcons();
         }
       });
     }

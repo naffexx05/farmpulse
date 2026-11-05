@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="{% static 'css/dist/output.css' %}">
   <link rel="stylesheet" href="{% static 'css/farmpulse-interactive.css' %}">
@@ -37,8 +37,12 @@
   <script src="{% static 'js/farmpulse-audio.js' %}"></script>
   <script src="{% static 'js/farmpulse-gauges.js' %}"></script>
   <script src="{% static 'js/farmpulse-splitter.js' %}"></script>
+  <script src="{% static 'js/farmpulse-enhancements.js' %}"></script>
 </head>
 <body class="h-full font-sans bg-forest-900 text-cream">
+
+  <!-- Accessibility: skip to main content -->
+  <a href="#main-content" class="fp-skip-link">Skip to main content</a>
 
   <div class="min-h-screen">
 
@@ -48,7 +52,7 @@
 
       {% include 'partials/topbar.html' %}
 
-      <main class="flex-1 p-4 sm:p-6 lg:p-8">
+      <main class="flex-1 p-4 sm:p-6 lg:p-8" id="main-content">
 
   {% if messages %}
     <div class="max-w-5xl mx-auto mb-4 space-y-2">

@@ -190,3 +190,59 @@ def market_dashboard(request):
         'active_nav': 'market',
     }
     return render(request, 'market/dashboard.html', context)
+
+
+@login_required
+def ticker_api(request):
+    """
+    JSON endpoint for the market price ticker strip on the home dashboard.
+    Returns the most recent wholesale (or farmgate) price for each crop,
+    along with a synthetic week-on-week change for display purposes.
+    """
+    from django.http import JsonResponse
+    from django.db.models import Max
+
+    crops = Crop.objects.all().order_by('name')
+    prices = []
+    for crop in crops:
+        latest = (
+            CropPrice.objects
+            .filter(crop=crop)
+            .order_by('-year', '-month')
+            .first()
+        )
+        if not latest:
+            continue
+        price = (
+            latest.price_wholesale_mwk
+            or latest.price_farmgate_mwk
+            or latest.price_retail_mwk
+        )
+        if not price:
+            continue
+
+        # Synthetic week-on-week change (use previous month record if available)
+        prev = (
+            CropPrice.objects
+            .filter(crop=crop)
+            .exclude(pk=latest.pk)
+            .order_by('-year', '-month')
+            .first()
+        )
+        change = 0.0
+        if prev:
+            prev_price = (
+                prev.price_wholesale_mwk
+                or prev.price_farmgate_mwk
+                or prev.price_retail_mwk
+            )
+            if prev_price and prev_price > 0:
+                change = round(float((price - prev_price) / prev_price * 100), 1)
+
+        prices.append({
+            'crop': crop.name,
+            'price': float(price),
+            'change': change,
+        })
+
+    return JsonResponse({'prices': prices})

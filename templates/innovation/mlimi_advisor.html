@@ -226,6 +226,10 @@
       </div>
 
       <div class="flex items-center gap-2">
+        <button type="button" id="fp-download-advisory" class="fp-btn-ghost text-xs text-purple-300 hover:text-purple-200 border border-purple-500/30 flex items-center gap-1.5 py-1.5 px-2.5" title="Download thread as text transcript">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          <span>{% if lang == 'ch' %}Tsitsani Uphungu (TXT){% else %}Download Advisory{% endif %}</span>
+        </button>
         <button type="button" onclick="clearChatThread()" class="fp-btn-ghost text-xs text-cream/70 hover:text-cream flex items-center gap-1.5 py-1.5 px-2.5">
           <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
           <span>Clear Thread</span>
@@ -292,7 +296,7 @@
             <span class="text-[10px] text-cream/50 font-mono">AgroGPT-Malawi-v4</span>
           </div>
 
-          <div class="bg-forest-800/90 rounded-2xl rounded-tl-sm p-4 sm:p-5 text-xs text-cream/90 border border-white/10 space-y-3 shadow-md leading-relaxed">
+          <div class="bg-forest-800/90 rounded-2xl rounded-tl-sm p-4 sm:p-5 text-xs text-cream/90 border border-white/10 space-y-3 shadow-md leading-relaxed" data-advisory-line data-role="assistant">
             {% if lang == 'ch' %}
               <p class="font-semibold text-cream">
                 Moni! Ndine Mlimi AI, mlangizi wanu wanzeru wa ulimi pa {{ farm.name|default:"Munda Wanu" }}.
@@ -527,7 +531,7 @@
     userDiv.innerHTML = `
       <div class="space-y-1 text-right">
         <span class="text-[10px] text-cream/50 mr-2">You (Farmer)</span>
-        <div class="bg-purple-600 text-white rounded-2xl rounded-tr-sm p-3.5 text-xs sm:text-sm max-w-xl shadow-md text-left leading-relaxed">
+        <div class="bg-purple-600 text-white rounded-2xl rounded-tr-sm p-3.5 text-xs sm:text-sm max-w-xl shadow-md text-left leading-relaxed" data-advisory-line data-role="user">
           ${escapeHtml(message)}
         </div>
       </div>
@@ -619,7 +623,7 @@
             <span class="text-[10px] text-cream/50 font-mono">Verified Agronomic Model</span>
           </div>
 
-          <div class="bg-forest-800/90 rounded-2xl rounded-tl-sm p-4 sm:p-5 text-xs text-cream/90 border border-white/10 space-y-3 shadow-md leading-relaxed">
+          <div class="bg-forest-800/90 rounded-2xl rounded-tl-sm p-4 sm:p-5 text-xs text-cream/90 border border-white/10 space-y-3 shadow-md leading-relaxed" data-advisory-line data-role="assistant">
             <div>${formattedContent}</div>
 
             ${contextTagsHtml}
