@@ -115,9 +115,11 @@ def ussd_api(request):
             # Get latest price
             latest = CropPrice.objects.filter(crop=crop).order_by('-year', '-month').first()
             if latest:
+                p_val = latest.price_wholesale_mwk or latest.price_farmgate_mwk or latest.price_retail_mwk or Decimal('0.00')
+                m_type = 'Wholesale' if latest.price_wholesale_mwk else ('Farmgate' if latest.price_farmgate_mwk else 'Retail')
                 return HttpResponse(
-                    f"END {crop.name} ({latest.get_market_type_display()}):\n"
-                    f"Price: MWK {latest.price_mwk_per_kg:.0f}/kg\n"
+                    f"END {crop.name} ({m_type}):\n"
+                    f"Price: MWK {p_val:,.0f}/kg\n"
                     f"Market: {latest.district.name if latest.district else 'National'}\n"
                     f"Date: {latest.month:02d}/{latest.year}",
                     content_type='text/plain'
