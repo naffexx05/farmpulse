@@ -19,6 +19,7 @@ urlpatterns = [
     path('plans/', views.plan_list, name='plan_list'),
     path('plans/compare/', views.plan_compare, name='plan_compare'),
     path('plans/<int:pk>/', views.plan_detail, name='plan_detail'),
+    path('plans/<int:pk>/execute/', views.execute_plan_to_season, name='execute_plan'),
     path('plans/<int:pk>/duplicate/', views.plan_duplicate, name='plan_duplicate'),
     path('plans/<int:pk>/export-csv/', views.plan_export_csv, name='plan_export_csv'),
     path('plans/<int:pk>/delete/', views.plan_delete, name='plan_delete'),

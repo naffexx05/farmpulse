@@ -28,6 +28,15 @@
 
     <!-- Actions -->
     <div class="flex items-center gap-2 flex-wrap shrink-0 pt-1">
+      <form method="post" action="{% url 'planner:execute_plan' plan.pk %}" class="inline">
+        {% csrf_token %}
+        <button type="submit" class="fp-btn-primary text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-md inline-flex items-center gap-1.5"
+                title="Execute plan into live growing season with pre-populated plantings">
+          <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+          <span>Execute Plan into Season</span>
+        </button>
+      </form>
+
       <button
         type="button"
         data-fp-speak="Ndondomeko yanu ya ulimi: Mwagawa maeka {{ plan.total_land_ha }}. Ndalama zofunika kugwiritsa ntchito ndi Kwacha {{ plan.total_expected_cost_mwk|floatformat:0 }}. Mukalandira mbewu zanu, phindu lanu loyembekezeka ndi Kwacha {{ plan.total_expected_margin_mwk|floatformat:0 }}."
@@ -37,8 +46,8 @@
         <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> Audio Advisory (Chichewa)
       </button>
 
-      <a href="{% url 'planner:scenario_simulator' %}?plan={{ plan.pk }}" class="fp-btn-primary text-xs">
-        <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> Run Risk Analysis
+      <a href="{% url 'planner:scenario_simulator' %}?plan={{ plan.pk }}" class="fp-btn-ghost text-xs">
+        <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> Risk Analysis
       </a>
 
       <a href="{% url 'planner:plan_duplicate' plan.pk %}" class="fp-btn-ghost text-xs" title="Duplicate this plan">
@@ -93,6 +102,28 @@
       </div>
     </div>
   </section>
+
+  <!-- Execution Bridge Banner -->
+  <div class="fp-card p-5 border-leaf/30 bg-leaf/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-leaf/20 text-leaf border border-leaf/30 flex items-center justify-center shrink-0">
+        <i data-lucide="sprout" class="w-5 h-5"></i>
+      </div>
+      <div>
+        <h3 class="text-sm font-bold text-cream">Automated Field Bridge: Activate this Plan into Live Season Tracking</h3>
+        <p class="text-xs text-cream/70 mt-0.5">
+          Converts {{ plan.total_land_ha|floatformat:1 }} ha of crop allocations into real field plantings with pre-filled baseline costs and break-even targets for in-season monitoring and Mlimi AI advising.
+        </p>
+      </div>
+    </div>
+    <form method="post" action="{% url 'planner:execute_plan' plan.pk %}" class="shrink-0">
+      {% csrf_token %}
+      <button type="submit" class="fp-btn-primary text-xs py-2 px-4 shadow-md inline-flex items-center gap-2">
+        <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+        <span>Execute Plan Now</span>
+      </button>
+    </form>
+  </div>
 
   <!-- Itemized Crops Table -->
   <section class="space-y-3">

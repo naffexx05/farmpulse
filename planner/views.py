@@ -490,6 +490,89 @@ def plan_detail(request, pk):
 
 
 @login_required
+@require_POST
+def execute_plan_to_season(request, pk):
+    """
+    Automated Bridge: Converts a formulated strategic crop plan into
+    active field plantings and a live tracking season on the farm.
+    Pre-populates crop allocations, land areas, target expenditures,
+    and establishes the benchmark baseline for end-of-season review.
+    """
+    import datetime
+    from django.utils import timezone
+    from farms.models import Season, Planting, SeasonReview
+
+    plan = get_object_or_404(Plan, pk=pk, farm__owner=request.user)
+    farm = plan.farm
+
+    # Current cycle dates
+    today = timezone.now().date()
+    end_date = today + datetime.timedelta(days=150)
+    season_name = f"{today.year}/{str(today.year + 1)[-2:]} Growing Season ({plan.get_strategy_type_display()})"
+
+    # Find or create a matching season
+    season = Season.objects.filter(
+        farm=farm,
+        start_date__lte=today,
+        end_date__gte=today
+    ).first()
+
+    if not season:
+        season = Season.objects.create(
+            farm=farm,
+            name=season_name,
+            start_date=today,
+            end_date=end_date,
+            notes=f"Automated execution from plan: {plan.name} ({plan.get_strategy_type_display()}). Target budget: MWK {plan.total_expected_cost_mwk:,.0f}."
+        )
+
+    # Create plantings from plan items
+    created_plantings = []
+    for item in plan.items.select_related('crop').all():
+        existing = Planting.objects.filter(season=season, crop=item.crop).first()
+        if existing:
+            existing.area_ha = item.area_ha
+            existing.production_cost_mwk = item.expected_total_cost_mwk
+            existing.notes = f"Updated from Plan: {plan.name}. Targeted Yield: {item.expected_yield_kg_total:,.0f} kg. Break-Even: MWK {item.break_even_price_mwk_per_kg:.2f}/kg."
+            existing.save()
+            created_plantings.append(existing)
+        else:
+            p = Planting.objects.create(
+                season=season,
+                crop=item.crop,
+                area_ha=item.area_ha,
+                planting_date=today,
+                production_cost_mwk=item.expected_total_cost_mwk,
+                notes=f"Formulated from Plan: {plan.name}. Targeted Yield: {item.expected_yield_kg_total:,.0f} kg. Break-Even: MWK {item.break_even_price_mwk_per_kg:.2f}/kg."
+            )
+            created_plantings.append(p)
+
+    # Link Plan as associated benchmark in SeasonReview
+    review, created = SeasonReview.objects.get_or_create(
+        season=season,
+        defaults={
+            'associated_plan': plan,
+            'overall_satisfaction': 4,
+            'lessons_learned': f"Baseline plan: {plan.name} targeting MWK {plan.total_expected_margin_mwk:,.0f} net return."
+        }
+    )
+    if not created and not review.associated_plan:
+        review.associated_plan = plan
+        review.save()
+
+    # Mark plan as active
+    plan.status = 'active'
+    plan.save()
+
+    messages.success(
+        request,
+        f"Plan successfully executed into live tracking! Created/updated {len(created_plantings)} crop plantings "
+        f"across {plan.total_land_ha:.1f} ha for {farm.name}. Your active break-even floors are now guiding Mlimi AI and Season Review."
+    )
+    return redirect('farms:farm_history')
+
+
+@login_required
 def plan_compare(request):
     """
     Phase 6.3 Compare view: side-by-side comparison of 2 or 3 saved plans.
