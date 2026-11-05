@@ -142,9 +142,10 @@
     updateTileLayer() {
       if (!this.map) return;
       const isSunlight = document.documentElement.classList.contains('theme-sunlight');
+      const apiKey = 'cb1_52n9_1_edefeed8908682308a207623';
       const tileUrl = isSunlight
-        ? 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-        : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+        ? `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${apiKey}`
+        : `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${apiKey}`;
 
       if (this.tileLayer) {
         this.map.removeLayer(this.tileLayer);
@@ -152,7 +153,8 @@
 
       this.tileLayer = L.tileLayer(tileUrl, {
         maxZoom: 18,
-        subdomains: 'abcd'
+        subdomains: 'abcd',
+        attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
       }).addTo(this.map);
     }
 
