@@ -171,6 +171,187 @@
 
   </div>
 
+  <!-- ========================================================================= -->
+  <!-- Innovation Enhancement: Variable-Rate Input Prescription & Fertilizer Economics -->
+  <!-- ========================================================================= -->
+  <div class="fp-card p-5 sm:p-6 space-y-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-leaf/20 text-leaf border border-leaf/30">
+            Precision Ag Economics
+          </span>
+          <span class="text-xs text-muted">Sentinel-2 Variable-Rate Application (VRA)</span>
+        </div>
+        <h2 class="text-lg sm:text-xl font-bold text-cream mt-1 flex items-center gap-2">
+          <i data-lucide="scale" class="w-5 h-5 text-leaf"></i> Variable-Rate Input Prescription &amp; Fertilizer Economics
+        </h2>
+        <p class="text-xs text-muted mt-1 max-w-3xl">
+          Translates multi-spectral canopy NDVI into targeted micro-zone fertilizer dosing across {{ total_area_ha }} ha. Avoids costly over-fertilization in high-vigor zones and directs remedial nutrition where crops are stressed.
+        </p>
+      </div>
+
+      <!-- Live Input Parameters -->
+      <div class="flex flex-wrap items-center gap-3 bg-forest-900/80 p-2.5 rounded-xl border border-white/10">
+        <div class="text-xs">
+          <label for="fertTypeSelect" class="block text-[10px] uppercase tracking-wider text-muted font-semibold mb-0.5">Fertilizer Type</label>
+          <select id="fertTypeSelect" onchange="onFertilizerTypeChange()" class="bg-forest-800 text-cream text-xs rounded-lg px-2.5 py-1.5 border border-white/15 focus:outline-none focus:border-leaf">
+            <option value="urea" data-price="72000" selected>Urea (46% N) — Top Dressing</option>
+            <option value="can" data-price="68000">CAN (28% N) — Calcium Ammonium Nitrate</option>
+            <option value="basal" data-price="75000">23:21:0+4S — Basal Compound</option>
+          </select>
+        </div>
+        <div class="text-xs">
+          <label for="bagPriceInput" class="block text-[10px] uppercase tracking-wider text-muted font-semibold mb-0.5">Price / 50kg Bag (MWK)</label>
+          <input type="number" id="bagPriceInput" value="{{ default_bag_price }}" step="1000" min="20000" max="150000"
+                 oninput="recalculatePrescription()"
+                 class="w-28 bg-forest-800 text-cream text-xs font-mono rounded-lg px-2.5 py-1.5 border border-white/15 focus:outline-none focus:border-leaf">
+        </div>
+      </div>
+    </div>
+
+    <!-- 3-Way Economic Comparison Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <!-- Card 1: Blanket Uniform Rate -->
+      <div class="p-4 rounded-xl bg-forest-900/60 border border-white/10 space-y-2">
+        <div class="flex items-center justify-between text-muted text-xs">
+          <span class="font-semibold uppercase tracking-wider">Traditional Blanket Practice</span>
+          <i data-lucide="layers" class="w-4 h-4 text-muted"></i>
+        </div>
+        <div class="text-2xl font-bold text-cream" id="cardBlanketBags">
+          {{ total_blanket_bags|floatformat:2 }} bags
+        </div>
+        <div class="text-sm font-semibold text-muted" id="cardBlanketCost">
+          MWK {{ blanket_total_mwk|intcomma }}
+        </div>
+        <div class="text-[11px] text-muted/80 pt-1 border-t border-white/5">
+          Uniform 2.0 bags/ha across entire {{ total_area_ha }} ha field. Risks lodging in lush soil and nitrogen leaching on ridges.
+        </div>
+      </div>
+
+      <!-- Card 2: Satellite VRA Prescription -->
+      <div class="p-4 rounded-xl bg-forest-900/60 border border-white/10 space-y-2">
+        <div class="flex items-center justify-between text-muted text-xs">
+          <span class="font-semibold uppercase tracking-wider">Satellite Variable-Rate (VRA)</span>
+          <i data-lucide="sparkles" class="w-4 h-4 text-leaf"></i>
+        </div>
+        <div class="text-2xl font-bold text-leaf" id="cardPrescribedBags">
+          {{ total_prescribed_bags|floatformat:2 }} bags
+        </div>
+        <div class="text-sm font-semibold text-leaf" id="cardPrescribedCost">
+          MWK {{ prescribed_total_mwk|intcomma }}
+        </div>
+        <div class="text-[11px] text-muted pt-1 border-t border-white/5">
+          Zonal micro-dosing calibrated to Sentinel-2 vegetative canopy density and soil moisture swales.
+        </div>
+      </div>
+
+      <!-- Card 3: Net Capital Saved -->
+      <div class="p-4 rounded-xl bg-leaf/10 border border-leaf/30 space-y-2">
+        <div class="flex items-center justify-between text-leaf text-xs">
+          <span class="font-bold uppercase tracking-wider">Direct Capital Saved</span>
+          <i data-lucide="trending-down" class="w-4 h-4 text-leaf"></i>
+        </div>
+        <div class="text-2xl font-extrabold text-leaf" id="cardSavingsMwk">
+          MWK {{ savings_total_mwk|intcomma }}
+        </div>
+        <div class="text-xs font-bold text-cream flex items-center justify-between">
+          <span id="cardSavingsBags">{{ total_savings_bags|floatformat:2 }} bags conserved (87.5 kg)</span>
+          <span class="px-2 py-0.5 rounded-full bg-leaf text-forest-900 text-[10px] font-black" id="cardSavingsPct">-{{ savings_pct }}%</span>
+        </div>
+        <div class="text-[11px] text-muted pt-1 border-t border-leaf/20">
+          Precision targeting eliminates input waste without yield sacrifice. Funds can be reallocated to certified seed or weeding labor.
+        </div>
+      </div>
+    </div>
+
+    <!-- Zone-by-Zone Prescription Breakdown Table -->
+    <div class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
+          <i data-lucide="crosshair" class="w-4 h-4 text-leaf"></i> Zonal Micro-Prescription &amp; Field Instructions
+        </h3>
+        <span class="text-[11px] text-muted">Calibrated to 10-meter Sentinel-2 multi-spectral grid</span>
+      </div>
+
+      <div class="overflow-x-auto rounded-xl border border-white/10">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-forest-900/90 text-cream/70 uppercase tracking-wider text-[10px] border-b border-white/10">
+            <tr>
+              <th class="p-3">Cadastral Micro-Zone</th>
+              <th class="p-3">Canopy Vigor (NDVI)</th>
+              <th class="p-3">Blanket Rate</th>
+              <th class="p-3">Prescribed Rate</th>
+              <th class="p-3">Zonal Savings</th>
+              <th class="p-3">Practical Station Dose (Malawi Standard)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5 font-sans" id="prescriptionTbody">
+            {% for z in prescription_zones %}
+            <tr class="hover:bg-white/5 transition-colors">
+              <td class="p-3">
+                <div class="font-bold text-cream">{{ z.zone }}</div>
+                <div class="text-[10px] text-muted">{{ z.area_ha }} ha ({{ z.area_pct }}% of parcel)</div>
+              </td>
+              <td class="p-3">
+                <span class="inline-flex items-center gap-1 font-mono font-bold text-{% if z.badge == 'emerald' %}emerald-400{% elif z.badge == 'leaf' %}leaf{% else %}amber-400{% endif %}">
+                  {{ z.ndvi }}
+                </span>
+                <span class="text-[10px] text-muted block">{{ z.status }}</span>
+              </td>
+              <td class="p-3 font-mono text-muted">
+                {{ z.blanket_bags|floatformat:2 }} bags
+              </td>
+              <td class="p-3">
+                <span class="font-mono font-bold text-leaf">{{ z.prescribed_bags|floatformat:2 }} bags</span>
+                <span class="text-[10px] text-muted block font-mono">({{ z.prescribed_rate_kg_ha|floatformat:0 }} kg/ha)</span>
+              </td>
+              <td class="p-3">
+                {% if z.savings_bags > 0 %}
+                  <span class="font-mono font-bold text-emerald-400">+MWK {{ z.savings_mwk|intcomma }}</span>
+                  <span class="text-[10px] text-muted block font-mono">({{ z.savings_bags|floatformat:2 }} bags saved)</span>
+                {% else %}
+                  <span class="font-mono text-muted">Balanced (Standard)</span>
+                {% endif %}
+              </td>
+              <td class="p-3">
+                <span class="text-cream/90 font-medium block">{{ z.station_dose }}</span>
+                <span class="text-[10px] text-muted/80 block mt-0.5">{{ z.guidance }}</span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Practical Worker Extension & Field Dispatch Toolbar -->
+    <div class="p-4 rounded-xl bg-forest-900/60 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-leaf/20 text-leaf flex items-center justify-center shrink-0">
+          <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h4 class="text-xs font-bold text-cream">Extension Worker Dispatch Package</h4>
+          <p class="text-[11px] text-muted">
+            Share concise application dosing directly with field managers via USSD *384# or printable clipboard sheet.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="copyUssdPrescription()" id="btnCopyUssd"
+                class="fp-btn-ghost text-xs px-3 py-2 text-leaf flex items-center gap-1.5 hover:bg-leaf/10">
+          <i data-lucide="phone" class="w-3.5 h-3.5"></i> Copy USSD Note
+        </button>
+        <button type="button" onclick="printPrescriptionSlip()"
+                class="fp-btn-primary text-xs px-3.5 py-2 flex items-center gap-1.5">
+          <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print Field Slip
+        </button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- Leaflet Map Initialization Script -->
@@ -269,6 +450,154 @@
       legendTitle.innerText = "SAR Topsoil Dielectric Moisture";
       legendScale.classList.remove('hidden');
     }
+  }
+
+  // Precision Input Prescription Dynamic Recalculation
+  const basePrescriptionZones = [
+    {
+      zone: 'North Quadrant',
+      area_ha: {{ total_area_ha }} * 0.45,
+      area_pct: 45,
+      ndvi: 0.72,
+      status: 'Optimal Vigor',
+      badge: 'emerald',
+      blanket_rate: 2.0,
+      prescribed_rate: 0.80,
+      prescribed_kg_ha: 40.0,
+      station_dose: '1 bottle cap (5g) per 2 maize stations',
+      guidance: 'High residual canopy chlorophyll and nitrogen reserves. Reduce side-dressing rate by 60% to prevent excessive vegetative lodging.'
+    },
+    {
+      zone: 'Central Swale',
+      area_ha: {{ total_area_ha }} * 0.35,
+      area_pct: 35,
+      ndvi: 0.65,
+      status: 'Good Canopy',
+      badge: 'leaf',
+      blanket_rate: 2.0,
+      prescribed_rate: 2.0,
+      prescribed_kg_ha: 100.0,
+      station_dose: '1 full fertilizer cup (10g) per maize station',
+      guidance: 'Balanced canopy profile with optimal soil moisture recharge. Apply standard maintenance side-dressing at 35 DAP along root line.'
+    },
+    {
+      zone: 'Southern Ridge',
+      area_ha: {{ total_area_ha }} * 0.20,
+      area_pct: 20,
+      ndvi: 0.42,
+      status: 'Moisture Stress',
+      badge: 'amber',
+      blanket_rate: 2.0,
+      prescribed_rate: 1.20,
+      prescribed_kg_ha: 60.0,
+      station_dose: 'Half cup (5g) buried 5cm away, mulched',
+      guidance: 'Elevated leaching risk on shallow ridge soil. Broadcast application will scorch roots. Split-microdose with organic crop residue mulch.'
+    }
+  ];
+
+  function onFertilizerTypeChange() {
+    const sel = document.getElementById('fertTypeSelect');
+    const opt = sel.options[sel.selectedIndex];
+    const price = parseInt(opt.getAttribute('data-price') || 72000, 10);
+    document.getElementById('bagPriceInput').value = price;
+    recalculatePrescription();
+  }
+
+  function formatMwk(num) {
+    return Math.round(num).toLocaleString('en-US');
+  }
+
+  function recalculatePrescription() {
+    const priceInput = document.getElementById('bagPriceInput');
+    let bagPrice = parseFloat(priceInput.value) || 72000;
+    if (bagPrice <= 0) bagPrice = 72000;
+
+    let totalBlanketBags = 0;
+    let totalPrescribedBags = 0;
+    let totalSavingsMwk = 0;
+
+    const tbody = document.getElementById('prescriptionTbody');
+    let html = '';
+
+    basePrescriptionZones.forEach(z => {
+      const bBags = z.area_ha * z.blanket_rate;
+      const pBags = z.area_ha * z.prescribed_rate;
+      const sBags = Math.max(0, bBags - pBags);
+      const sMwk = sBags * bagPrice;
+
+      totalBlanketBags += bBags;
+      totalPrescribedBags += pBags;
+      totalSavingsMwk += sMwk;
+
+      const badgeColor = z.badge === 'emerald' ? 'text-emerald-400' : (z.badge === 'leaf' ? 'text-leaf' : 'text-amber-400');
+      const savingsHtml = sBags > 0
+        ? `<span class="font-mono font-bold text-emerald-400">+MWK ${formatMwk(sMwk)}</span><span class="text-[10px] text-muted block font-mono">(${sBags.toFixed(2)} bags saved)</span>`
+        : `<span class="font-mono text-muted">Balanced (Standard)</span>`;
+
+      html += `
+        <tr class="hover:bg-white/5 transition-colors">
+          <td class="p-3">
+            <div class="font-bold text-cream">${z.zone}</div>
+            <div class="text-[10px] text-muted">${z.area_ha.toFixed(2)} ha (${z.area_pct}% of parcel)</div>
+          </td>
+          <td class="p-3">
+            <span class="inline-flex items-center gap-1 font-mono font-bold ${badgeColor}">
+              ${z.ndvi.toFixed(2)}
+            </span>
+            <span class="text-[10px] text-muted block">${z.status}</span>
+          </td>
+          <td class="p-3 font-mono text-muted">
+            ${bBags.toFixed(2)} bags
+          </td>
+          <td class="p-3">
+            <span class="font-mono font-bold text-leaf">${pBags.toFixed(2)} bags</span>
+            <span class="text-[10px] text-muted block font-mono">(${z.prescribed_kg_ha.toFixed(0)} kg/ha)</span>
+          </td>
+          <td class="p-3">
+            ${savingsHtml}
+          </td>
+          <td class="p-3">
+            <span class="text-cream/90 font-medium block">${z.station_dose}</span>
+            <span class="text-[10px] text-muted/80 block mt-0.5">${z.guidance}</span>
+          </td>
+        </tr>
+      `;
+    });
+
+    tbody.innerHTML = html;
+
+    const totalBlanketCost = totalBlanketBags * bagPrice;
+    const totalPrescribedCost = totalPrescribedBags * bagPrice;
+    const totalSavingsBags = Math.max(0, totalBlanketBags - totalPrescribedBags);
+    const savingsPct = totalBlanketCost > 0 ? ((totalSavingsMwk / totalBlanketCost) * 100).toFixed(1) : 0;
+
+    document.getElementById('cardBlanketBags').innerText = totalBlanketBags.toFixed(2) + ' bags';
+    document.getElementById('cardBlanketCost').innerText = 'MWK ' + formatMwk(totalBlanketCost);
+    document.getElementById('cardPrescribedBags').innerText = totalPrescribedBags.toFixed(2) + ' bags';
+    document.getElementById('cardPrescribedCost').innerText = 'MWK ' + formatMwk(totalPrescribedCost);
+    document.getElementById('cardSavingsMwk').innerText = 'MWK ' + formatMwk(totalSavingsMwk);
+    document.getElementById('cardSavingsBags').innerText = totalSavingsBags.toFixed(2) + ' bags conserved (' + (totalSavingsBags * 50).toFixed(1) + ' kg)';
+    document.getElementById('cardSavingsPct').innerText = '-' + savingsPct + '%';
+  }
+
+  function copyUssdPrescription() {
+    const text = "*384*77# FarmPulse VRA -> Chitukuko Farm: North 0.90b (40kg/ha), Swale 1.75b (100kg/ha), Ridge 0.60b (60kg/ha). Total: 3.25 bags. Net Saved: MWK 126,000.";
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('btnCopyUssd');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i> Copied to Clipboard!`;
+      if (window.lucide) lucide.createIcons();
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+        if (window.lucide) lucide.createIcons();
+      }, 2500);
+    }).catch(() => {
+      prompt("Copy USSD Extension Note:", text);
+    });
+  }
+
+  function printPrescriptionSlip() {
+    window.print();
   }
 </script>
 {% endblock %}

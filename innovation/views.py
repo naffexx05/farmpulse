@@ -38,6 +38,7 @@ def satellite_twin(request):
     """
     Innovation 1: Satellite Field Twin & Sentinel-2 Earth Observation.
     Visualizes cadastral plot polygons, NDVI canopy vigor, and SAR soil moisture.
+    Provides Variable-Rate Input Prescriptions (VRA) translating spectral density into MWK savings.
     """
     farm = Farm.objects.filter(owner=request.user).first() or Farm.objects.first()
     parcels = SatelliteParcel.objects.filter(farm=farm) if farm else SatelliteParcel.objects.none()
@@ -50,6 +51,67 @@ def satellite_twin(request):
         {'zone': 'Southern Ridge', 'ndvi': 0.42, 'status': 'Moisture Stress', 'badge': 'amber', 'area_pct': 20},
     ]
 
+    # Precision Input Prescription (Variable Rate Application)
+    total_area_ha = float(active_parcel.calculated_area_ha) if active_parcel else 2.5
+    default_bag_price = 72000  # MWK per 50kg bag of Urea (Malawi average)
+    blanket_rate_bags_per_ha = 2.0  # Standard blanket application rate (100 kg/ha)
+
+    prescription_zones = [
+        {
+            'zone': 'North Quadrant',
+            'ndvi': 0.72,
+            'status': 'Optimal Vigor',
+            'badge': 'emerald',
+            'area_ha': round(total_area_ha * 0.45, 2),
+            'area_pct': 45,
+            'blanket_bags': round(total_area_ha * 0.45 * blanket_rate_bags_per_ha, 2),
+            'prescribed_rate_kg_ha': 40.0,
+            'prescribed_bags': round(total_area_ha * 0.45 * 0.80, 2),
+            'savings_bags': round((total_area_ha * 0.45 * blanket_rate_bags_per_ha) - (total_area_ha * 0.45 * 0.80), 2),
+            'savings_mwk': int(((total_area_ha * 0.45 * blanket_rate_bags_per_ha) - (total_area_ha * 0.45 * 0.80)) * default_bag_price),
+            'guidance': 'High residual canopy chlorophyll and nitrogen reserves. Reduce side-dressing rate by 60% to prevent excessive vegetative lodging.',
+            'station_dose': '1 bottle cap (5g) per 2 maize stations'
+        },
+        {
+            'zone': 'Central Swale',
+            'ndvi': 0.65,
+            'status': 'Good Canopy',
+            'badge': 'leaf',
+            'area_ha': round(total_area_ha * 0.35, 2),
+            'area_pct': 35,
+            'blanket_bags': round(total_area_ha * 0.35 * blanket_rate_bags_per_ha, 2),
+            'prescribed_rate_kg_ha': 100.0,
+            'prescribed_bags': round(total_area_ha * 0.35 * 2.0, 2),
+            'savings_bags': 0.0,
+            'savings_mwk': 0,
+            'guidance': 'Balanced canopy profile with optimal soil moisture recharge. Apply standard maintenance side-dressing at 35 DAP along root line.',
+            'station_dose': '1 full fertilizer cup (10g) per maize station'
+        },
+        {
+            'zone': 'Southern Ridge',
+            'ndvi': 0.42,
+            'status': 'Moisture Stress',
+            'badge': 'amber',
+            'area_ha': round(total_area_ha * 0.20, 2),
+            'area_pct': 20,
+            'blanket_bags': round(total_area_ha * 0.20 * blanket_rate_bags_per_ha, 2),
+            'prescribed_rate_kg_ha': 60.0,
+            'prescribed_bags': round(total_area_ha * 0.20 * 1.20, 2),
+            'savings_bags': round((total_area_ha * 0.20 * blanket_rate_bags_per_ha) - (total_area_ha * 0.20 * 1.20), 2),
+            'savings_mwk': int(((total_area_ha * 0.20 * blanket_rate_bags_per_ha) - (total_area_ha * 0.20 * 1.20)) * default_bag_price),
+            'guidance': 'Elevated leaching risk on shallow ridge soil. Broadcast application will scorch roots. Split-microdose with organic crop residue mulch.',
+            'station_dose': 'Half cup (5g) buried 5cm away, mulched'
+        },
+    ]
+
+    total_blanket_bags = sum(z['blanket_bags'] for z in prescription_zones)
+    total_prescribed_bags = sum(z['prescribed_bags'] for z in prescription_zones)
+    total_savings_bags = round(total_blanket_bags - total_prescribed_bags, 2)
+    blanket_total_mwk = int(total_blanket_bags * default_bag_price)
+    prescribed_total_mwk = int(total_prescribed_bags * default_bag_price)
+    savings_total_mwk = int(total_savings_bags * default_bag_price)
+    savings_pct = round((savings_total_mwk / blanket_total_mwk) * 100, 1) if blanket_total_mwk > 0 else 0
+
     context = {
         'farm': farm,
         'parcels': parcels,
@@ -59,6 +121,17 @@ def satellite_twin(request):
         'centroid_lat': float(active_parcel.centroid_lat) if active_parcel else -13.9626,
         'centroid_lng': float(active_parcel.centroid_lng) if active_parcel else 33.7741,
         'active_nav': 'satellite_twin',
+        # Prescription economics
+        'prescription_zones': prescription_zones,
+        'default_bag_price': default_bag_price,
+        'total_area_ha': total_area_ha,
+        'total_blanket_bags': total_blanket_bags,
+        'total_prescribed_bags': total_prescribed_bags,
+        'total_savings_bags': total_savings_bags,
+        'blanket_total_mwk': blanket_total_mwk,
+        'prescribed_total_mwk': prescribed_total_mwk,
+        'savings_total_mwk': savings_total_mwk,
+        'savings_pct': savings_pct,
     }
     return render(request, 'innovation/satellite_twin.html', context)
 

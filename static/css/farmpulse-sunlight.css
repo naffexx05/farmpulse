@@ -490,3 +490,17 @@ html.theme-sunlight .text-purple-400 {
   color: #7E22CE !important;
 }
 
+/* 17. Form Inputs & Selects in Sunlight Mode */
+html.theme-sunlight select,
+html.theme-sunlight input[type="number"],
+html.theme-sunlight input[type="text"] {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+html.theme-sunlight select option {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+}
+
