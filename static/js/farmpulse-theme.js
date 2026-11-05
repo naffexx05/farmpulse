@@ -51,7 +51,7 @@
     btn.setAttribute('title', isSunlight ? 'Switch to Midnight Forest (Low Glare)' : 'Switch to Sunlight Field Mode (Direct Sun)');
 
     const iconName = isSunlight ? 'moon' : 'sun';
-    const iconColor = isSunlight ? 'text-sky-300' : 'text-amber-300';
+    const iconColor = isSunlight ? 'text-slate-700' : 'text-amber-300';
     const labelText = isSunlight ? 'Forest' : 'Sunlight';
 
     btn.innerHTML = `

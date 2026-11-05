@@ -193,14 +193,14 @@ h3.font-display, .fp-subsection-title {
 
 .fp-card {
   border-radius: var(--fp-radius-lg) !important;
-  border: 1px solid var(--fp-border) !important;
+  border: 1px solid var(--fp-border);
   background: linear-gradient(
     145deg,
     rgba(15, 34, 20, 0.95) 0%,
     rgba(10, 26, 14, 0.98) 100%
-  ) !important;
-  box-shadow: var(--fp-shadow-card) !important;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+  );
+  box-shadow: var(--fp-shadow-card);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .fp-card:hover {
@@ -208,16 +208,16 @@ h3.font-display, .fp-subsection-title {
 }
 
 .fp-glass {
-  border-radius: var(--fp-radius-lg) !important;
+  border-radius: var(--fp-radius-lg);
   background: linear-gradient(
     145deg,
     rgba(20, 44, 26, 0.88) 0%,
     rgba(15, 34, 20, 0.92) 100%
-  ) !important;
-  border: 1px solid rgba(255,255,255,0.09) !important;
-  backdrop-filter: blur(24px) saturate(1.3) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(1.3) !important;
-  box-shadow: var(--fp-shadow-card) !important;
+  );
+  border: 1px solid rgba(255,255,255,0.09);
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  box-shadow: var(--fp-shadow-card);
 }
 
 /* Elevated glass for modals / overlays */
@@ -226,10 +226,10 @@ h3.font-display, .fp-subsection-title {
     145deg,
     rgba(28, 58, 36, 0.95) 0%,
     rgba(20, 44, 26, 0.98) 100%
-  ) !important;
-  border: 1px solid rgba(255,255,255,0.12) !important;
-  backdrop-filter: blur(32px) !important;
-  border-radius: var(--fp-radius-xl) !important;
+  );
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(32px);
+  border-radius: var(--fp-radius-xl);
 }
 
 /* -------------------------------------------------------------------------
@@ -573,8 +573,8 @@ h3.font-display, .fp-subsection-title {
    ------------------------------------------------------------------------- */
 
 aside#sidebar {
-  border-right: 1px solid rgba(255,255,255,0.05) !important;
-  background: linear-gradient(180deg, #060E08 0%, #0A1A0E 100%) !important;
+  border-right: 1px solid rgba(255,255,255,0.05);
+  background: linear-gradient(180deg, #060E08 0%, #0A1A0E 100%);
 }
 
 /* Nav items */
@@ -621,10 +621,10 @@ aside#sidebar {
    ------------------------------------------------------------------------- */
 
 header.sticky {
-  border-bottom: 1px solid rgba(255,255,255,0.045) !important;
-  background: rgba(6,14,8,0.94) !important;
-  backdrop-filter: blur(28px) saturate(1.1) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(1.1) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.045);
+  background: rgba(6,14,8,0.94);
+  backdrop-filter: blur(28px) saturate(1.1);
+  -webkit-backdrop-filter: blur(28px) saturate(1.1);
 }
 
 /* Network status pill */
@@ -1234,4 +1234,420 @@ html.theme-sunlight .fp-card-innovation::after {
     font-size: 1.25rem !important;
   }
 }
+
+/* =========================================================================
+   SUNLIGHT FIELD MODE — Definitive Institutional Light Theme
+   High-contrast, glare-resistant daylight palette calibrated for
+   outdoor field inspection and ministerial projection.
+   ========================================================================= */
+
+html.theme-sunlight {
+  color-scheme: light;
+
+  --fp-green:        #15803D;
+  --fp-green-dim:    rgba(21, 128, 61, 0.08);
+  --fp-green-border: rgba(21, 128, 61, 0.25);
+
+  --fp-surface-0:    #F4F6F3;
+  --fp-surface-1:    #FFFFFF;
+  --fp-surface-2:    #FFFFFF;
+  --fp-surface-3:    #F3F4F6;
+
+  --fp-text-primary:   #111827;
+  --fp-text-secondary: #374151;
+  --fp-text-muted:     #6B7280;
+
+  --fp-border:       #E5E7EB;
+  --fp-border-hover: #D1D5DB;
+
+  --fp-shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+}
+
+/* 1. Body & Root Surface */
+html.theme-sunlight body,
+body[data-theme="sunlight"] {
+  background-color: #F4F6F3 !important;
+  background-image: none !important;
+  color: #111827 !important;
+}
+
+/* 2. Sidebar Navigation */
+html.theme-sunlight aside#sidebar {
+  background: #FFFFFF !important;
+  border-right: 1px solid #E5E7EB !important;
+  box-shadow: 1px 0 3px rgba(0,0,0,0.02) !important;
+}
+
+html.theme-sunlight aside#sidebar .border-b,
+html.theme-sunlight aside#sidebar .border-white\/5 {
+  border-color: #E5E7EB !important;
+}
+
+html.theme-sunlight aside#sidebar .font-display,
+html.theme-sunlight aside#sidebar .text-cream {
+  color: #111827 !important;
+}
+
+html.theme-sunlight aside#sidebar .text-muted {
+  color: #6B7280 !important;
+}
+
+html.theme-sunlight .fp-nav-item {
+  color: #374151 !important;
+  background: transparent !important;
+  border-left-color: transparent !important;
+}
+
+html.theme-sunlight .fp-nav-item:hover {
+  background: #F3F4F6 !important;
+  color: #111827 !important;
+  border-left-color: #15803D !important;
+}
+
+html.theme-sunlight .fp-nav-item-active {
+  background: #DCFCE7 !important;
+  color: #15803D !important;
+  border-left-color: #15803D !important;
+  font-weight: 700 !important;
+  box-shadow: none !important;
+}
+
+html.theme-sunlight .fp-nav-item-active::before {
+  background: #15803D !important;
+}
+
+html.theme-sunlight .fp-nav-category {
+  color: #9CA3AF !important;
+}
+
+/* 3. Topbar */
+html.theme-sunlight header,
+html.theme-sunlight header.sticky {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border-bottom: 1px solid #E5E7EB !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+}
+
+html.theme-sunlight header .text-cream {
+  color: #111827 !important;
+}
+
+html.theme-sunlight header .text-muted {
+  color: #6B7280 !important;
+}
+
+html.theme-sunlight header input[type="search"],
+html.theme-sunlight .fp-input {
+  background-color: #F9FAFB !important;
+  border: 1px solid #D1D5DB !important;
+  color: #111827 !important;
+}
+
+html.theme-sunlight header input[type="search"]::placeholder,
+html.theme-sunlight .fp-input::placeholder {
+  color: #9CA3AF !important;
+}
+
+html.theme-sunlight .fp-clock-pill {
+  background: #F9FAFB !important;
+  border-color: #E5E7EB !important;
+  color: #374151 !important;
+}
+
+html.theme-sunlight #malawi-clock {
+  color: #111827 !important;
+}
+
+html.theme-sunlight .fp-demo-pill {
+  background: #F3F4F6 !important;
+  border-color: #E5E7EB !important;
+  color: #4B5563 !important;
+}
+
+/* 4. Cards, Containers, and Glass Elements */
+html.theme-sunlight .fp-card,
+html.theme-sunlight .fp-glass,
+html.theme-sunlight .fp-stat-card,
+html.theme-sunlight .fp-card-gradient {
+  background: #FFFFFF !important;
+  border: 1px solid #E5E7EB !important;
+  color: #111827 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03) !important;
+}
+
+html.theme-sunlight .fp-card:hover,
+html.theme-sunlight .fp-stat-card:hover {
+  border-color: #D1D5DB !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06) !important;
+}
+
+/* 5. Hero Banner — Stays commanding forest green with pure white text */
+html.theme-sunlight .fp-hero-banner {
+  background: linear-gradient(135deg, #092E16 0%, #134E26 50%, #092E16 100%) !important;
+  border: 1px solid rgba(22, 101, 52, 0.4) !important;
+  box-shadow: 0 10px 25px -5px rgba(9, 46, 22, 0.25) !important;
+}
+
+html.theme-sunlight .fp-hero-banner h1 {
+  color: #FFFFFF !important;
+}
+
+html.theme-sunlight .fp-hero-banner p {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+html.theme-sunlight .fp-hero-banner .text-cream,
+html.theme-sunlight .fp-hero-banner .text-cream\/75,
+html.theme-sunlight .fp-hero-banner .text-cream\/60 {
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+html.theme-sunlight .fp-hero-banner .text-leaf {
+  color: #86EFAC !important;
+}
+
+html.theme-sunlight .fp-hero-banner .bg-leaf\/20 {
+  background-color: rgba(134, 239, 172, 0.2) !important;
+  border-color: rgba(134, 239, 172, 0.4) !important;
+  color: #86EFAC !important;
+}
+
+/* 6. Tailwind Background Utility Overrides */
+html.theme-sunlight .bg-forest-950,
+html.theme-sunlight .bg-forest-900,
+html.theme-sunlight .bg-forest-850,
+html.theme-sunlight .bg-forest-800 {
+  background-color: #FFFFFF !important;
+  border-color: #E5E7EB !important;
+  color: #111827 !important;
+}
+
+html.theme-sunlight .bg-forest-700,
+html.theme-sunlight .bg-forest-700\/40,
+html.theme-sunlight .bg-forest-700\/50,
+html.theme-sunlight .bg-forest-700\/60,
+html.theme-sunlight .bg-forest-700\/80 {
+  background-color: #F8FAF7 !important;
+  border-color: #E5E7EB !important;
+  color: #111827 !important;
+}
+
+/* 7. Typography Hierarchy */
+html.theme-sunlight .text-cream {
+  color: #111827 !important;
+}
+
+html.theme-sunlight .text-cream\/90,
+html.theme-sunlight .text-cream\/85,
+html.theme-sunlight .text-cream\/80,
+html.theme-sunlight .text-cream\/75,
+html.theme-sunlight .text-cream\/70 {
+  color: #374151 !important;
+}
+
+html.theme-sunlight .text-cream\/60,
+html.theme-sunlight .text-cream\/50,
+html.theme-sunlight .text-muted {
+  color: #4B5563 !important;
+}
+
+html.theme-sunlight .text-cream\/40,
+html.theme-sunlight .text-cream\/35,
+html.theme-sunlight .text-cream\/30 {
+  color: #6B7280 !important;
+}
+
+html.theme-sunlight .text-leaf {
+  color: #15803D !important;
+}
+
+/* 8. Borders & Dividers */
+html.theme-sunlight .border-white\/5,
+html.theme-sunlight .border-white\/8,
+html.theme-sunlight .border-white\/10,
+html.theme-sunlight .border-white\/15,
+html.theme-sunlight .border-white\/20,
+html.theme-sunlight .border-white\/30 {
+  border-color: #E5E7EB !important;
+}
+
+html.theme-sunlight .divide-white\/5,
+html.theme-sunlight .divide-white\/10 {
+  border-color: #E5E7EB !important;
+}
+
+/* 9. Buttons */
+html.theme-sunlight .fp-btn-ghost {
+  color: #374151 !important;
+  background-color: #FFFFFF !important;
+  border: 1px solid #E5E7EB !important;
+}
+
+html.theme-sunlight .fp-btn-ghost:hover {
+  color: #111827 !important;
+  background-color: #F3F4F6 !important;
+}
+
+html.theme-sunlight .fp-btn-outline {
+  border-color: #D1D5DB !important;
+  color: #374151 !important;
+  background: transparent !important;
+}
+
+html.theme-sunlight .fp-btn-outline:hover {
+  background-color: #F3F4F6 !important;
+  color: #111827 !important;
+}
+
+/* 10. Dropdowns & Floating Drawers */
+html.theme-sunlight #user-menu,
+html.theme-sunlight #notifications-menu {
+  background-color: #FFFFFF !important;
+  border: 1px solid #E5E7EB !important;
+  color: #111827 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+}
+
+html.theme-sunlight #user-menu a:hover,
+html.theme-sunlight #notifications-menu .hover\:bg-white\/5:hover {
+  background-color: #F9FAFB !important;
+}
+
+/* 11. Tables */
+html.theme-sunlight .fp-table,
+html.theme-sunlight table {
+  color: #111827 !important;
+}
+
+html.theme-sunlight .fp-table thead,
+html.theme-sunlight table thead {
+  background-color: #F9FAFB !important;
+  border-bottom: 1px solid #E5E7EB !important;
+}
+
+html.theme-sunlight .fp-table thead th,
+html.theme-sunlight table thead th {
+  color: #374151 !important;
+  background-color: #F9FAFB !important;
+  font-weight: 600 !important;
+}
+
+html.theme-sunlight .fp-table tbody tr:hover,
+html.theme-sunlight table tbody tr:hover {
+  background-color: #F9FAFB !important;
+}
+
+html.theme-sunlight .fp-table td,
+html.theme-sunlight table td {
+  color: #111827 !important;
+  border-color: #F3F4F6 !important;
+}
+
+/* 12. Ticker Strip */
+html.theme-sunlight #fp-market-ticker,
+html.theme-sunlight .fp-ticker-wrap {
+  background: #FFFFFF !important;
+  color: #111827 !important;
+}
+
+html.theme-sunlight #fp-market-ticker .text-cream {
+  color: #111827 !important;
+}
+
+html.theme-sunlight #fp-market-ticker .text-cream\/50 {
+  color: #6B7280 !important;
+}
+
+html.theme-sunlight #fp-market-ticker .fp-ticker-sep {
+  color: #E5E7EB !important;
+}
+
+/* 13. Map Radar Controls */
+html.theme-sunlight .map-filter-btn {
+  color: #4B5563 !important;
+}
+
+html.theme-sunlight .map-filter-btn.bg-forest-700 {
+  background-color: #E5E7EB !important;
+  color: #111827 !important;
+}
+
+/* 14. Bottom Advisory Callout */
+html.theme-sunlight .fp-card-innovation {
+  background: linear-gradient(135deg, #F0FDF4 0%, #FFFFFF 100%) !important;
+  border-color: #BBF7D0 !important;
+}
+
+/* 15. Icon Container Badges in Sunlight Mode */
+html.theme-sunlight .bg-white\/10 {
+  background-color: #F3F4F6 !important;
+  color: #374151 !important;
+}
+
+html.theme-sunlight .bg-leaf\/10,
+html.theme-sunlight .bg-leaf\/15,
+html.theme-sunlight .bg-leaf\/20 {
+  background-color: #DCFCE7 !important;
+  color: #15803D !important;
+  border-color: #86EFAC !important;
+}
+
+html.theme-sunlight .bg-water\/15,
+html.theme-sunlight .bg-water\/20 {
+  background-color: #E0F2FE !important;
+  color: #0369A1 !important;
+  border-color: #7DD3FC !important;
+}
+
+html.theme-sunlight .bg-amber-400\/10,
+html.theme-sunlight .bg-amber-400\/15,
+html.theme-sunlight .bg-amber-400\/20 {
+  background-color: #FEF3C7 !important;
+  color: #B45309 !important;
+  border-color: #FDE68A !important;
+}
+
+html.theme-sunlight .bg-rose-500\/15,
+html.theme-sunlight .bg-rose-500\/20 {
+  background-color: #FFE4E6 !important;
+  color: #BE123C !important;
+  border-color: #FECDD3 !important;
+}
+
+html.theme-sunlight .bg-purple-500\/15,
+html.theme-sunlight .bg-purple-500\/20,
+html.theme-sunlight .bg-purple-600\/20 {
+  background-color: #F3E8FF !important;
+  color: #7E22CE !important;
+  border-color: #E9D5FF !important;
+}
+
+/* 16. Semantic Metric Colors in Sunlight Mode */
+html.theme-sunlight .text-amber-300,
+html.theme-sunlight .text-amber-400 {
+  color: #B45309 !important;
+}
+
+html.theme-sunlight .text-emerald-400,
+html.theme-sunlight .text-emerald-300 {
+  color: #15803D !important;
+}
+
+html.theme-sunlight .text-rose-400,
+html.theme-sunlight .text-rose-500,
+html.theme-sunlight .text-rose-300 {
+  color: #DC2626 !important;
+}
+
+html.theme-sunlight .text-water,
+html.theme-sunlight .text-sky-400 {
+  color: #0284C7 !important;
+}
+
+html.theme-sunlight .text-purple-300,
+html.theme-sunlight .text-purple-400 {
+  color: #7E22CE !important;
+}
+
+
 

@@ -333,8 +333,8 @@
       if (!body) return;
       if (theme === 'sunlight') {
         body.setAttribute('data-theme', 'sunlight');
-        body.style.backgroundColor = '#F4F8F3';
-        body.style.color = '#0A291A';
+        body.style.backgroundColor = '#F4F6F3';
+        body.style.color = '#111827';
       } else {
         body.removeAttribute('data-theme');
         body.style.backgroundColor = '';
