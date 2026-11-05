@@ -136,39 +136,110 @@ html.theme-sunlight .fp-stat-card:hover {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06) !important;
 }
 
-/* 5. Hero Banner — Commanding Forest Green in BOTH Themes */
-html.theme-sunlight .fp-hero-banner {
-  background: linear-gradient(135deg, #093318 0%, #14532D 60%, #093318 100%) !important;
-  border: 1px solid rgba(22, 101, 52, 0.5) !important;
-  box-shadow: 0 10px 25px -5px rgba(9, 51, 24, 0.25) !important;
+/* 5. Hero Banner — Crisp Sunlight Card with Bold High-Contrast Typography */
+html.theme-sunlight .fp-hero-banner,
+html.theme-sunlight div.fp-hero-banner {
+  background: linear-gradient(135deg, #F0FDF4 0%, #FFFFFF 55%, #F8FAFC 100%) !important;
+  background-image: none !important;
+  border: 1px solid #CBD5E1 !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
 }
 
 /* Hide dark overlay filters that muddy the hero in daylight */
 html.theme-sunlight .fp-hero-banner .fp-hero-animated,
-html.theme-sunlight .fp-hero-banner .bg-gradient-to-r {
+html.theme-sunlight .fp-hero-banner .bg-gradient-to-r,
+html.theme-sunlight .fp-hero-banner .mix-blend-overlay,
+html.theme-sunlight .fp-hero-banner > div.absolute {
   display: none !important;
 }
 
-html.theme-sunlight .fp-hero-banner h1 {
-  color: #FFFFFF !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+/* Greeting Title: Deep, razor-sharp charcoal black */
+html.theme-sunlight .fp-hero-banner h1,
+html.theme-sunlight .fp-hero-banner h1.text-cream {
+  color: #0F172A !important;
+  font-weight: 800 !important;
+  text-shadow: none !important;
+  letter-spacing: -0.025em !important;
 }
 
+/* Subtitle and descriptive copy: Crisp slate-700 */
 html.theme-sunlight .fp-hero-banner p,
 html.theme-sunlight .fp-hero-banner .text-cream,
-html.theme-sunlight .fp-hero-banner .text-cream\/75,
-html.theme-sunlight .fp-hero-banner .text-cream\/60 {
-  color: rgba(255, 255, 255, 0.92) !important;
+html.theme-sunlight .fp-hero-banner .text-cream\/75 {
+  color: #334155 !important;
+  text-shadow: none !important;
 }
 
+/* Farm location / metadata text */
+html.theme-sunlight .fp-hero-banner .text-cream\/60,
+html.theme-sunlight .fp-hero-banner .text-cream\/50 {
+  color: #64748B !important;
+  font-weight: 500 !important;
+}
+
+/* Bold highlights and farm name */
+html.theme-sunlight .fp-hero-banner strong.text-leaf,
 html.theme-sunlight .fp-hero-banner .text-leaf {
-  color: #86EFAC !important;
+  color: #15803D !important;
+  font-weight: 700 !important;
 }
 
+/* Current season and other highlight spans */
+html.theme-sunlight .fp-hero-banner span.text-cream {
+  color: #0F172A !important;
+  font-weight: 600 !important;
+}
+
+/* Sprout badge */
 html.theme-sunlight .fp-hero-banner .bg-leaf\/20 {
-  background-color: rgba(134, 239, 172, 0.2) !important;
-  border-color: rgba(134, 239, 172, 0.4) !important;
-  color: #86EFAC !important;
+  background-color: #DCFCE7 !important;
+  border: 1px solid #86EFAC !important;
+  color: #15803D !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 2px rgba(22, 101, 52, 0.08) !important;
+}
+
+html.theme-sunlight .fp-hero-banner .bg-leaf\/20 svg,
+html.theme-sunlight .fp-hero-banner .bg-leaf\/20 i {
+  stroke: #15803D !important;
+  color: #15803D !important;
+}
+
+/* CTA Primary Button (Generate Crop Plan) */
+html.theme-sunlight .fp-hero-banner .fp-btn-primary {
+  background: #16A34A !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  border: 1px solid #15803D !important;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3) !important;
+}
+
+html.theme-sunlight .fp-hero-banner .fp-btn-primary:hover {
+  background: #15803D !important;
+  color: #FFFFFF !important;
+}
+
+html.theme-sunlight .fp-hero-banner .fp-btn-primary svg,
+html.theme-sunlight .fp-hero-banner .fp-btn-primary i {
+  stroke: #FFFFFF !important;
+}
+
+/* Outline CTA Button (Seasonal Risk Analysis) */
+html.theme-sunlight .fp-hero-banner .border-amber-400\/40 {
+  border: 1px solid #F59E0B !important;
+  color: #92400E !important;
+  background-color: #FFFBEB !important;
+  font-weight: 600 !important;
+}
+
+html.theme-sunlight .fp-hero-banner .border-amber-400\/40:hover {
+  background-color: #FEF3C7 !important;
+  color: #78350F !important;
+}
+
+html.theme-sunlight .fp-hero-banner .border-amber-400\/40 svg,
+html.theme-sunlight .fp-hero-banner .border-amber-400\/40 i {
+  stroke: #92400E !important;
 }
 
 /* 6. Tailwind Background Classes Override */
@@ -331,9 +402,14 @@ html.theme-sunlight .map-filter-btn {
   color: #475569 !important;
 }
 
-html.theme-sunlight .map-filter-btn.bg-forest-700 {
-  background-color: #E2E8F0 !important;
+html.theme-sunlight .map-filter-btn:hover {
   color: #0F172A !important;
+}
+
+html.theme-sunlight .map-filter-btn.bg-forest-700 {
+  background-color: #0F172A !important;
+  color: #FFFFFF !important;
+  font-weight: 600 !important;
 }
 
 /* 14. Bottom Advisory Callout */
