@@ -183,12 +183,9 @@
                       name="crops"
                       value="{{ item.slug }}"
                       data-recommended="{{ item.is_recommended|yesno:'true,false' }}"
-                      {% if request.GET.crops %}
-                        {% if item.slug in request.GET.getlist.crops %}checked{% endif %}
-                      {% else %}
-                        {% if item.is_preferred or item.slug in recommended_crop_slugs %}checked{% endif %}
-                      {% endif %}
-                      class="crop-checkbox accent-leaf w-4 h-4 rounded mt-0.5"
+                      {% if item.is_selected %}checked{% endif %}
+                      class="crop-checkbox accent-leaf w-4 h-4 rounded mt-0.5 cursor-pointer"
+                      onchange="onCropCheckboxToggle()"
                     >
                     <div>
                       <span class="text-sm font-bold text-cream block leading-tight">{{ item.name }}</span>
@@ -705,9 +702,27 @@
     checkboxes.forEach(cb => {
       cb.checked = RECOMMENDED_CROPS.includes(cb.value);
     });
+    onCropCheckboxToggle();
     const form = document.getElementById('planner-form');
     if (form) {
       form.submit();
+    }
+  }
+
+  function onCropCheckboxToggle() {
+    const checkedBoxes = document.querySelectorAll('.crop-checkbox:checked');
+    const checkedSlugs = Array.from(checkedBoxes).map(cb => cb.value);
+    if (checkedSlugs.length === 0) return;
+
+    if (window.farmPulseSplitter) {
+      window.farmPulseSplitter.setSelectedCrops(checkedSlugs);
+    }
+
+    if (typeof initInputCostLedger === 'function') {
+      const budgetInputEl = document.getElementById('budget-input');
+      const b = budgetInputEl ? (parseFloat(budgetInputEl.value) || 450000) : 450000;
+      const benchmarks = JSON.parse('{{ crops_benchmarks_json|escapejs }}');
+      initInputCostLedger(checkedSlugs, b, benchmarks);
     }
   }
 
@@ -726,14 +741,11 @@
     const totalLand = parseFloat("{{ request.GET.land|default:default_land }}") || 2.0;
     const budget = parseFloat("{{ request.GET.budget|default:default_budget }}") || 450000;
 
-    let selectedCrops = [];
-    {% if request.GET.crops %}
-      selectedCrops = [{% for c in request.GET.getlist.crops %}'{{ c }}',{% endfor %}];
-    {% else %}
-      selectedCrops = RECOMMENDED_CROPS.length > 0 ? RECOMMENDED_CROPS : ['maize', 'groundnuts', 'soybeans'];
-    {% endif %}
-
+    let selectedCrops = {{ selected_crop_slugs_json|safe }};
     selectedCrops = selectedCrops.filter(s => benchmarks[s]);
+    if (selectedCrops.length === 0) {
+      selectedCrops = RECOMMENDED_CROPS.filter(s => benchmarks[s]);
+    }
     if (selectedCrops.length === 0) {
       selectedCrops = Object.keys(benchmarks).slice(0, 3);
     }
@@ -748,13 +760,25 @@
       });
     }
 
-    // ── Input Cost Ledger ──────────────────────────────────────────────────
+    // Input Cost Ledger
     initInputCostLedger(selectedCrops, budget, benchmarks);
 
-    // Wire parameter budget field to ledger in real time
+    // Wire parameter input fields to splitter & ledger in real time
+    const landInputEl = document.getElementById('land-input');
+    if (landInputEl) {
+      landInputEl.addEventListener('input', function (e) {
+        if (window.farmPulseSplitter && e.target.value) {
+          window.farmPulseSplitter.setTotalLand(e.target.value);
+        }
+      });
+    }
+
     const budgetInputEl = document.getElementById('budget-input');
     if (budgetInputEl) {
       budgetInputEl.addEventListener('input', function (e) {
+        if (window.farmPulseSplitter && e.target.value) {
+          window.farmPulseSplitter.setSeasonalBudget(e.target.value);
+        }
         if (typeof window.updateLedgerBudget === 'function') {
           window.updateLedgerBudget(e.target.value);
         }

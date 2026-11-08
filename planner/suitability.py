@@ -578,3 +578,4 @@ def calculate_regional_fit_score(allocated_crops: List[Dict[str, Any]], district
         'verdict': verdict,
         'warnings': warnings,
     }
+

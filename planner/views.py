@@ -82,6 +82,20 @@ def planner_input(request):
     default_budget = farm.seasonal_budget_mwk or Decimal('450000.00')
     default_labour = farm.available_labour_persons or 3
 
+    # Determine currently selected crops (from request or district/farm profile)
+    raw_crops = request.GET.getlist('crops') or request.POST.getlist('crops')
+    if raw_crops:
+        selected_slugs = [s.strip() for s in raw_crops if s and s.strip()]
+    else:
+        preferred_slugs = [c.slug for c in farm.preferred_crops.all()]
+        selected_slugs = preferred_slugs if preferred_slugs else list(recommended_crop_slugs)
+
+    # Validate against known crops
+    valid_slugs = {c.slug for c in all_crops}
+    selected_slugs = [s for s in selected_slugs if s in valid_slugs]
+    if not selected_slugs:
+        selected_slugs = [s for s in recommended_crop_slugs if s in valid_slugs] or ['maize', 'groundnuts', 'soybeans']
+
     # If parameters submitted via GET or POST, generate plans
     has_generated = 'generate' in request.GET or request.method == 'POST'
     plans_data = None
@@ -101,11 +115,6 @@ def planner_input(request):
             labour_input = int(request.GET.get('labour', str(default_labour)))
         except (ValueError, TypeError):
             labour_input = default_labour
-
-        selected_slugs = request.GET.getlist('crops')
-        if not selected_slugs:
-            # Fallback to preferred or district-recommended mix
-            selected_slugs = [c.slug for c in farm.preferred_crops.all()] or recommended_crop_slugs
 
         selected_crop_objs = list(Crop.objects.filter(slug__in=selected_slugs))
 
@@ -197,6 +206,7 @@ def planner_input(request):
             'slug': c.slug,
             'category': c.get_category_display(),
             'bm': bm,
+            'is_selected': c.slug in selected_slugs,
             'is_preferred': c.id in preferred_crop_ids,
             'is_recommended': bm['is_regionally_recommended'],
             'tier': bm['regional_suitability_tier'],
@@ -222,6 +232,8 @@ def planner_input(request):
         'all_crops': all_crops,
         'crops_with_suitability': crops_with_suitability,
         'preferred_crop_ids': preferred_crop_ids,
+        'selected_crop_slugs': selected_slugs,
+        'selected_crop_slugs_json': json.dumps(selected_slugs),
         'default_land': default_land,
         'default_budget': default_budget,
         'default_labour': default_labour,

@@ -57,6 +57,70 @@
       this.render();
     }
 
+    setSelectedCrops(newCropSlugs) {
+      if (!Array.isArray(newCropSlugs)) return;
+      const validCrops = newCropSlugs.filter(slug => this.benchmarks[slug]);
+      if (validCrops.length === 0) return;
+
+      this.selectedCrops = validCrops;
+
+      // Remove allocations for deselected crops
+      Object.keys(this.allocations).forEach(slug => {
+        if (!validCrops.includes(slug)) {
+          delete this.allocations[slug];
+          delete this.isLocked[slug];
+        }
+      });
+
+      // Retained crops that are still selected
+      const retainedCrops = Object.keys(this.allocations);
+
+      if (retainedCrops.length === 0) {
+        // All crops changed, full re-init
+        this.initAllocations();
+      } else {
+        const newlyAdded = validCrops.filter(slug => !retainedCrops.includes(slug));
+        if (newlyAdded.length > 0) {
+          let retainedTotal = 0;
+          retainedCrops.forEach(slug => retainedTotal += (this.allocations[slug] || 0));
+          let remainingLand = Math.max(0, this.totalLandHa - retainedTotal);
+
+          if (remainingLand >= 0.1) {
+            // Allocate remaining land across newly added crops
+            const share = Math.round((remainingLand / newlyAdded.length) * 100) / 100;
+            newlyAdded.forEach((slug, idx) => {
+              if (idx === newlyAdded.length - 1) {
+                const allocated = share * (newlyAdded.length - 1);
+                this.allocations[slug] = Math.max(0.05, Math.round((remainingLand - allocated) * 100) / 100);
+              } else {
+                this.allocations[slug] = share;
+              }
+            });
+          } else {
+            // Rebalance so all crops get a meaningful slice
+            this.initAllocations();
+          }
+        }
+      }
+
+      this.render();
+    }
+
+    setTotalLand(landHa) {
+      const parsed = parseFloat(landHa);
+      if (isNaN(parsed) || parsed <= 0) return;
+      this.totalLandHa = Math.round(parsed * 100) / 100;
+      this.initAllocations();
+      this.render();
+    }
+
+    setSeasonalBudget(budgetMwk) {
+      const parsed = parseFloat(budgetMwk);
+      if (isNaN(parsed) || parsed < 0) return;
+      this.seasonalBudgetMwk = Math.round(parsed);
+      this.render();
+    }
+
     adjustCropArea(slug, delta) {
       const current = this.allocations[slug] || 0;
       this.setCropArea(slug, current + delta);
