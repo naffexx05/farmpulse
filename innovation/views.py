@@ -44,6 +44,32 @@ def satellite_twin(request):
     parcels = SatelliteParcel.objects.filter(farm=farm) if farm else SatelliteParcel.objects.none()
     active_parcel = parcels.first()
 
+    # Fallback auto-provisioning if farm has no parcel yet
+    if farm and not active_parcel:
+        lat = float(farm.latitude or -13.962700)
+        lng = float(farm.longitude or 33.774100)
+        d_lat = 0.0016
+        d_lng = 0.0017
+        polygon = [
+            [round(lng - d_lng, 6), round(lat + d_lat, 6)],
+            [round(lng + d_lng, 6), round(lat + d_lat, 6)],
+            [round(lng + d_lng, 6), round(lat - d_lat, 6)],
+            [round(lng - d_lng, 6), round(lat - d_lat, 6)],
+            [round(lng - d_lng, 6), round(lat + d_lat, 6)],
+        ]
+        active_parcel = SatelliteParcel.objects.create(
+            farm=farm,
+            name=f"{farm.name} Main Parcel",
+            calculated_area_ha=Decimal(str(farm.total_land_ha or 2.50)),
+            centroid_lat=Decimal(str(lat)),
+            centroid_lng=Decimal(str(lng)),
+            polygon_geojson=polygon,
+            mean_ndvi=Decimal("0.68"),
+            soil_moisture_pct=Decimal("29.4"),
+            stress_level="optimal",
+        )
+        parcels = SatelliteParcel.objects.filter(farm=farm)
+
     # Pre-calculated NDVI band zones for active parcel
     ndvi_zones = [
         {'zone': 'North Quadrant', 'ndvi': 0.72, 'status': 'Optimal Vigor', 'badge': 'emerald', 'area_pct': 45},
@@ -112,14 +138,45 @@ def satellite_twin(request):
     savings_total_mwk = int(total_savings_bags * default_bag_price)
     savings_pct = round((savings_total_mwk / blanket_total_mwk) * 100, 1) if blanket_total_mwk > 0 else 0
 
+    # Format cadastral boundary vertices for on-screen ground-truth verification
+    parcel_vertices = []
+    if active_parcel and active_parcel.polygon_geojson:
+        raw_coords = active_parcel.polygon_geojson
+        coords = raw_coords
+        if coords and isinstance(coords[0], list) and len(coords[0]) > 0 and isinstance(coords[0][0], list):
+            coords = coords[0]
+
+        cardinals = ['North-West Corner', 'North-East Corner', 'South-East Corner', 'South-West Corner']
+        unique_pts = coords[:4] if len(coords) >= 4 else coords
+        for idx, pt in enumerate(unique_pts):
+            if isinstance(pt, (list, tuple)) and len(pt) >= 2:
+                lng_val = float(pt[0])
+                lat_val = float(pt[1])
+                cardinal_lbl = cardinals[idx] if idx < len(cardinals) else f"Boundary Point {idx + 1}"
+                lat_dms = f"{abs(lat_val):.4f}° S" if lat_val < 0 else f"{lat_val:.4f}° N"
+                lng_dms = f"{abs(lng_val):.4f}° E" if lng_val >= 0 else f"{abs(lng_val):.4f}° W"
+                parcel_vertices.append({
+                    'index': idx + 1,
+                    'label': cardinal_lbl,
+                    'lat': f"{lat_val:.6f}",
+                    'lng': f"{lng_val:.6f}",
+                    'display': f"{lat_dms}, {lng_dms}",
+                })
+
+    centroid_lat = float(active_parcel.centroid_lat) if active_parcel else -13.962700
+    centroid_lng = float(active_parcel.centroid_lng) if active_parcel else 33.774100
+    centroid_dms = f"{abs(centroid_lat):.4f}° S, {abs(centroid_lng):.4f}° E"
+
     context = {
         'farm': farm,
         'parcels': parcels,
         'active_parcel': active_parcel,
         'ndvi_zones': ndvi_zones,
         'parcel_coords_json': json.dumps(active_parcel.polygon_geojson if active_parcel else []),
-        'centroid_lat': float(active_parcel.centroid_lat) if active_parcel else -13.9626,
-        'centroid_lng': float(active_parcel.centroid_lng) if active_parcel else 33.7741,
+        'centroid_lat': centroid_lat,
+        'centroid_lng': centroid_lng,
+        'centroid_dms': centroid_dms,
+        'parcel_vertices': parcel_vertices,
         'active_nav': 'satellite_twin',
         # Prescription economics
         'prescription_zones': prescription_zones,

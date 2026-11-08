@@ -20,6 +20,8 @@ class FarmForm(forms.ModelForm):
         fields = [
             'name',
             'location_description',
+            'latitude',
+            'longitude',
             'total_land_ha',
             'cultivated_land_ha',
             'irrigation_type',
@@ -34,6 +36,8 @@ class FarmForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'class': 'fp-input'}),
             'location_description': forms.TextInput(attrs={'class': 'fp-input'}),
+            'latitude': forms.NumberInput(attrs={'class': 'fp-input font-mono', 'step': '0.000001', 'placeholder': 'e.g. -13.962700'}),
+            'longitude': forms.NumberInput(attrs={'class': 'fp-input font-mono', 'step': '0.000001', 'placeholder': 'e.g. 33.774100'}),
             'total_land_ha': forms.NumberInput(attrs={'class': 'fp-input', 'step': '0.01', 'min': '0'}),
             'cultivated_land_ha': forms.NumberInput(attrs={'class': 'fp-input', 'step': '0.01', 'min': '0'}),
             'irrigation_type': forms.Select(attrs={'class': 'fp-input'}),
