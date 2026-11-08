@@ -6,39 +6,38 @@ from datetime import date
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
-def run_seed():
-    from django.contrib.auth.models import User
-    from core.models import UserProfile
-    from farms.models import Farm, Crop, Season, Planting, SeasonReview
-    from climate.models import District
-    from planner.models import Plan, PlanItem, PlanAssumption
-    from innovation.models import SatelliteParcel, ParametricInsurancePolicy
+from django.contrib.auth.models import User
+from core.models import UserProfile
+from farms.models import Farm, Crop, Season, Planting, SeasonReview
+from climate.models import District
+from planner.models import Plan, PlanItem, PlanAssumption
+from innovation.models import SatelliteParcel, ParametricInsurancePolicy
 
-    print("--- Seeding Miriam Chiphaka Account and 10 Years Data ---")
+print("--- Seeding Miriam Chiphaka Account and 10 Years Data ---")
 
-    # 1. District
-    mzuzu_dist, _ = District.objects.get_or_create(
-        slug='mzuzu',
-        defaults={
-            'name': 'Mzuzu',
-            'region': 'northern',
-            'latitude': Decimal('-11.458900'),
-            'longitude': Decimal('34.015200'),
-            'elevation_m': 1280,
-            'description': 'Northern Highlands & Viphya-Mzuzu Plateau. Elevation 1,280m ASL, annual rainfall 1,150 mm, deep humic ferralsols and clay loam with exceptional moisture retention.'
-        }
-    )
-    print(f"District: {mzuzu_dist.name}")
+# 1. District
+mzuzu_dist, _ = District.objects.get_or_create(
+    slug='mzuzu',
+    defaults={
+        'name': 'Mzuzu',
+        'region': 'northern',
+        'latitude': Decimal('-11.458900'),
+        'longitude': Decimal('34.015200'),
+        'elevation_m': 1280,
+        'description': 'Northern Highlands & Viphya-Mzuzu Plateau. Elevation 1,280m ASL, annual rainfall 1,150 mm, deep humic ferralsols and clay loam with exceptional moisture retention.'
+    }
+)
+print(f"District: {mzuzu_dist.name}")
 
-    # 2. User: Miriam Chiphaka
-    username = 'miriam'
-    user, created = User.objects.get_or_create(username=username)
-    user.first_name = 'Miriam'
-    user.last_name = 'Chiphaka'
-    user.email = 'miriam.chiphaka@farmpulse.mw'
-    user.set_password('Password123!')
-    user.is_active = True
-    user.save()
+# 2. User: Miriam Chiphaka
+username = 'miriam'
+user, created = User.objects.get_or_create(username=username)
+user.first_name = 'Miriam'
+user.last_name = 'Chiphaka'
+user.email = 'miriam.chiphaka@farmpulse.mw'
+user.set_password('Password123!')
+user.is_active = True
+user.save()
 print(f"User '{user.username}' created/updated (Password: Password123!)")
 
 profile, _ = UserProfile.objects.get_or_create(user=user)
@@ -721,9 +720,5 @@ policy = ParametricInsurancePolicy.objects.create(
     transaction_ref=''
 )
 print(f"Parametric Insurance Policy created: {policy.policy_number} ({policy.status}).")
-    print("\n--- MIRIAM CHIPHAKA SEEDING COMPLETE! ---")
-
-
-if __name__ == '__main__':
-    run_seed()
+print("\n--- MIRIAM CHIPHAKA SEEDING COMPLETE! ---")
 

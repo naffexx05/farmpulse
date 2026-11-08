@@ -68,9 +68,15 @@ def ensure_database_ready():
         if 'auth_user' not in tables:
             call_command('migrate', interactive=False)
         from django.contrib.auth.models import User
-        if not User.objects.filter(username='miriam').exists():
-            import seed_miriam_chiphaka
-            seed_miriam_chiphaka.run_seed()
+        miriam = User.objects.filter(username='miriam').first()
+        if not miriam:
+            import runpy
+            runpy.run_module('seed_miriam_chiphaka', run_name='__main__')
+        else:
+            if not miriam.check_password('Password123!'):
+                miriam.set_password('Password123!')
+                miriam.is_active = True
+                miriam.save()
     except Exception as exc:
         print(f"[FarmPulse DB Auto-init Error]: {exc}")
 

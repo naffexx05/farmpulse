@@ -28,8 +28,8 @@ try:
     from django.contrib.auth.models import User
     if not User.objects.filter(username='miriam').exists():
         print("[FarmPulse WSGI] Auto-seeding Miriam Chiphaka 10-year dataset...")
-        import seed_miriam_chiphaka
-        seed_miriam_chiphaka.run_seed()
+        import runpy
+        runpy.run_module('seed_miriam_chiphaka', run_name='__main__')
         print("[FarmPulse WSGI] Miriam Chiphaka seeded successfully.")
 except Exception as exc:
     print(f"[FarmPulse WSGI Startup Notice]: {exc}")
