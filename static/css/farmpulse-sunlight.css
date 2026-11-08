@@ -72,6 +72,21 @@ html.theme-sunlight .fp-nav-category {
   color: #94A3B8 !important;
 }
 
+/* Sidebar Nested Sub-Links */
+html.theme-sunlight #sidebar .pl-7 a {
+  color: #64748B !important;
+}
+html.theme-sunlight #sidebar .pl-7 a:hover {
+  color: #0F172A !important;
+  background-color: #F1F5F9 !important;
+}
+html.theme-sunlight #sidebar .pl-7 a.text-leaf,
+html.theme-sunlight #sidebar .pl-7 a.font-bold {
+  color: #15803D !important;
+  background-color: #DCFCE7 !important;
+  font-weight: 700 !important;
+}
+
 /* 3. Sticky Topbar */
 html.theme-sunlight header,
 html.theme-sunlight header.sticky {

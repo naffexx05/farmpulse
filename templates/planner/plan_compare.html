@@ -40,6 +40,22 @@
     </form>
   </header>
 
+  <!-- Crop Planning Sub-Navigation Tabs -->
+  <div class="flex items-center gap-2 border-b border-white/10 pb-2">
+    <a href="{% url 'planner:planner_input' %}"
+       class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg transition-all {% if active_nav == 'planner' %}bg-leaf text-forest-900 shadow-sm{% else %}text-muted hover:text-cream hover:bg-white/5{% endif %}">
+      <i data-lucide="leaf" class="w-3.5 h-3.5"></i> New Crop Plan
+    </a>
+    <a href="{% url 'planner:plan_list' %}"
+       class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg transition-all {% if active_nav == 'plans' or active_nav == 'compare' %}bg-leaf text-forest-900 shadow-sm{% else %}text-muted hover:text-cream hover:bg-white/5{% endif %}">
+      <i data-lucide="bookmark" class="w-3.5 h-3.5"></i> My Saved Plans
+    </a>
+    <a href="{% url 'planner:scenario_simulator' %}"
+       class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg transition-all {% if active_nav == 'scenarios' %}bg-leaf text-forest-900 shadow-sm{% else %}text-muted hover:text-cream hover:bg-white/5{% endif %}">
+      <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> Drought &amp; Risk Simulator
+    </a>
+  </div>
+
   {% if selected_plans %}
     <!-- High-level Metric Comparison Cards -->
     <div class="grid grid-cols-1 md:grid-cols-{{ selected_plans|length }} gap-4 items-stretch">

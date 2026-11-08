@@ -29,6 +29,22 @@
     {% endif %}
   </header>
 
+  <!-- My Farm Sub-Navigation Tabs -->
+  <div class="flex items-center gap-2 border-b border-white/10 pb-2">
+    <a href="{% url 'farms:my_farm' %}"
+       class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg transition-all {% if active_nav == 'my_farm' %}bg-leaf text-forest-900 shadow-sm{% else %}text-muted hover:text-cream hover:bg-white/5{% endif %}">
+      <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Farm Profile &amp; Plots
+    </a>
+    <a href="{% url 'farms:farm_history' %}"
+       class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg transition-all {% if active_nav == 'farm_history' %}bg-leaf text-forest-900 shadow-sm{% else %}text-muted hover:text-cream hover:bg-white/5{% endif %}">
+      <i data-lucide="history" class="w-3.5 h-3.5"></i> Field History &amp; Past Yields
+    </a>
+    <a href="{% url 'farms:season_review_index' %}"
+       class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg transition-all {% if active_nav == 'season_review' %}bg-leaf text-forest-900 shadow-sm{% else %}text-muted hover:text-cream hover:bg-white/5{% endif %}">
+      <i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i> Season Harvest Review
+    </a>
+  </div>
+
   {% if not farm %}
     <div class="fp-card p-12 text-center max-w-lg mx-auto border-dashed border-white/15 space-y-4">
       <div class="w-14 h-14 rounded-full bg-forest-800 text-leaf flex items-center justify-center mx-auto border border-white/10">
