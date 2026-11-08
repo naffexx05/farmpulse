@@ -721,3 +721,4 @@ policy = ParametricInsurancePolicy.objects.create(
 )
 print(f"Parametric Insurance Policy created: {policy.policy_number} ({policy.status}).")
 print("\n--- MIRIAM CHIPHAKA SEEDING COMPLETE! ---")
+
