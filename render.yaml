@@ -5,9 +5,10 @@ services:
     region: frankfurt
     plan: free
     buildCommand: "./build.sh"
-    startCommand: "gunicorn config.wsgi:application"
+    startCommand: "python manage.py migrate && python seed_miriam_chiphaka.py && gunicorn config.wsgi:application"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.5
       - key: DEBUG
         value: "True"
+
