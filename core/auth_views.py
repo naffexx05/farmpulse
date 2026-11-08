@@ -59,7 +59,24 @@ class RegisterForm(forms.Form):
         return cleaned_data
 
 
+def ensure_database_ready():
+    """Self-healing safety net: automatically runs migrations and seeds Miriam if missing."""
+    try:
+        from django.db import connection
+        from django.core.management import call_command
+        tables = connection.introspection.table_names()
+        if 'auth_user' not in tables:
+            call_command('migrate', interactive=False)
+        from django.contrib.auth.models import User
+        if not User.objects.filter(username='miriam').exists():
+            import seed_miriam_chiphaka
+            seed_miriam_chiphaka.run_seed()
+    except Exception as exc:
+        print(f"[FarmPulse DB Auto-init Error]: {exc}")
+
+
 def user_login(request):
+    ensure_database_ready()
     if request.user.is_authenticated:
         return redirect('home')
 

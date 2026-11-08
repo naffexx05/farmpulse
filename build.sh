@@ -13,3 +13,4 @@ python seed_miriam_chiphaka.py
 
 # Collect static assets for WhiteNoise
 python manage.py collectstatic --no-input
+
