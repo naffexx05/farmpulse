@@ -141,13 +141,17 @@ def satellite_twin(request):
     # Format cadastral boundary vertices for on-screen ground-truth verification
     parcel_vertices = []
     if active_parcel and active_parcel.polygon_geojson:
-        raw_coords = active_parcel.polygon_geojson
-        coords = raw_coords
-        if coords and isinstance(coords[0], list) and len(coords[0]) > 0 and isinstance(coords[0][0], list):
+        raw_geo = active_parcel.polygon_geojson
+        if isinstance(raw_geo, dict):
+            coords = raw_geo.get('coordinates', [])
+        else:
+            coords = raw_geo
+
+        if isinstance(coords, list) and len(coords) > 0 and isinstance(coords[0], list) and len(coords[0]) > 0 and isinstance(coords[0][0], list):
             coords = coords[0]
 
         cardinals = ['North-West Corner', 'North-East Corner', 'South-East Corner', 'South-West Corner']
-        unique_pts = coords[:4] if len(coords) >= 4 else coords
+        unique_pts = coords[:4] if isinstance(coords, list) and len(coords) >= 4 else (coords if isinstance(coords, list) else [])
         for idx, pt in enumerate(unique_pts):
             if isinstance(pt, (list, tuple)) and len(pt) >= 2:
                 lng_val = float(pt[0])
