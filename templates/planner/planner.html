@@ -41,15 +41,80 @@
     </a>
   </div>
 
-  <!-- Input Form Card -->
-  <section class="fp-glass p-6 space-y-6">
-    <div class="border-b border-white/5 pb-4">
-      <h2 class="font-display text-xl font-semibold text-cream">Plan Parameters for {{ farm.name }}</h2>
-      <p class="text-xs text-cream/60">Enter your seasonal resource constraints and select the candidate crops to consider.</p>
+  <!-- Agro-Ecological Region & Soil Passport Banner -->
+  <section class="p-5 rounded-2xl bg-forest-900/90 border border-leaf/30 space-y-4 shadow-xl">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/10 pb-3">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-bold bg-leaf/20 text-leaf border border-leaf/30">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Agro-Ecological Region
+          </span>
+          <span class="text-xs font-bold text-cream">{{ district_profile.name }} District &bull; {{ district_profile.aez_name }}</span>
+        </div>
+        <p class="text-xs text-cream/70 mt-1 max-w-2xl">
+          Crops, yields, and gross margins are calibrated to {{ district_profile.name }}'s official DARS agro-zone soil benchmarks and rainfall regime.
+        </p>
+      </div>
+
+      <!-- Quick Region Switcher for Live Demo/Pitch -->
+      <div class="flex items-center gap-2 bg-forest-800/80 p-1.5 rounded-xl border border-white/10 text-xs">
+        <label for="district-switcher" class="text-[11px] text-cream/50 pl-2 font-medium">Switch Region:</label>
+        <select id="district-switcher" onchange="onDistrictChange(this.value)"
+                class="bg-forest-900 text-cream text-xs font-semibold rounded-lg px-2.5 py-1.5 border border-white/15 focus:outline-none focus:border-leaf">
+          {% for d in available_districts %}
+            <option value="{{ d.slug }}" {% if d.active %}selected{% endif %}>
+              {{ d.name }} ({{ d.region }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
     </div>
 
-    <form method="get" action="{% url 'planner:planner_input' %}" class="space-y-6">
+    <!-- 4 AEZ Telemetry Badges -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+      <div class="bg-forest-800/60 p-2.5 rounded-lg border border-white/5 space-y-0.5">
+        <span class="text-[10px] text-cream/50 uppercase font-mono block">Elevation &amp; Topography</span>
+        <span class="font-bold text-cream text-[13px] block">{{ district_profile.elevation_range }}</span>
+        <span class="text-[10px] text-sky-300 block">Thermal Growing Window</span>
+      </div>
+      <div class="bg-forest-800/60 p-2.5 rounded-lg border border-white/5 space-y-0.5">
+        <span class="text-[10px] text-cream/50 uppercase font-mono block">Seasonal Rainfall Regime</span>
+        <span class="font-bold text-cream text-[13px] block">{{ district_profile.rainfall_range }}</span>
+        <span class="text-[10px] text-leaf block">Historic DCCMS Observation</span>
+      </div>
+      <div class="bg-forest-800/60 p-2.5 rounded-lg border border-white/5 space-y-0.5">
+        <span class="text-[10px] text-cream/50 uppercase font-mono block">Dominant Soil Texture</span>
+        <span class="font-bold text-cream text-[13px] block truncate" title="{{ district_profile.soil_type }}">{{ district_profile.soil_type }}</span>
+        <span class="text-[10px] text-amber-300 block">Free Draining Root Tilth</span>
+      </div>
+      <div class="bg-forest-800/60 p-2.5 rounded-lg border border-white/5 space-y-0.5">
+        <span class="text-[10px] text-cream/50 uppercase font-mono block">Recommended Crop Mix</span>
+        <span class="font-bold text-emerald-400 text-[13px] block">
+          {{ recommended_crop_slugs|join:", "|title }}
+        </span>
+        <span class="text-[10px] text-cream/40 block">DARS Certified Alignment</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Input Form Card -->
+  <section class="fp-glass p-6 space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-4">
+      <div>
+        <h2 class="font-display text-xl font-semibold text-cream">Plan Parameters for {{ farm.name }}</h2>
+        <p class="text-xs text-cream/60">Enter your seasonal resource constraints and select the candidate crops to consider.</p>
+      </div>
+      <!-- One-Click Auto-Select Button -->
+      <button type="button" onclick="selectRegionRecommendedCrops()"
+              class="fp-btn-secondary text-xs inline-flex items-center gap-1.5 !py-1.5 !px-3 shrink-0">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-leaf"></i>
+        <span>Select Recommended Mix for {{ district_profile.name }}</span>
+      </button>
+    </div>
+
+    <form method="get" action="{% url 'planner:planner_input' %}" id="planner-form" class="space-y-6">
       <input type="hidden" name="generate" value="1">
+      <input type="hidden" name="district" id="form-district-input" value="{{ active_district_slug }}">
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <!-- Land -->
@@ -98,36 +163,85 @@
         </div>
       </div>
 
-      <!-- Crop Selection -->
-      <div class="space-y-2 pt-2">
+      <!-- Candidate Crop Selection Grid with Regional Badges -->
+      <div class="space-y-3 pt-2">
         <div class="flex items-center justify-between">
-          <label class="fp-label">Candidate Crops to Include in Allocation</label>
-          <span class="text-[11px] text-leaf">Preferred crops pre-selected</span>
+          <label class="fp-label">Candidate Crops &amp; Regional Suitability (Select 2–4 crops)</label>
+          <span class="text-[11px] text-cream/60">
+            Ratings calibrated for <strong class="text-leaf">{{ district_profile.name }} District</strong>
+          </span>
         </div>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          {% for c in all_crops %}
-            <label class="flex items-center gap-2.5 p-3 rounded-xl bg-forest-800/60 border border-white/10 hover:border-leaf/40 cursor-pointer transition-colors">
-              <input
-                type="checkbox"
-                name="crops"
-                value="{{ c.slug }}"
-                {% if request.GET.crops %}
-                  {% if c.slug in request.GET.getlist.crops %}checked{% endif %}
-                {% else %}
-                  {% if c.id in preferred_crop_ids or c.slug in 'maize,groundnuts' %}checked{% endif %}
-                {% endif %}
-                class="accent-leaf w-4 h-4 rounded"
-              >
-              <div>
-                <span class="text-sm font-medium text-cream block leading-tight">{{ c.name }}</span>
-                <span class="text-[10px] text-cream/40 uppercase">{{ c.get_category_display }}</span>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {% for item in crops_with_suitability %}
+            <label class="flex flex-col justify-between p-3.5 rounded-xl bg-forest-800/70 border border-white/10 hover:border-leaf/50 cursor-pointer transition-all duration-200 relative group select-none">
+              <div class="space-y-2">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      name="crops"
+                      value="{{ item.slug }}"
+                      data-recommended="{{ item.is_recommended|yesno:'true,false' }}"
+                      {% if request.GET.crops %}
+                        {% if item.slug in request.GET.getlist.crops %}checked{% endif %}
+                      {% else %}
+                        {% if item.is_preferred or item.slug in recommended_crop_slugs %}checked{% endif %}
+                      {% endif %}
+                      class="crop-checkbox accent-leaf w-4 h-4 rounded mt-0.5"
+                    >
+                    <div>
+                      <span class="text-sm font-bold text-cream block leading-tight">{{ item.name }}</span>
+                      <span class="text-[10px] text-cream/40 uppercase tracking-wider font-mono">{{ item.category }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Regional Suitability Badge -->
+                  {% if item.tier == 'optimal' %}
+                    <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
+                      <i data-lucide="check" class="w-3 h-3 text-emerald-400"></i> Recommended
+                    </span>
+                  {% elif item.tier == 'suitable' %}
+                    <span class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
+                      Suitable
+                    </span>
+                  {% else %}
+                    <span class="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 shrink-0" title="{{ item.rationale }}">
+                      <i data-lucide="alert-triangle" class="w-3 h-3 text-rose-400"></i> Marginal
+                    </span>
+                  {% endif %}
+                </div>
+
+                <!-- Certified Seed Varieties -->
+                <div class="text-[11px] text-cream/70 bg-forest-900/60 p-2 rounded-lg border border-white/5 space-y-1">
+                  <div class="text-[10px] text-cream/50 uppercase font-mono flex items-center justify-between">
+                    <span>Certified Seed:</span>
+                    <span class="font-bold text-leaf font-mono">{{ item.score }}/100</span>
+                  </div>
+                  <div class="text-[11px] text-cream font-medium truncate" title="{{ item.varieties }}">
+                    {{ item.varieties }}
+                  </div>
+                  <div class="text-[10px] text-cream/50 pt-0.5 border-t border-white/5 flex justify-between font-mono">
+                    <span>Est. Yield:</span>
+                    <span class="text-cream font-semibold">{{ item.bm.yield_kg_ha|floatformat:0 }} kg/ha</span>
+                  </div>
+                </div>
               </div>
+
+              <!-- Agro-Ecological Rationale snippet -->
+              <p class="text-[10px] text-cream/60 mt-2 line-clamp-2 leading-relaxed" title="{{ item.rationale }}">
+                {{ item.rationale }}
+              </p>
             </label>
           {% endfor %}
         </div>
       </div>
 
-      <div class="flex items-center justify-end pt-2">
+      <div class="flex items-center justify-between pt-2 border-t border-white/5">
+        <span class="text-xs text-cream/50 flex items-center gap-1">
+          <i data-lucide="info" class="w-3.5 h-3.5 text-leaf"></i>
+          Yields are calibrated to {{ district_profile.name }} soil &amp; precipitation metrics.
+        </span>
         <button type="submit" class="fp-btn-primary">
           <i data-lucide="sparkles" class="w-4 h-4"></i> Generate Crop Plans
         </button>
@@ -329,6 +443,7 @@
           {% csrf_token %}
           <input type="hidden" name="custom_allocations_json" id="custom-allocations-json-input" value="[]">
           <input type="hidden" name="total_budget_mwk" value="{{ request.GET.budget|default:default_budget }}">
+          <input type="hidden" name="district" value="{{ active_district_slug }}">
           <div class="flex items-center gap-2">
             <input
               type="text"
@@ -379,6 +494,25 @@
               </div>
               <p class="text-xs text-cream/70">{{ plan.tagline }}</p>
 
+              <!-- Agro-Ecological Regional Fit Pill -->
+              <div class="flex items-center gap-1.5 pt-0.5">
+                <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded bg-leaf/15 text-leaf border border-leaf/30">
+                  <i data-lucide="shield-check" class="w-3.5 h-3.5 text-leaf"></i>
+                  AEZ Fit: {{ plan.regional_fit_score }}/100 &bull; {{ plan.regional_verdict }}
+                </span>
+              </div>
+
+              {% if plan.regional_warnings %}
+                <div class="p-2.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] space-y-1">
+                  {% for w in plan.regional_warnings %}
+                    <div class="flex items-start gap-1.5">
+                      <i data-lucide="alert-triangle" class="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-400"></i>
+                      <span>{{ w }}</span>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+
               {% if plan.budget_warning %}
                 <div class="p-2.5 rounded-lg bg-risk-high/15 border border-risk-high/30 text-risk-high text-[11px] flex items-start gap-1.5">
                   <i data-lucide="alert-triangle" class="w-3.5 h-3.5 shrink-0 mt-0.5"></i>
@@ -417,6 +551,16 @@
                         {{ item.crop.name }}
                       </span>
                       <span class="font-mono text-xs text-cream/90 font-semibold">{{ item.area_ha }} ha</span>
+                    </div>
+
+                    <!-- Recommended Varieties & AEZ Suitability Subline -->
+                    <div class="flex items-center justify-between text-[10px] text-cream/60">
+                      <span class="font-mono text-leaf truncate max-w-[65%]" title="{{ item.recommended_varieties }}">
+                        Seed: {{ item.recommended_varieties|truncatechars:26 }}
+                      </span>
+                      <span class="{% if item.regional_suitability.tier == 'optimal' %}text-emerald-400{% elif item.regional_suitability.tier == 'suitable' %}text-amber-300{% else %}text-rose-400{% endif %} font-semibold">
+                        {{ item.regional_suitability.label|truncatechars:20 }}
+                      </span>
                     </div>
 
                     <!-- Financial & Star Metric: Break-Even Price -->
@@ -465,6 +609,7 @@
                 <input type="hidden" name="name" value="{{ farm.name }} — {{ plan.title }}">
                 <input type="hidden" name="total_land_ha" value="{{ plan.total_land_ha }}">
                 <input type="hidden" name="total_budget_mwk" value="{{ plans_data.seasonal_budget_mwk|default:'' }}">
+                <input type="hidden" name="district" value="{{ active_district_slug }}">
                 {% for item in plan.items %}
                   <input type="hidden" name="crop_slugs" value="{{ item.crop.slug }}">
                 {% endfor %}
@@ -539,6 +684,33 @@
 
 {% block extra_js %}
 <script>
+  const RECOMMENDED_CROPS = [{% for s in recommended_crop_slugs %}'{{ s }}',{% endfor %}];
+
+  function onDistrictChange(districtSlug) {
+    const form = document.getElementById('planner-form');
+    const input = document.getElementById('form-district-input');
+    if (form && input) {
+      input.value = districtSlug;
+      form.submit();
+    } else {
+      const url = new URL(window.location.href);
+      url.searchParams.set('district', districtSlug);
+      url.searchParams.set('generate', '1');
+      window.location.href = url.toString();
+    }
+  }
+
+  function selectRegionRecommendedCrops() {
+    const checkboxes = document.querySelectorAll('.crop-checkbox');
+    checkboxes.forEach(cb => {
+      cb.checked = RECOMMENDED_CROPS.includes(cb.value);
+    });
+    const form = document.getElementById('planner-form');
+    if (form) {
+      form.submit();
+    }
+  }
+
   function openAssumptionsModal(strategy) {
     const modal = document.getElementById(`assumptions-modal-${strategy}`);
     modal?.classList.remove('hidden');
@@ -558,11 +730,7 @@
     {% if request.GET.crops %}
       selectedCrops = [{% for c in request.GET.getlist.crops %}'{{ c }}',{% endfor %}];
     {% else %}
-      {% if preferred_crop_ids %}
-        selectedCrops = [{% for c in all_crops %}{% if c.id in preferred_crop_ids or c.slug in 'maize,groundnuts' %}'{{ c.slug }}',{% endif %}{% endfor %}];
-      {% else %}
-        selectedCrops = ['maize', 'groundnuts', 'soybeans'];
-      {% endif %}
+      selectedCrops = RECOMMENDED_CROPS.length > 0 ? RECOMMENDED_CROPS : ['maize', 'groundnuts', 'soybeans'];
     {% endif %}
 
     selectedCrops = selectedCrops.filter(s => benchmarks[s]);
@@ -575,7 +743,8 @@
         totalLandHa: totalLand,
         seasonalBudgetMwk: budget,
         benchmarks: benchmarks,
-        selectedCrops: selectedCrops
+        selectedCrops: selectedCrops,
+        districtSlug: '{{ active_district_slug }}'
       });
     }
 

@@ -1,9 +1,15 @@
 import statistics
 from decimal import Decimal
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 from farms.models import Crop, Farm, Planting
 from market.models import CropPrice, InputCost
+from .suitability import (
+    resolve_district_slug,
+    get_district_profile,
+    get_crop_suitability,
+    calculate_regional_fit_score,
+)
 
 
 DEFAULT_BENCHMARKS = {
@@ -18,14 +24,19 @@ DEFAULT_BENCHMARKS = {
 }
 
 
-def get_crop_benchmarks(crop: Crop, farm: Farm = None) -> Dict[str, Any]:
+def get_crop_benchmarks(crop: Crop, farm: Farm = None, district_slug: Optional[str] = None) -> Dict[str, Any]:
     """
     Retrieves or derives authoritative baseline benchmarks for a crop:
-    - Yield per ha (uses farmer's past actuals if available, else standard agro-ecological baseline)
+    - Yield per ha (uses farmer's past actuals if available, else standard agro-ecological baseline,
+      calibrated by the district's specific soil, temperature, and rainfall regime)
     - Production cost per ha (from itemized InputCost records)
     - Expected selling price per kg (from latest Farmgate CropPrice)
+    - Agro-Ecological suitability profile and recommended certified seed varieties.
     """
     slug = crop.slug
+    resolved_district = resolve_district_slug(farm, district_slug)
+    suitability = get_crop_suitability(slug, resolved_district)
+
     defaults = DEFAULT_BENCHMARKS.get(slug, {
         'yield_ha': Decimal('1500.0'),
         'cost_ha': Decimal('350000.0'),
@@ -33,8 +44,8 @@ def get_crop_benchmarks(crop: Crop, farm: Farm = None) -> Dict[str, Any]:
     })
 
     # 1. Historical Farm Yield (if farmer has logged plantings for this crop)
-    yield_source = "National Agro-Ecological Benchmark"
-    yield_kg_ha = defaults['yield_ha']
+    yield_source = f"{resolved_district.title()} Agro-Ecological Benchmark (DARS)"
+    base_yield = defaults['yield_ha']
     if farm:
         past_plantings = list(Planting.objects.filter(
             season__farm=farm, crop=crop, yield_kg__isnull=False, area_ha__gt=0
@@ -42,8 +53,16 @@ def get_crop_benchmarks(crop: Crop, farm: Farm = None) -> Dict[str, Any]:
         if past_plantings:
             past_yields = [float(p.yield_kg / p.area_ha) for p in past_plantings if p.area_ha > 0]
             if past_yields:
-                yield_kg_ha = Decimal(str(round(statistics.mean(past_yields), 1)))
+                base_yield = Decimal(str(round(statistics.mean(past_yields), 1)))
                 yield_source = f"Farm History ({len(past_plantings)} observed harvest(s))"
+
+    # Apply District Agro-Ecological Yield Multiplier
+    yield_multiplier = suitability.get('yield_multiplier', Decimal('1.00'))
+    yield_kg_ha = Decimal(str(round(float(base_yield) * float(yield_multiplier), 1)))
+    if yield_multiplier != Decimal('1.00'):
+        delta_pct = int(round((float(yield_multiplier) - 1.0) * 100))
+        sign = "+" if delta_pct > 0 else ""
+        yield_source += f" [{sign}{delta_pct}% {resolved_district.title()} AEZ Factor]"
 
     # 2. Cost per Hectare (from InputCost model)
     cost_source = "AISAM / Agro-Dealer Baseline Benchmark 2024"
@@ -75,6 +94,8 @@ def get_crop_benchmarks(crop: Crop, farm: Farm = None) -> Dict[str, Any]:
         'price_kg_mwk': price_kg,
         'price_source': price_source,
         'break_even_price_mwk': round(break_even_price, 2),
+        'district_slug': resolved_district,
+        'regional_suitability': suitability,
     }
 
 
@@ -84,6 +105,7 @@ def calculate_plan_allocations(
     seasonal_budget_mwk: Decimal = None,
     available_labour: int = None,
     selected_crops: List[Crop] = None,
+    district_slug: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Pure-Python calculation engine that generates 3 alternative planning strategies:
@@ -91,17 +113,21 @@ def calculate_plan_allocations(
     2. 'return_focused': Return-Focused Strategy (prioritizes high-margin cash crops)
     3. 'risk_conscious': Risk-Conscious Strategy (prioritizes food staple security & lower inputs)
 
-    Honest trade-offs are articulated for each option.
+    Honest trade-offs and regional agro-ecological suitability are articulated for each option.
     """
+    resolved_district = resolve_district_slug(farm, district_slug)
+    district_profile = get_district_profile(resolved_district)
+
     if not selected_crops:
         selected_crops = list(farm.preferred_crops.all())
     if not selected_crops:
-        # Fallback to Maize + Groundnuts as standard Malawi mix
-        selected_crops = list(Crop.objects.filter(slug__in=['maize', 'groundnuts']))
+        # Fallback to District-recommended mix
+        recommended_slugs = district_profile.get('best_crop_mix', ['maize', 'groundnuts'])
+        selected_crops = list(Crop.objects.filter(slug__in=recommended_slugs))
         if not selected_crops:
             selected_crops = list(Crop.objects.all()[:2])
 
-    benchmarks = {c.slug: get_crop_benchmarks(c, farm) for c in selected_crops}
+    benchmarks = {c.slug: get_crop_benchmarks(c, farm, resolved_district) for c in selected_crops}
 
     # Identify primary staple (Maize or Cassava or first crop)
     staple_crop = next((c for c in selected_crops if c.slug in ['maize', 'cassava', 'sorghum']), selected_crops[0])
@@ -177,6 +203,8 @@ def calculate_plan_allocations(
             'gross_margin_mwk': round(st_margin, 2),
             'break_even_price_mwk': round(st_break_even, 2),
             'is_staple': True,
+            'regional_suitability': st_bm.get('regional_suitability', {}),
+            'recommended_varieties': st_bm.get('regional_suitability', {}).get('recommended_varieties', 'Standard certified seed'),
         })
 
         assumptions.append({
@@ -197,6 +225,13 @@ def calculate_plan_allocations(
             'value': f"MWK {st_bm['cost_ha_mwk']:,.0f}/ha",
             'source': st_bm['cost_source'],
         })
+        if 'regional_suitability' in st_bm:
+            assumptions.append({
+                'category': 'agro_ecological',
+                'name': f"{staple_crop.name} Regional Fit ({resolved_district.title()})",
+                'value': f"{st_bm['regional_suitability']['label']} (Rating: {st_bm['regional_suitability']['score']}/100)",
+                'source': f"DARS AEZ Guideline — {st_bm['regional_suitability']['rationale']} Recommended varieties: {st_bm['regional_suitability']['recommended_varieties']}",
+            })
 
         # 2. Cash Crops Allocation
         if cash_crops != [staple_crop]:
@@ -223,6 +258,8 @@ def calculate_plan_allocations(
                     'gross_margin_mwk': round(c_margin, 2),
                     'break_even_price_mwk': round(c_break_even, 2),
                     'is_staple': False,
+                    'regional_suitability': c_bm.get('regional_suitability', {}),
+                    'recommended_varieties': c_bm.get('regional_suitability', {}).get('recommended_varieties', 'Standard certified seed'),
                 })
 
                 assumptions.append({
@@ -237,8 +274,19 @@ def calculate_plan_allocations(
                     'value': f"MWK {c_bm['cost_ha_mwk']:,.0f}/ha",
                     'source': c_bm['cost_source'],
                 })
+                if 'regional_suitability' in c_bm:
+                    assumptions.append({
+                        'category': 'agro_ecological',
+                        'name': f"{c.name} Regional Fit ({resolved_district.title()})",
+                        'value': f"{c_bm['regional_suitability']['label']} (Rating: {c_bm['regional_suitability']['score']}/100)",
+                        'source': f"DARS AEZ Guideline — {c_bm['regional_suitability']['rationale']} Recommended varieties: {c_bm['regional_suitability']['recommended_varieties']}",
+                    })
 
         total_margin = total_plan_revenue - total_plan_cost
+
+        # Calculate Regional Fit Score for this portfolio
+        allocated_items = [{'slug': i['crop'].slug, 'name': i['crop'].name, 'area_ha': i['area_ha']} for i in plan_items]
+        fit_assessment = calculate_regional_fit_score(allocated_items, resolved_district)
 
         # Budget Check
         budget_warning = None
@@ -258,6 +306,9 @@ def calculate_plan_allocations(
             'total_revenue_mwk': round(total_plan_revenue, 2),
             'total_margin_mwk': round(total_margin, 2),
             'budget_warning': budget_warning,
+            'regional_fit_score': fit_assessment['score'],
+            'regional_verdict': fit_assessment['verdict'],
+            'regional_warnings': fit_assessment['warnings'],
             'items': plan_items,
             'assumptions': assumptions,
         })
@@ -269,6 +320,8 @@ def calculate_plan_allocations(
         'seasonal_budget_mwk': seasonal_budget_mwk,
         'available_labour': available_labour,
         'selected_crops': selected_crops,
+        'district_slug': resolved_district,
+        'district_profile': district_profile,
     }
 
 

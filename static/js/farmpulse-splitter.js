@@ -13,6 +13,7 @@
       this.seasonalBudgetMwk = config.seasonalBudgetMwk || 450000;
       this.benchmarks = config.benchmarks || {};
       this.selectedCrops = config.selectedCrops || ['maize', 'groundnuts', 'soybeans'];
+      this.districtSlug = config.districtSlug || 'lilongwe';
       
       // Default initial allocations
       this.allocations = {};
@@ -184,13 +185,30 @@
       // Staple Food Security (Malawi standard subsistence requirement = 1,200 kg per family / year)
       const foodSecurityPct = Math.min(200, Math.round((stapleHarvestKg / 1200) * 100));
 
-      // Climate Resilience Score (0-100): Rewards legume rotation, drought tolerance & diversification
-      let resilienceScore = 50;
+      // Agro-Ecological Alignment Score & Climate Resilience Score (0-100)
+      let aezWeightedScore = 0;
+      const marginalWarnings = [];
+      for (const item of items) {
+        const bm = this.benchmarks[item.slug];
+        if (bm) {
+          const score = bm.regional_suitability_score || 75;
+          aezWeightedScore += score * (item.areaHa / Math.max(0.01, totalAllocatedHa));
+          if (bm.regional_suitability_tier === 'marginal' && item.areaHa > 0) {
+            marginalWarnings.push(`${bm.name} (${item.areaHa.toFixed(1)} ha): ${bm.regional_rationale || 'Elevated agro-ecological risk in this zone'}`);
+          }
+        }
+      }
+      const aezScore = Math.min(100, Math.round(aezWeightedScore || 80));
+
+      // Composite Resilience Score: Rewards legume rotation, drought tolerance, diversification & AEZ fit
+      let resilienceScore = 40;
       if (totalAllocatedHa > 0) {
         const legumeRatio = legumeAreaHa / totalAllocatedHa;
-        resilienceScore += Math.round(legumeRatio * 35);
+        resilienceScore += Math.round(legumeRatio * 30);
         if (items.length >= 2) resilienceScore += 10;
         if (items.length >= 3) resilienceScore += 5;
+        // Blend in AEZ match (40% weight)
+        resilienceScore = Math.round((resilienceScore * 0.6) + (aezScore * 0.4));
       }
       resilienceScore = Math.min(100, resilienceScore);
 
@@ -206,6 +224,8 @@
         roiPct,
         foodSecurityPct,
         resilienceScore,
+        aezScore,
+        marginalWarnings,
         stapleHarvestKg: Math.round(stapleHarvestKg),
         totalBags50kg,
         costBags,
@@ -294,13 +314,26 @@
           const isStaple = bm.is_staple;
           const locked = this.isLocked[slug];
 
+          const suitBadge = bm.regional_suitability_tier === 'optimal'
+            ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">Recommended</span>`
+            : (bm.regional_suitability_tier === 'suitable'
+              ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/30">Suitable</span>`
+              : `<span class="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-medium border border-rose-500/30" title="${bm.regional_rationale || ''}">Marginal Risk</span>`);
+
+          const varietyTag = bm.regional_varieties ? `<span class="text-[9px] text-cream/40 font-mono">Seed: ${bm.regional_varieties.split(',')[0]}</span>` : '';
+
           rowsHtml += `
             <div class="p-3.5 rounded-xl bg-forest-900/60 border border-white/5 space-y-2">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                   <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${bm.color};"></span>
-                  <strong class="text-xs text-cream font-semibold">${bm.name}</strong>
-                  ${isStaple ? '<span class="text-[9px] px-1.5 py-0.2 rounded bg-leaf/15 text-leaf font-bold">Staple Grain</span>' : '<span class="text-[9px] px-1.5 py-0.2 rounded bg-water/15 text-water font-bold">Cash Crop</span>'}
+                  <div>
+                    <div class="flex items-center gap-1.5">
+                      <strong class="text-xs text-cream font-semibold">${bm.name}</strong>
+                      ${suitBadge}
+                    </div>
+                    ${varietyTag}
+                  </div>
                 </div>
                 <div class="flex items-center gap-2">
                   <button 
@@ -414,7 +447,19 @@
 
       const resilienceEl = document.getElementById('splitter-resilience-score');
       if (resilienceEl) {
-        resilienceEl.textContent = `${totals.resilienceScore}/100`;
+        const badgeEl = document.getElementById('splitter-resilience-badge');
+        if (badgeEl) {
+          if (totals.marginalWarnings && totals.marginalWarnings.length > 0) {
+            badgeEl.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30';
+            badgeEl.innerHTML = `<i data-lucide="alert-triangle" class="w-3 h-3 inline mr-1 text-amber-400"></i>AEZ Fit: <span id="splitter-resilience-score">${totals.resilienceScore}/100</span>`;
+          } else {
+            badgeEl.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-leaf/20 text-leaf border border-leaf/30';
+            badgeEl.innerHTML = `<i data-lucide="shield-check" class="w-3 h-3 inline mr-1 text-leaf"></i>AEZ Fit: <span id="splitter-resilience-score">${totals.resilienceScore}/100</span>`;
+          }
+          if (window.lucide) lucide.createIcons();
+        } else {
+          resilienceEl.textContent = `${totals.resilienceScore}/100`;
+        }
       }
 
       // 7. Update Hidden Form Data for "Save Plan"

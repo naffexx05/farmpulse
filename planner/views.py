@@ -10,6 +10,13 @@ from django.views.decorators.http import require_POST
 from farms.models import Crop, Farm
 from .engine import calculate_plan_allocations, get_crop_benchmarks, simulate_game_shocks
 from .models import Plan, PlanItem, PlanAssumption, InputCostBenchmark, SeasonalInputCost
+from .suitability import (
+    resolve_district_slug,
+    get_district_profile,
+    get_crop_suitability,
+    get_recommended_crop_slugs,
+    DISTRICT_AGRO_PROFILES,
+)
 
 CURRENT_SEASON = 2025
 
@@ -32,6 +39,43 @@ def planner_input(request):
 
     all_crops = Crop.objects.all().order_by('name')
     preferred_crop_ids = set(farm.preferred_crops.values_list('id', flat=True))
+
+    # 1. Agro-Ecological District & Regional AEZ Resolution
+    district_param = request.GET.get('district') or request.POST.get('district')
+    active_district_slug = resolve_district_slug(farm, district_param)
+    district_profile = get_district_profile(active_district_slug)
+    recommended_crop_slugs = get_recommended_crop_slugs(active_district_slug, limit=4)
+
+    available_districts = [
+        {
+            'slug': 'lilongwe',
+            'name': 'Lilongwe',
+            'region': 'Central Region',
+            'aez': 'Central Plateau & Plains (1,050m ASL · Ferric Luvisols)',
+            'active': active_district_slug == 'lilongwe',
+        },
+        {
+            'slug': 'kasungu',
+            'name': 'Kasungu',
+            'region': 'Central Region',
+            'aez': 'Kasungu Plains & Sandy Loam (1,020m ASL · Haplic Lixisols)',
+            'active': active_district_slug == 'kasungu',
+        },
+        {
+            'slug': 'salima',
+            'name': 'Salima',
+            'region': 'Central Region',
+            'aez': 'Lakeshore Lowland & Floodplains (480m ASL · Eutric Fluvisols)',
+            'active': active_district_slug == 'salima',
+        },
+        {
+            'slug': 'blantyre',
+            'name': 'Blantyre',
+            'region': 'Southern Region',
+            'aez': 'Shire Highlands & Upper Valley (1,120m ASL · Orthic Ferralsols)',
+            'active': active_district_slug == 'blantyre',
+        },
+    ]
 
     # Form defaults from farm facts
     default_land = farm.cultivated_land_ha or farm.total_land_ha or Decimal('2.00')
@@ -60,8 +104,8 @@ def planner_input(request):
 
         selected_slugs = request.GET.getlist('crops')
         if not selected_slugs:
-            # Fallback to preferred or standard
-            selected_slugs = [c.slug for c in farm.preferred_crops.all()] or ['maize', 'groundnuts']
+            # Fallback to preferred or district-recommended mix
+            selected_slugs = [c.slug for c in farm.preferred_crops.all()] or recommended_crop_slugs
 
         selected_crop_objs = list(Crop.objects.filter(slug__in=selected_slugs))
 
@@ -71,11 +115,13 @@ def planner_input(request):
             seasonal_budget_mwk=budget_input,
             available_labour=labour_input,
             selected_crops=selected_crop_objs,
+            district_slug=active_district_slug,
         )
 
     crops_benchmarks = {}
     for c in all_crops:
-        bm = get_crop_benchmarks(c, farm)
+        bm = get_crop_benchmarks(c, farm, active_district_slug)
+        suit = bm.get('regional_suitability', {})
         crops_benchmarks[c.slug] = {
             'id': c.id,
             'name': c.name,
@@ -97,6 +143,16 @@ def planner_input(request):
                 'sorghum': '#FB923C',
                 'tobacco': '#A3E635',
             }.get(c.slug, '#8FCB62'),
+            # Regional Agro-Ecological suitability attributes
+            'regional_suitability_tier': suit.get('tier', 'suitable'),
+            'regional_suitability_score': suit.get('score', 75),
+            'regional_suitability_label': suit.get('label', 'Suitable with Good Management'),
+            'regional_varieties': suit.get('recommended_varieties', 'Standard certified seed'),
+            'regional_rationale': suit.get('rationale', ''),
+            'regional_soil_fit': suit.get('soil_fit', ''),
+            'regional_water_fit': suit.get('water_fit', ''),
+            'regional_badge_color': suit.get('badge_color', 'leaf'),
+            'is_regionally_recommended': suit.get('tier') == 'optimal',
         }
 
 
@@ -132,6 +188,27 @@ def planner_input(request):
     last_synced_date = latest_benchmark.last_synced_at.strftime('%d %b %Y, %H:%M') if latest_benchmark else "2025/26 Season"
     data_source_display = "WFP / HDX Market Surveillance" if (latest_benchmark and latest_benchmark.data_source == 'wfp_vam') else "ADMARC / AGORA 2025 Benchmark"
 
+    crops_with_suitability = []
+    for c in all_crops:
+        bm = crops_benchmarks[c.slug]
+        crops_with_suitability.append({
+            'obj': c,
+            'name': c.name,
+            'slug': c.slug,
+            'category': c.get_category_display(),
+            'bm': bm,
+            'is_preferred': c.id in preferred_crop_ids,
+            'is_recommended': bm['is_regionally_recommended'],
+            'tier': bm['regional_suitability_tier'],
+            'score': bm['regional_suitability_score'],
+            'label': bm['regional_suitability_label'],
+            'varieties': bm['regional_varieties'],
+            'rationale': bm['regional_rationale'],
+            'soil_fit': bm['regional_soil_fit'],
+            'water_fit': bm['regional_water_fit'],
+            'badge_color': bm['regional_badge_color'],
+        })
+
     input_ledger_json = json.dumps({
         'categories': INPUT_CATEGORIES,
         'benchmarks': benchmarks_by_crop,
@@ -143,6 +220,7 @@ def planner_input(request):
         'farm': farm,
         'farms': farms,
         'all_crops': all_crops,
+        'crops_with_suitability': crops_with_suitability,
         'preferred_crop_ids': preferred_crop_ids,
         'default_land': default_land,
         'default_budget': default_budget,
@@ -152,6 +230,10 @@ def planner_input(request):
         'input_ledger_json': input_ledger_json,
         'last_synced_date': last_synced_date,
         'data_source_display': data_source_display,
+        'active_district_slug': active_district_slug,
+        'district_profile': district_profile,
+        'available_districts': available_districts,
+        'recommended_crop_slugs': recommended_crop_slugs,
         'active_nav': 'planner',
     }
     return render(request, 'planner/planner.html', context)
@@ -172,6 +254,8 @@ def save_plan(request):
     farm = Farm.objects.filter(owner=request.user).first()
     if not farm:
         return redirect('farms:farm_edit')
+
+    district_slug = resolve_district_slug(farm, request.POST.get('district'))
 
     # Support interactive custom field allocations
     custom_allocations_raw = request.POST.get('custom_allocations_json')
@@ -194,7 +278,7 @@ def save_plan(request):
                 crop = Crop.objects.filter(slug=slug).first()
                 if not crop:
                     continue
-                bm = get_crop_benchmarks(crop, farm)
+                bm = get_crop_benchmarks(crop, farm, district_slug)
                 cost_item = area_ha * bm['cost_ha_mwk']
                 yield_total = area_ha * bm['yield_kg_ha']
                 rev_item = yield_total * bm['price_kg_mwk']
@@ -231,7 +315,7 @@ def save_plan(request):
                     total_expected_cost_mwk=round(total_cost, 2),
                     total_expected_revenue_mwk=round(total_rev, 2),
                     total_expected_margin_mwk=round(total_margin, 2),
-                    notes="Configured via interactive Field Land Splitter canvas.",
+                    notes=f"Configured via interactive Field Land Splitter canvas for {district_slug.title()} agro-zone.",
                 )
 
                 for item in plan_items_to_create:
@@ -262,6 +346,15 @@ def save_plan(request):
                         value_used=f"{item['price_kg_mwk']} MWK/kg",
                         source_note=item['bm']['price_source'],
                     )
+                    suit = item['bm'].get('regional_suitability', {})
+                    if suit:
+                        PlanAssumption.objects.create(
+                            plan=plan,
+                            category='agro_ecological',
+                            parameter_name=f"{item['crop'].name} Regional Fit ({district_slug.title()})",
+                            value_used=f"{suit.get('label')} ({suit.get('score')}/100)",
+                            source_note=f"DARS AEZ: {suit.get('rationale')} Recommended varieties: {suit.get('recommended_varieties')}",
+                        )
 
                 messages.success(request, f"Custom plan '{plan.name}' saved successfully with {total_land} ha allocated!")
                 return redirect('planner:plan_detail', pk=plan.pk)
@@ -284,6 +377,7 @@ def save_plan(request):
         total_land_ha=total_land,
         seasonal_budget_mwk=total_budget,
         selected_crops=selected_crops,
+        district_slug=district_slug,
     )
 
     chosen_plan_data = next((p for p in calculation['plans'] if p['strategy_type'] == strategy_type), calculation['plans'][0])
@@ -299,6 +393,7 @@ def save_plan(request):
         total_expected_cost_mwk=chosen_plan_data['total_cost_mwk'],
         total_expected_revenue_mwk=chosen_plan_data['total_revenue_mwk'],
         total_expected_margin_mwk=chosen_plan_data['total_margin_mwk'],
+        notes=f"Agro-Ecological alignment: {chosen_plan_data.get('regional_fit_score', 85)}/100 ({chosen_plan_data.get('regional_verdict', 'Optimal')}) in {district_slug.title()} District.",
     )
 
     # Create PlanItems
@@ -332,7 +427,8 @@ def save_plan(request):
 
 
 # ==============================================================================
-# Game-Like Scenario Simulator ðŸŽ® (Phase 5.7 & 5.8)
+# Game-Like Scenario Simulator (Phase 5.7 & 5.8)
+# ==============================================================================
 # ==============================================================================
 
 @login_required
