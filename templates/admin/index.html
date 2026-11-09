@@ -1,0 +1,99 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static "admin/css/dashboard.css" %}">{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block nav-breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+<!-- Executive National KPI Grid -->
+<div class="fp-admin-kpi-grid">
+  <div class="fp-admin-kpi-card">
+    <div class="kpi-label">Registered Smallholders</div>
+    <div class="kpi-val">15 Farmers</div>
+    <div class="kpi-sub">Across 12 agricultural districts in Malawi</div>
+  </div>
+
+  <div class="fp-admin-kpi-card">
+    <div class="kpi-label">Land Under Management</div>
+    <div class="kpi-val">48.5 ha</div>
+    <div class="kpi-sub">100% mapped via Sentinel-2 Earth Observation</div>
+  </div>
+
+  <div class="fp-admin-kpi-card">
+    <div class="kpi-label">Tracked Agricultural Revenue</div>
+    <div class="kpi-val">MWK 28.6M</div>
+    <div class="kpi-sub">194 verified seasonal harvest records</div>
+  </div>
+
+  <div class="fp-admin-kpi-card">
+    <div class="kpi-label">Parametric Underwriting Exposure</div>
+    <div class="kpi-val">MWK 4.8M</div>
+    <div class="kpi-sub">15 active &amp; triggered climate policies</div>
+  </div>
+</div>
+
+<!-- Quick Navigation Command Bar -->
+<div class="fp-admin-quicklinks">
+  <span class="fp-admin-quicklinks-title">Quick Portals:</span>
+  <a href="{% url 'admin_portal' %}" class="fp-quicklink-btn fp-quicklink-primary">
+    Extension &amp; DADO Portal
+  </a>
+  <a href="{% url 'home' %}" class="fp-quicklink-btn fp-quicklink-secondary">
+    Farmer Dashboard
+  </a>
+  <a href="{% url 'planner:planner_input' %}" class="fp-quicklink-btn fp-quicklink-secondary">
+    Crop Planner
+  </a>
+  <a href="{% url 'market:dashboard' %}" class="fp-quicklink-btn fp-quicklink-secondary">
+    Market Prices
+  </a>
+  <a href="{% url 'climate:dashboard' %}" class="fp-quicklink-btn fp-quicklink-secondary">
+    Weather &amp; Rainfall
+  </a>
+  <a href="{% url 'innovation:satellite_twin' %}" class="fp-quicklink-btn fp-quicklink-secondary">
+    Satellite Field Health
+  </a>
+  <a href="{% url 'innovation:parametric_insurance' %}" class="fp-quicklink-btn fp-quicklink-secondary">
+    Parametric Insurance
+  </a>
+</div>
+
+<div id="content-main">
+  {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div id="content-related">
+    <div class="module" id="recent-actions-module">
+        <h2>{% translate 'Recent actions' %}</h2>
+        <h3>{% translate 'My actions' %}</h3>
+            {% load log %}
+            {% get_admin_log 10 as admin_log for_user user %}
+            {% if not admin_log %}
+            <p style="padding: 12px 16px; color: #94a3b8; font-size: 0.8rem;">No recent modifications recorded.</p>
+            {% else %}
+            <ul class="actionlist">
+            {% for entry in admin_log %}
+            <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
+                <a href="{{ entry.get_admin_url }}" class="nav-link">{{ entry.object_repr }}</a>
+                <br>
+                {% if entry.content_type %}
+                    <span class="mini quiet">{% filter capfirst %}{{ entry.content_type.name }}{% endfilter %}</span>
+                {% else %}
+                    <span class="mini quiet">{% translate 'Unknown content' %}</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+    </div>
+</div>
+{% endblock %}

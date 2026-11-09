@@ -1,0 +1,54 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}
+{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | FarmPulse Malawi Central Administration
+{% endblock %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/farmpulse_admin.css' %}?v=4.0">
+  <script src="https://unpkg.com/lucide@0.453.0/dist/umd/lucide.min.js"></script>
+{% endblock %}
+
+{% block branding %}
+<div id="site-name" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+  <div style="display: flex; align-items: center; gap: 14px;">
+    <!-- Sprout Icon Badge -->
+    <div style="width: 36px; height: 36px; border-radius: 9px; background: #10b981; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#070d09" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m14 9-6 6"></path>
+        <path d="M4 14a6 6 0 0 1 6-6h1v1a6 6 0 0 1-6 6z"></path>
+        <path d="M14 4a6 6 0 0 1 6 6v1h-1a6 6 0 0 1-6-6z"></path>
+      </svg>
+    </div>
+    <div>
+      <a href="{% url 'admin:index' %}" style="font-size: 1.15rem; font-weight: 800; color: #f8fafc; text-decoration: none; display: block; line-height: 1.2;">
+        FarmPulse Malawi
+      </a>
+      <span style="font-size: 0.72rem; color: #34d399; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em;">
+        Central Administration &amp; National Governance
+      </span>
+    </div>
+  </div>
+
+  <!-- Direct Portal Navigation Buttons -->
+  <div style="display: flex; align-items: center; gap: 10px; margin-right: 20px;">
+    <a href="{% url 'admin_portal' %}" class="fp-quicklink-btn fp-quicklink-primary" style="font-size: 0.76rem; padding: 6px 14px; text-decoration: none;">
+      DADO Extension Portal
+    </a>
+    <a href="{% url 'home' %}" class="fp-quicklink-btn fp-quicklink-secondary" style="font-size: 0.76rem; padding: 6px 14px; text-decoration: none;">
+      Farmer Dashboard
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+  {{ block.super }}
+  <script>
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+  </script>
+{% endblock %}

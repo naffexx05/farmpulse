@@ -69,6 +69,8 @@ class ParametricInsurancePolicy(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        verbose_name = "Parametric Insurance Policy"
+        verbose_name_plural = "Parametric Insurance Policies"
         ordering = ['-created_at']
 
     def __str__(self):
