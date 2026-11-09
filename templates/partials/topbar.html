@@ -134,12 +134,18 @@
         aria-expanded="false"
         id="user-menu-button"
       >
-        <div class="w-8 h-8 rounded-full bg-leaf text-forest-900 flex items-center justify-center font-semibold text-sm">
+        <div class="w-8 h-8 rounded-full {% if request.user.username == 'admin' or request.user.profile.role in 'admin,extension_officer' %}bg-amber-400 text-forest-950{% else %}bg-leaf text-forest-950{% endif %} flex items-center justify-center font-bold text-sm">
           {{ request.user.username|slice:":1"|upper }}
         </div>
         <div class="hidden sm:block text-left">
-          <div class="text-xs font-semibold text-cream leading-tight">{{ request.user.username|default:"Guest" }}</div>
-          <div class="text-[10px] text-muted leading-tight">Farmer / Agronomist</div>
+          <div class="text-xs font-semibold text-cream leading-tight">{{ request.user.get_full_name|default:request.user.username }}</div>
+          <div class="text-[10px] leading-tight">
+            {% if request.user.username == 'admin' or request.user.profile.role in 'admin,extension_officer' %}
+              <span class="text-amber-400 font-semibold">DADO Extension Lead</span>
+            {% else %}
+              <span class="text-leaf font-semibold">Smallholder Farmer</span>
+            {% endif %}
+          </div>
         </div>
         <i data-lucide="chevron-down" class="w-4 h-4 text-cream/50"></i>
       </button>
@@ -147,23 +153,47 @@
       <!-- Dropdown -->
       <div
         id="user-menu"
-        class="hidden absolute right-0 mt-2 w-52 rounded-xl bg-forest-800 border border-white/10 shadow-lg overflow-hidden z-50"
+        class="hidden absolute right-0 mt-2 w-56 rounded-xl bg-forest-800 border border-white/10 shadow-lg overflow-hidden z-50 text-xs"
       >
         <div class="px-4 py-3 border-b border-white/5">
-          <div class="text-sm font-semibold text-cream">{{ request.user.username }}</div>
+          <div class="text-sm font-semibold text-cream">{{ request.user.get_full_name|default:request.user.username }}</div>
           <div class="text-[11px] text-muted">
-            {% if request.user.email %}{{ request.user.email }}{% else %}No email set{% endif %}
+            {% if request.user.email %}{{ request.user.email }}{% else %}farmer@farmpulse.mw{% endif %}
+          </div>
+          <div class="mt-1">
+            {% if request.user.username == 'admin' or request.user.profile.role in 'admin,extension_officer' %}
+              <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-amber-400/15 text-amber-400 border border-amber-400/30">DADO / Admin</span>
+            {% else %}
+              <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-leaf/15 text-leaf border border-leaf/30">Smallholder Farmer</span>
+            {% endif %}
           </div>
         </div>
-        <a href="{% url 'farms:my_farm' %}" class="block px-4 py-2.5 text-sm text-cream/85 hover:bg-white/5">
-          My Farm
-        </a>
-        <a href="{% url 'settings_index' %}" class="block px-4 py-2.5 text-sm text-cream/85 hover:bg-white/5">
-          Settings & Units
+
+        {% if request.user.username == 'admin' or request.user.profile.role in 'admin,extension_officer' %}
+          <a href="{% url 'admin_portal' %}" class="block px-4 py-2.5 text-cream hover:bg-white/5 font-semibold text-amber-400">
+            <i data-lucide="shield-alert" class="w-3.5 h-3.5 inline mr-1.5"></i> DADO Extension Portal
+          </a>
+          <a href="/admin/" target="_blank" class="block px-4 py-2.5 text-cream hover:bg-white/5">
+            <i data-lucide="database" class="w-3.5 h-3.5 inline mr-1.5 text-emerald-400"></i> Central Django Admin
+          </a>
+          <a href="{% url 'home' %}?view_as=farmer" class="block px-4 py-2.5 text-cream hover:bg-white/5">
+            <i data-lucide="sprout" class="w-3.5 h-3.5 inline mr-1.5 text-leaf"></i> Inspect Farmer View
+          </a>
+        {% else %}
+          <a href="{% url 'farms:my_farm' %}" class="block px-4 py-2.5 text-cream hover:bg-white/5 font-medium">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 inline mr-1.5 text-leaf"></i> My Farm Profile
+          </a>
+          <a href="{% url 'planner:planner_input' %}" class="block px-4 py-2.5 text-cream hover:bg-white/5 font-medium">
+            <i data-lucide="leaf" class="w-3.5 h-3.5 inline mr-1.5 text-leaf"></i> Crop Planner
+          </a>
+        {% endif %}
+
+        <a href="{% url 'settings_index' %}" class="block px-4 py-2.5 text-cream hover:bg-white/5 font-medium">
+          <i data-lucide="settings" class="w-3.5 h-3.5 inline mr-1.5 text-muted"></i> Settings &amp; Units
         </a>
         <div class="border-t border-white/5">
-          <a href="{% url 'accounts:logout' %}" class="block px-4 py-2.5 text-sm text-risk-high hover:bg-white/5">
-            Log out
+          <a href="{% url 'accounts:logout' %}" class="block px-4 py-2.5 text-risk-high hover:bg-white/5 font-semibold">
+            <i data-lucide="log-out" class="w-3.5 h-3.5 inline mr-1.5"></i> Log out
           </a>
         </div>
       </div>

@@ -118,8 +118,20 @@ def user_login(request):
             user = authenticate(request, username=username_to_auth, password=pwd)
             if user is not None:
                 login(request, user)
-                messages.success(request, f"Welcome back, {user.first_name or user.username}!")
-                return redirect(request.POST.get('next') or next_url or 'home')
+                profile = getattr(user, 'profile', None)
+
+                explicit_next = request.POST.get('next') or request.GET.get('next')
+                if explicit_next and explicit_next not in ['home', '/', '']:
+                    messages.success(request, f"Welcome back, {user.first_name or user.username}!")
+                    return redirect(explicit_next)
+
+                # Role-based intelligent landing:
+                if user.username == 'admin' or (profile and profile.role in ['admin', 'extension_officer']):
+                    messages.success(request, f"Welcome to the Extension & Operations Portal, Dr. {user.last_name or 'Chikoti'} (DADO National Lead).")
+                    return redirect('admin_portal')
+                else:
+                    messages.success(request, f"Welcome back, {user.first_name or user.username}! Ready for farm planning.")
+                    return redirect('home')
             else:
                 messages.error(request, "Invalid username/email or password.")
     else:

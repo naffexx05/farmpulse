@@ -25,12 +25,14 @@ def home(request):
     saved plans, and seasonal agro-climatic outlooks.
     """
     if not request.user.is_authenticated:
-        return redirect('accounts:login')
+        return render(request, 'landing.html')
 
-    farm = Farm.objects.filter(owner=request.user).prefetch_related('preferred_crops').first()
-    
     # User Profile
     profile = get_user_profile(request.user)
+
+    # If administrator/DADO/extension officer logs in, guide them to their operations portal by default
+    if (request.user.is_staff or request.user.is_superuser or profile.role in ['admin', 'extension_officer']) and request.GET.get('view_as') != 'farmer':
+        return redirect('admin_portal')
 
     # 1. Location & District
     district_obj = None

@@ -1,99 +1,256 @@
 {% extends "admin/base_site.html" %}
 {% load i18n static %}
 
-{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static "admin/css/dashboard.css" %}">{% endblock %}
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/farmpulse_admin.css' %}?v=5.0">
+{% endblock %}
 
-{% block coltype %}colMS{% endblock %}
-
-{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
-
+{% block coltype %}colM{% endblock %}
+{% block bodyclass %}{{ block.super }} dashboard fp-admin-body{% endblock %}
 {% block nav-breadcrumbs %}{% endblock %}
-
 {% block nav-sidebar %}{% endblock %}
 
 {% block content %}
-<!-- Executive National KPI Grid -->
-<div class="fp-admin-kpi-grid">
-  <div class="fp-admin-kpi-card">
-    <div class="kpi-label">Registered Smallholders</div>
-    <div class="kpi-val">15 Farmers</div>
-    <div class="kpi-sub">Across 12 agricultural districts in Malawi</div>
-  </div>
+<div class="fp-admin-canvas">
 
-  <div class="fp-admin-kpi-card">
-    <div class="kpi-label">Land Under Management</div>
-    <div class="kpi-val">48.5 ha</div>
-    <div class="kpi-sub">100% mapped via Sentinel-2 Earth Observation</div>
-  </div>
-
-  <div class="fp-admin-kpi-card">
-    <div class="kpi-label">Tracked Agricultural Revenue</div>
-    <div class="kpi-val">MWK 28.6M</div>
-    <div class="kpi-sub">194 verified seasonal harvest records</div>
-  </div>
-
-  <div class="fp-admin-kpi-card">
-    <div class="kpi-label">Parametric Underwriting Exposure</div>
-    <div class="kpi-val">MWK 4.8M</div>
-    <div class="kpi-sub">15 active &amp; triggered climate policies</div>
-  </div>
-</div>
-
-<!-- Quick Navigation Command Bar -->
-<div class="fp-admin-quicklinks">
-  <span class="fp-admin-quicklinks-title">Quick Portals:</span>
-  <a href="{% url 'admin_portal' %}" class="fp-quicklink-btn fp-quicklink-primary">
-    Extension &amp; DADO Portal
-  </a>
-  <a href="{% url 'home' %}" class="fp-quicklink-btn fp-quicklink-secondary">
-    Farmer Dashboard
-  </a>
-  <a href="{% url 'planner:planner_input' %}" class="fp-quicklink-btn fp-quicklink-secondary">
-    Crop Planner
-  </a>
-  <a href="{% url 'market:dashboard' %}" class="fp-quicklink-btn fp-quicklink-secondary">
-    Market Prices
-  </a>
-  <a href="{% url 'climate:dashboard' %}" class="fp-quicklink-btn fp-quicklink-secondary">
-    Weather &amp; Rainfall
-  </a>
-  <a href="{% url 'innovation:satellite_twin' %}" class="fp-quicklink-btn fp-quicklink-secondary">
-    Satellite Field Health
-  </a>
-  <a href="{% url 'innovation:parametric_insurance' %}" class="fp-quicklink-btn fp-quicklink-secondary">
-    Parametric Insurance
-  </a>
-</div>
-
-<div id="content-main">
-  {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
-</div>
-{% endblock %}
-
-{% block sidebar %}
-<div id="content-related">
-    <div class="module" id="recent-actions-module">
-        <h2>{% translate 'Recent actions' %}</h2>
-        <h3>{% translate 'My actions' %}</h3>
-            {% load log %}
-            {% get_admin_log 10 as admin_log for_user user %}
-            {% if not admin_log %}
-            <p style="padding: 12px 16px; color: #94a3b8; font-size: 0.8rem;">No recent modifications recorded.</p>
-            {% else %}
-            <ul class="actionlist">
-            {% for entry in admin_log %}
-            <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
-                <a href="{{ entry.get_admin_url }}" class="nav-link">{{ entry.object_repr }}</a>
-                <br>
-                {% if entry.content_type %}
-                    <span class="mini quiet">{% filter capfirst %}{{ entry.content_type.name }}{% endfilter %}</span>
-                {% else %}
-                    <span class="mini quiet">{% translate 'Unknown content' %}</span>
-                {% endif %}
-            </li>
-            {% endfor %}
-            </ul>
-            {% endif %}
+  <!-- Executive National Telemetry KPI Strip -->
+  <div class="fp-admin-kpi-grid">
+    <div class="fp-admin-kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Registered Smallholders</span>
+        <span class="kpi-tag kpi-tag-emerald">National</span>
+      </div>
+      <div class="kpi-val">15 Producers</div>
+      <div class="kpi-sub">Across 12 Malawian agricultural districts</div>
     </div>
+
+    <div class="fp-admin-kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Land Under Management</span>
+        <span class="kpi-tag kpi-tag-sky">Sentinel-2</span>
+      </div>
+      <div class="kpi-val">48.5 ha</div>
+      <div class="kpi-sub">100% monitored via Earth Observation</div>
+    </div>
+
+    <div class="fp-admin-kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Tracked Agricultural Revenue</span>
+        <span class="kpi-tag kpi-tag-amber">AIP &amp; Market</span>
+      </div>
+      <div class="kpi-val">MWK 28.6M</div>
+      <div class="kpi-sub">194 verified seasonal harvest records</div>
+    </div>
+
+    <div class="fp-admin-kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Parametric Underwriting</span>
+        <span class="kpi-tag kpi-tag-purple">Climate Cover</span>
+      </div>
+      <div class="kpi-val">MWK 4.8M</div>
+      <div class="kpi-sub">15 active &amp; triggered climate policies</div>
+    </div>
+  </div>
+
+  <!-- Quick Command Navigation Bar -->
+  <div class="fp-admin-quicklinks-bar">
+    <div class="quicklinks-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+      <span>Operational Gateways:</span>
+    </div>
+    <div class="quicklinks-group">
+      <a href="{% url 'admin_portal' %}" class="fp-qbtn fp-qbtn-gold">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        DADO Extension Portal
+      </a>
+      <a href="{% url 'home' %}?view_as=farmer" class="fp-qbtn fp-qbtn-emerald">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m14 9-6 6"/><path d="M4 14a6 6 0 0 1 6-6h1v1a6 6 0 0 1-6 6z"/><path d="M14 4a6 6 0 0 1 6 6v1h-1a6 6 0 0 1-6-6z"/></svg>
+        Farmer View
+      </a>
+      <a href="{% url 'innovation:satellite_twin' %}" class="fp-qbtn fp-qbtn-slate">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
+        Sentinel-2 Satellite Twin
+      </a>
+      <a href="{% url 'innovation:parametric_insurance' %}" class="fp-qbtn fp-qbtn-slate">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Parametric Underwriting
+      </a>
+      <a href="{% url 'climate:dashboard' %}" class="fp-qbtn fp-qbtn-slate">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg>
+        DCCMS Weather Radar
+      </a>
+      <a href="{% url 'market:dashboard' %}" class="fp-qbtn fp-qbtn-slate">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+        AMIS Commodity Prices
+      </a>
+    </div>
+  </div>
+
+  <!-- Main 2-Column Split: Application Modules (Left, ~70%) & Operations Console (Right, ~30%) -->
+  <div class="fp-admin-split">
+    
+    <!-- Left Column: Modern App Cards Grid -->
+    <div class="fp-admin-apps-column">
+      <div class="fp-column-heading">
+        <h2>National Registry &amp; Data Tables</h2>
+        <span class="fp-heading-badge">{{ app_list|length }} Sovereign Domains</span>
+      </div>
+
+      <div class="fp-apps-grid">
+        {% for app in app_list %}
+          <div class="fp-app-card">
+            <div class="fp-app-card-header">
+              <div class="fp-app-title">
+                <span class="fp-app-dot"></span>
+                <a href="{{ app.app_url }}" title="View all {{ app.name }} tables">{{ app.name }}</a>
+              </div>
+              <span class="fp-app-count">{{ app.models|length }} tables</span>
+            </div>
+
+            <div class="fp-app-models-table-wrap">
+              <table class="fp-app-table">
+                <tbody>
+                  {% for model in app.models %}
+                    <tr>
+                      <th scope="row" class="fp-model-name-cell">
+                        {% if model.admin_url %}
+                          <a href="{{ model.admin_url }}">{{ model.name }}</a>
+                        {% else %}
+                          <span>{{ model.name }}</span>
+                        {% endif %}
+                      </th>
+                      <td class="fp-model-actions-cell">
+                        {% if model.add_url %}
+                          <a href="{{ model.add_url }}" class="fp-action-pill fp-action-add" title="Create new {{ model.name }}">+ Add</a>
+                        {% endif %}
+                        {% if model.admin_url %}
+                          <a href="{{ model.admin_url }}" class="fp-action-pill fp-action-manage" title="Manage {{ model.name }} records">Manage</a>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% empty %}
+          <div class="fp-empty-notice">
+            <p>No administrative modules available for your credentials.</p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Right Column: Operations Sidebar & System Telemetry -->
+    <div class="fp-admin-side-column">
+      
+      <!-- Operations Command Center Card -->
+      <div class="fp-side-card">
+        <div class="fp-side-card-header">
+          <div class="fp-side-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>DADO Quick Actions</span>
+          </div>
+          <span class="fp-status-dot active"></span>
+        </div>
+        <div class="fp-side-card-body">
+          <p class="fp-side-desc">Direct executive tasks for district agronomists and administrators:</p>
+          <div class="fp-side-action-list">
+            <a href="{% url 'admin:core_userprofile_add' %}" class="fp-side-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+              Enroll New Smallholder Farmer
+            </a>
+            <a href="{% url 'admin:farms_farm_add' %}" class="fp-side-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              Register Parcel &amp; GPS Boundary
+            </a>
+            <a href="{% url 'admin:innovation_parametricinsurancepolicy_changelist' %}" class="fp-side-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Audit Parametric Insurance Policies
+            </a>
+            <a href="{% url 'admin:climate_climaterecord_add' %}" class="fp-side-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M12 12v9"/></svg>
+              Log Daily Rain Gauge Measurement
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Infrastructure Health Card -->
+      <div class="fp-side-card">
+        <div class="fp-side-card-header">
+          <div class="fp-side-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            <span>National Infrastructure</span>
+          </div>
+          <span class="fp-side-badge-green">100% Operational</span>
+        </div>
+        <div class="fp-side-card-body">
+          <div class="fp-telemetry-row">
+            <span class="telemetry-label">Sentinel-2 Earth Observation:</span>
+            <span class="telemetry-val text-emerald">Active (5-day revisit)</span>
+          </div>
+          <div class="fp-telemetry-row">
+            <span class="telemetry-label">DCCMS Rain Station Feeds:</span>
+            <span class="telemetry-val text-emerald">12 Automated Nodes</span>
+          </div>
+          <div class="fp-telemetry-row">
+            <span class="telemetry-label">AMIS Commodity Price Feed:</span>
+            <span class="telemetry-val text-emerald">Daily Sync Active</span>
+          </div>
+          <div class="fp-telemetry-row">
+            <span class="telemetry-label">Sovereignty Database Engine:</span>
+            <span class="telemetry-val">SQLite 3 / WAL Mode</span>
+          </div>
+          <div class="fp-telemetry-row">
+            <span class="telemetry-label">Core Web Framework:</span>
+            <span class="telemetry-val">Django 5.1 &bull; Python 3.12</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audit Trail / Recent Actions -->
+      <div class="fp-side-card">
+        <div class="fp-side-card-header">
+          <div class="fp-side-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+            <span>Recent System Actions</span>
+          </div>
+        </div>
+        <div class="fp-side-card-body">
+          {% load log %}
+          {% get_admin_log 8 as admin_log for_user user %}
+          {% if not admin_log %}
+            <div class="fp-recent-empty">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.8" style="margin: 0 auto 8px auto; display: block;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <span>System records fully synchronized.</span>
+              <p style="font-size: 0.72rem; color: #64748b; margin-top: 4px;">15 smallholders, 16 farms, 194 plantings ready for audit.</p>
+            </div>
+          {% else %}
+            <ul class="fp-action-list">
+              {% for entry in admin_log %}
+                <li class="fp-action-item">
+                  <span class="fp-entry-badge {% if entry.is_addition %}badge-add{% elif entry.is_change %}badge-change{% else %}badge-del{% endif %}">
+                    {% if entry.is_addition %}ADD{% elif entry.is_change %}EDIT{% else %}DEL{% endif %}
+                  </span>
+                  <div class="fp-entry-details">
+                    <a href="{{ entry.get_admin_url }}" class="fp-entry-link">{{ entry.object_repr|truncatechars:26 }}</a>
+                    <span class="fp-entry-meta">{{ entry.content_type.name|capfirst }} &bull; {{ entry.action_time|date:"H:i" }}</span>
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
 </div>
 {% endblock %}

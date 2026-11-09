@@ -18,8 +18,15 @@ class UserProfile(models.Model):
         ('standard', 'MWK 1,250,000 (Standard)'),
         ('compact', 'MWK 1.25M (Compact)'),
     ]
+    ROLE_CHOICES = [
+        ('farmer', 'Smallholder Farmer'),
+        ('extension_officer', 'District Extension Officer (DADO)'),
+        ('admin', 'National Platform Administrator'),
+    ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    role = models.CharField(max_length=30, choices=ROLE_CHOICES, default='farmer')
+    organization = models.CharField(max_length=120, blank=True, help_text="Cooperative, District Office, or Agribusiness")
     phone_number = models.CharField(max_length=30, blank=True)
     preferred_district = models.CharField(max_length=80, default="Lilongwe", blank=True)
 
@@ -42,7 +49,12 @@ class UserProfile(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Profile: {self.user.username}"
+        return f"Profile: {self.user.username} ({self.get_role_display()})"
+
+    @property
+    def is_extension_or_admin(self):
+        return self.role in ['extension_officer', 'admin'] or self.user.is_staff or self.user.is_superuser
+
 
 
 def get_user_profile(user):

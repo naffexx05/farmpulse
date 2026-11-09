@@ -1,76 +1,86 @@
 /* ==============================================================================
-   FarmPulse Malawi — Enterprise Admin Theme
-   Palette: Emerald (#10b981), Forest (#070d09 / #0f1c14), Cream (#f8fafc), Slate
+   FarmPulse Malawi — National Central Administration & Governance Theme
+   Theme: Sovereign AgTech — Emerald (#10b981), Forest (#070d09), Cream (#f8fafc)
+   Author: FarmPulse Malawi Engineering Team
    ============================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-:root {
-  --primary: #10b981;
-  --secondary: #059669;
-  --accent: #34d399;
-  --primary-fg: #ffffff;
-  
-  --body-fg: #e2e8f0;
-  --body-bg: #070d09;
-  --body-quiet-color: #94a3b8;
-  --header-color: #f8fafc;
-  --header-bg: #0b150f;
-  --header-link-color: #10b981;
-  
-  --breadcrumbs-fg: #94a3b8;
-  --breadcrumbs-bg: #0a130e;
-  --breadcrumbs-link-fg: #cbd5e1;
-  
-  --link-fg: #34d399;
-  --link-hover-color: #6ee7b7;
-  --link-selected-fg: #10b981;
-  
-  --hairline-color: rgba(255, 255, 255, 0.08);
-  --border-color: rgba(255, 255, 255, 0.1);
-  --darkened-bg: #0b150f;
-  --selected-bg: rgba(16, 185, 129, 0.15);
-  --selected-row: rgba(16, 185, 129, 0.08);
-  
-  --message-success-bg: rgba(16, 185, 129, 0.15);
-  --message-warning-bg: rgba(245, 158, 11, 0.15);
-  --message-error-bg: rgba(239, 68, 68, 0.15);
-  
-  --font-family-primary: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-family-monospace: 'JetBrains Mono', monospace;
+/* ---- Force Override All Django Dark/Light Theming Variables ----------------- */
+:root,
+html,
+body,
+[data-theme="dark"],
+[data-theme="light"],
+html[data-theme="dark"],
+html[data-theme="light"] {
+  --primary: #10b981 !important;
+  --secondary: #059669 !important;
+  --accent: #34d399 !important;
+  --primary-fg: #070d09 !important;
+
+  --body-fg: #e2e8f0 !important;
+  --body-bg: #070d09 !important;
+  --body-quiet-color: #94a3b8 !important;
+  --header-color: #f8fafc !important;
+  --header-bg: #0a140e !important;
+  --header-link-color: #10b981 !important;
+
+  --breadcrumbs-fg: #94a3b8 !important;
+  --breadcrumbs-bg: #09120c !important;
+  --breadcrumbs-link-fg: #34d399 !important;
+
+  --link-fg: #34d399 !important;
+  --link-hover-color: #6ee7b7 !important;
+  --link-selected-fg: #10b981 !important;
+
+  --hairline-color: rgba(255, 255, 255, 0.08) !important;
+  --border-color: rgba(255, 255, 255, 0.1) !important;
+  --darkened-bg: #0c1711 !important;
+  --selected-bg: rgba(16, 185, 129, 0.15) !important;
+  --selected-row: rgba(16, 185, 129, 0.08) !important;
+
+  --message-success-bg: rgba(16, 185, 129, 0.15) !important;
+  --message-warning-bg: rgba(245, 158, 11, 0.15) !important;
+  --message-error-bg: rgba(239, 68, 68, 0.15) !important;
+
+  --font-family-primary: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  --font-family-monospace: 'JetBrains Mono', monospace !important;
+}
+
+/* Global Reset & Base Typography */
+* {
+  box-sizing: border-box;
 }
 
 body {
-  font-family: var(--font-family-primary) !important;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   background-color: #070d09 !important;
   color: #e2e8f0 !important;
-  letter-spacing: -0.01em;
+  margin: 0;
+  padding: 0;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ---- Top Header Bar -------------------------------------------------------- */
+#container {
+  background-color: #070d09 !important;
+  min-height: 100vh;
+}
+
+/* ---- Modern Top Header ----------------------------------------------------- */
 #header {
-  background: linear-gradient(180deg, #0f1c14 0%, #0a140e 100%) !important;
+  background: linear-gradient(180deg, #0e1b13 0%, #08110b 100%) !important;
   border-bottom: 1px solid rgba(16, 185, 129, 0.25) !important;
-  padding: 14px 24px !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
-}
-
-#header #branding h1 {
-  font-size: 1.15rem !important;
-  font-weight: 700 !important;
-  color: #f8fafc !important;
+  padding: 14px 28px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
   display: flex !important;
   align-items: center !important;
-  gap: 10px !important;
+  justify-content: space-between !important;
 }
 
-#header #branding h1 a:link,
-#header #branding h1 a:visited {
-  color: #f8fafc !important;
-  text-decoration: none !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 8px !important;
+#header #branding {
+  flex: 1;
 }
 
 #header #user-tools {
@@ -78,33 +88,625 @@ body {
   color: #94a3b8 !important;
   display: flex !important;
   align-items: center !important;
-  gap: 12px !important;
+  gap: 10px !important;
 }
 
-#header #user-tools a {
+#header #user-tools strong {
+  color: #f8fafc !important;
+  font-weight: 700;
+}
+
+#header #user-tools a,
+#header #user-tools button {
   color: #34d399 !important;
-  border-bottom: none !important;
-  padding: 4px 10px !important;
-  border-radius: 6px !important;
   background: rgba(16, 185, 129, 0.1) !important;
-  border: 1px solid rgba(16, 185, 129, 0.2) !important;
-  transition: all 0.15s ease !important;
+  border: 1px solid rgba(16, 185, 129, 0.25) !important;
+  padding: 5px 12px !important;
+  border-radius: 7px !important;
+  font-size: 0.74rem !important;
+  font-weight: 600 !important;
   text-decoration: none !important;
+  cursor: pointer;
+  transition: all 0.15s ease !important;
 }
 
-#header #user-tools a:hover {
+#header #user-tools a:hover,
+#header #user-tools button:hover {
   background: rgba(16, 185, 129, 0.25) !important;
   color: #ffffff !important;
-  border-color: rgba(16, 185, 129, 0.4) !important;
+  border-color: #10b981 !important;
 }
 
-/* ---- Breadcrumbs ----------------------------------------------------------- */
+#header .theme-toggle {
+  display: none !important; /* Theme is permanently locked to sovereign high-contrast AgTech dark */
+}
+
+/* Direct Portal Navigation Buttons inside branding */
+.fp-quicklink-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.fp-quicklink-primary {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: #070d09 !important;
+  border: 1px solid #10b981 !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.fp-quicklink-primary:hover {
+  background: #34d399 !important;
+  color: #070d09 !important;
+  transform: translateY(-1px);
+}
+
+.fp-quicklink-secondary {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #cbd5e1 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+.fp-quicklink-secondary:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* ---- Content Area Layout Override (Defeat Django's 60% Float Trap) --------- */
+#content,
+#content.colM,
+#content.colMS,
+.colMS #content-main,
+.colM #content-main {
+  float: none !important;
+  width: 100% !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+#content {
+  padding: 24px 32px !important;
+  max-width: 1560px !important;
+  margin: 0 auto !important;
+  background-color: #070d09 !important;
+}
+
+#content-related {
+  display: none !important; /* Replaced by rich fp-admin-side-column */
+}
+
+/* Clear headings */
+#content h1 {
+  font-size: 1.5rem !important;
+  font-weight: 800 !important;
+  color: #f8fafc !important;
+  margin: 0 0 20px 0 !important;
+  letter-spacing: -0.02em;
+}
+
+/* ---- Executive KPI Grid ---------------------------------------------------- */
+.fp-admin-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.fp-admin-kpi-card {
+  background: linear-gradient(180deg, #0e1c14 0%, #09120c 100%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 14px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.fp-admin-kpi-card:hover {
+  border-color: rgba(16, 185, 129, 0.45);
+  transform: translateY(-2px);
+}
+
+.fp-admin-kpi-card .kpi-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.fp-admin-kpi-card .kpi-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+}
+
+.fp-admin-kpi-card .kpi-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.kpi-tag-emerald { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+.kpi-tag-sky     { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+.kpi-tag-amber   { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+.kpi-tag-purple  { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+
+.fp-admin-kpi-card .kpi-val {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.fp-admin-kpi-card .kpi-sub {
+  font-size: 0.74rem;
+  color: #64748b;
+  margin-top: 6px;
+}
+
+/* ---- Quick Command Navigation Bar ------------------------------------------ */
+.fp-admin-quicklinks-bar {
+  background: #0c1711;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.fp-admin-quicklinks-bar .quicklinks-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.fp-admin-quicklinks-bar .quicklinks-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.fp-qbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 7px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.fp-qbtn-gold {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #070d09;
+  border: 1px solid #f59e0b;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
+}
+.fp-qbtn-gold:hover { background: #fbbf24; color: #070d09; transform: translateY(-1px); }
+
+.fp-qbtn-emerald {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #070d09;
+  border: 1px solid #10b981;
+}
+.fp-qbtn-emerald:hover { background: #34d399; color: #070d09; transform: translateY(-1px); }
+
+.fp-qbtn-slate {
+  background: rgba(255, 255, 255, 0.05);
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.fp-qbtn-slate:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* ---- Two-Column Split: Apps Grid vs. Operations Sidebar --------------------- */
+.fp-admin-split {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 1180px) {
+  .fp-admin-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fp-column-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.fp-column-heading h2 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #f8fafc;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.fp-heading-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+/* Apps Grid: 2-column cards inside the left column */
+.fp-apps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 20px;
+}
+
+/* Individual App Card */
+.fp-app-card {
+  background: #0d1812;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fp-app-card:hover {
+  border-color: rgba(16, 185, 129, 0.45);
+  box-shadow: 0 8px 26px rgba(16, 185, 129, 0.12);
+}
+
+.fp-app-card-header {
+  background: linear-gradient(135deg, #10261a 0%, #0b1a12 100%);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.25);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fp-app-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fp-app-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.fp-app-title a {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #34d399;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: color 0.15s ease;
+}
+
+.fp-app-title a:hover {
+  color: #6ee7b7;
+}
+
+.fp-app-count {
+  font-size: 0.7rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* App Models Table inside Card */
+.fp-app-models-table-wrap {
+  padding: 4px 0;
+}
+
+.fp-app-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.fp-app-table tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.15s ease;
+}
+
+.fp-app-table tr:last-child {
+  border-bottom: none;
+}
+
+.fp-app-table tr:hover {
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.fp-model-name-cell {
+  text-align: left;
+  padding: 11px 18px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.fp-model-name-cell a {
+  color: #f1f5f9;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.fp-model-name-cell a:hover {
+  color: #34d399;
+}
+
+.fp-model-actions-cell {
+  text-align: right;
+  padding: 11px 18px;
+  white-space: nowrap;
+}
+
+/* Action Pill Buttons */
+.fp-action-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s ease;
+  margin-left: 6px;
+}
+
+.fp-action-add {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.fp-action-add:hover {
+  background: #10b981;
+  color: #070d09;
+  border-color: #10b981;
+}
+
+.fp-action-manage {
+  background: rgba(255, 255, 255, 0.05);
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.fp-action-manage:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* ---- Right Column: Operations Sidebar & System Telemetry ------------------- */
+.fp-admin-side-column {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.fp-side-card {
+  background: #0d1812;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.fp-side-card-header {
+  background: #0f1c14;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fp-side-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: 0.02em;
+}
+
+.fp-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f59e0b;
+}
+
+.fp-status-dot.active {
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+.fp-side-badge-green {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.fp-side-card-body {
+  padding: 16px;
+}
+
+.fp-side-desc {
+  font-size: 0.74rem;
+  color: #94a3b8;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+
+.fp-side-action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fp-side-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.fp-side-btn:hover {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #34d399;
+  transform: translateX(2px);
+}
+
+.fp-telemetry-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 0.75rem;
+}
+
+.fp-telemetry-row:last-child {
+  border-bottom: none;
+}
+
+.telemetry-label {
+  color: #94a3b8;
+}
+
+.telemetry-val {
+  color: #e2e8f0;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+}
+
+.text-emerald {
+  color: #34d399 !important;
+}
+
+/* Recent Actions in Side Card */
+.fp-recent-empty {
+  text-align: center;
+  padding: 16px 8px;
+  color: #94a3b8;
+  font-size: 0.76rem;
+}
+
+.fp-action-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fp-action-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.fp-entry-badge {
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.05em;
+}
+
+.badge-add    { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+.badge-change { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
+.badge-del    { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+
+.fp-entry-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.fp-entry-link {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  text-decoration: none;
+  display: block;
+}
+
+.fp-entry-link:hover {
+  color: #34d399;
+}
+
+.fp-entry-meta {
+  font-size: 0.68rem;
+  color: #64748b;
+  display: block;
+  margin-top: 2px;
+}
+
+/* ==============================================================================
+   Universal Styles for Model Change Lists, Forms, and Generic Django Views
+   ============================================================================== */
+
+/* Breadcrumbs */
 div.breadcrumbs {
-  background: #0a130e !important;
+  background: #09120c !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
   color: #94a3b8 !important;
-  padding: 10px 24px !important;
-  font-size: 0.78rem !important;
+  padding: 10px 32px !important;
+  font-size: 0.76rem !important;
 }
 
 div.breadcrumbs a {
@@ -116,132 +718,94 @@ div.breadcrumbs a:hover {
   color: #6ee7b7 !important;
 }
 
-/* ---- Main Content & Modules ------------------------------------------------ */
-#content {
-  padding: 24px !important;
-  background: #070d09 !important;
-}
-
-.module {
-  background: #0c1711 !important;
+/* Change Lists (Tables) */
+#changelist {
+  background: #0d1812 !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-radius: 14px !important;
+  border-radius: 12px !important;
   overflow: hidden !important;
-  margin-bottom: 22px !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
 }
 
-.module h2, 
-.module caption, 
-.inline-group h2 {
-  background: linear-gradient(90deg, #12241a 0%, #0e1c14 100%) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-  color: #34d399 !important;
-  font-weight: 700 !important;
-  font-size: 0.85rem !important;
-  letter-spacing: 0.08em !important;
-  text-transform: uppercase !important;
-  padding: 12px 18px !important;
-}
-
-.module caption a {
-  color: #34d399 !important;
-}
-
-/* ---- App Tables & Rows ----------------------------------------------------- */
-table {
-  border-collapse: separate !important;
-  border-spacing: 0 !important;
+#changelist table {
   width: 100% !important;
+  border-collapse: collapse !important;
 }
 
-table thead th {
+#changelist thead th {
   background: #09120c !important;
   color: #94a3b8 !important;
-  font-size: 0.75rem !important;
+  font-size: 0.74rem !important;
   text-transform: uppercase !important;
   letter-spacing: 0.06em !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
   padding: 12px 16px !important;
 }
 
-table tbody tr {
-  background: #0c1711 !important;
+#changelist tbody tr {
+  background: #0d1812 !important;
   transition: background 0.15s ease !important;
 }
 
-table tbody tr:hover {
+#changelist tbody tr:hover {
   background: rgba(16, 185, 129, 0.06) !important;
 }
 
-table tbody tr:nth-child(even) {
-  background: #0a140f !important;
+#changelist tbody tr:nth-child(even) {
+  background: #09140e !important;
 }
 
-table tbody td, 
-table tbody th {
+#changelist tbody td,
+#changelist tbody th {
   padding: 12px 16px !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
-  font-size: 0.83rem !important;
+  font-size: 0.8rem !important;
   color: #e2e8f0 !important;
 }
 
-table tbody th a {
+#changelist tbody th a {
   color: #f1f5f9 !important;
   font-weight: 600 !important;
   text-decoration: none !important;
 }
 
-table tbody th a:hover {
+#changelist tbody th a:hover {
   color: #34d399 !important;
 }
 
-/* Action Links (+ Add / Change) */
-.module table td a.addlink,
-.module table td a.changelink,
-.module table td a.viewlink {
-  font-size: 0.72rem !important;
-  font-weight: 600 !important;
-  padding: 4px 10px !important;
-  border-radius: 6px !important;
-  text-decoration: none !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 4px !important;
+/* Forms & Inputs */
+input[type=text],
+input[type=password],
+input[type=email],
+input[type=url],
+input[type=number],
+textarea,
+select {
+  background-color: #08110b !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #f8fafc !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  font-size: 0.82rem !important;
 }
 
-.module table td a.addlink {
-  background: rgba(16, 185, 129, 0.15) !important;
-  color: #34d399 !important;
-  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #10b981 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25) !important;
 }
 
-.module table td a.addlink:hover {
-  background: rgba(16, 185, 129, 0.3) !important;
-  color: #ffffff !important;
-}
-
-.module table td a.changelink {
-  background: rgba(255, 255, 255, 0.05) !important;
-  color: #cbd5e1 !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
-
-.module table td a.changelink:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
-  color: #ffffff !important;
-}
-
-/* ---- Buttons & Inputs ------------------------------------------------------ */
-.button, 
-input[type=submit], 
-input[type=button], 
-.submit-row input, 
+/* Submit Buttons */
+.button,
+input[type=submit],
+input[type=button],
+.submit-row input,
 a.button {
-  background: linear-gradient(180deg, #10b981 0%, #059669 100%) !important;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
   border: 1px solid #10b981 !important;
-  color: #ffffff !important;
-  font-weight: 600 !important;
+  color: #070d09 !important;
+  font-weight: 700 !important;
   font-size: 0.8rem !important;
   padding: 8px 18px !important;
   border-radius: 8px !important;
@@ -250,251 +814,12 @@ a.button {
   transition: all 0.15s ease !important;
 }
 
-.button:hover, 
-input[type=submit]:hover, 
-input[type=button]:hover, 
-.submit-row input:hover {
-  background: #10b981 !important;
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45) !important;
+.button:hover,
+input[type=submit]:hover,
+input[type=button]:hover,
+.submit-row input:hover,
+a.button:hover {
+  background: #34d399 !important;
+  color: #070d09 !important;
   transform: translateY(-1px) !important;
 }
-
-.button.default, 
-input[type=submit].default {
-  background: linear-gradient(180deg, #10b981 0%, #047857 100%) !important;
-}
-
-input[type=text], 
-input[type=password], 
-input[type=email], 
-input[type=url], 
-input[type=number], 
-textarea, 
-select {
-  background: #060c08 !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  border-radius: 8px !important;
-  color: #f8fafc !important;
-  padding: 8px 12px !important;
-  font-size: 0.85rem !important;
-  font-family: inherit !important;
-}
-
-input[type=text]:focus, 
-textarea:focus, 
-select:focus {
-  border-color: #10b981 !important;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
-  outline: none !important;
-}
-
-/* ---- Right Sidebar & Recent Actions ---------------------------------------- */
-#content-related {
-  margin-right: 0 !important;
-  width: 320px !important;
-}
-
-#content-related .module {
-  background: #0a130e !important;
-  border: 1px solid rgba(255, 255, 255, 0.06) !important;
-}
-
-#content-related h2 {
-  background: #0d1a12 !important;
-  font-size: 0.8rem !important;
-  color: #e2e8f0 !important;
-}
-
-#content-related ul.actionlist {
-  padding: 8px 16px !important;
-  margin: 0 !important;
-}
-
-#content-related ul.actionlist li {
-  padding: 8px 0 !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
-  font-size: 0.78rem !important;
-  color: #94a3b8 !important;
-}
-
-#content-related ul.actionlist li a {
-  color: #34d399 !important;
-  font-weight: 500 !important;
-}
-
-/* ---- Filter Sidebar -------------------------------------------------------- */
-#changelist-filter {
-  background: #0a130e !important;
-  border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
-}
-
-#changelist-filter h2 {
-  background: #0d1a12 !important;
-  color: #34d399 !important;
-}
-
-#changelist-filter h3 {
-  color: #94a3b8 !important;
-  font-weight: 600 !important;
-}
-
-#changelist-filter li.selected a {
-  color: #10b981 !important;
-  font-weight: 700 !important;
-}
-
-/* ---- Modern Executive Cards for admin index -------------------------------- */
-.fp-admin-kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-  margin-bottom: 28px;
-}
-
-.fp-admin-kpi-card {
-  background: linear-gradient(135deg, #0e1c14 0%, #08110b 100%);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  border-radius: 12px;
-  padding: 16px 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.fp-admin-kpi-card .kpi-label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #94a3b8;
-  margin-bottom: 4px;
-}
-
-.fp-admin-kpi-card .kpi-val {
-  font-size: 1.55rem;
-  font-weight: 800;
-  color: #f8fafc;
-  line-height: 1.2;
-}
-
-.fp-admin-kpi-card .kpi-sub {
-  font-size: 0.73rem;
-  color: #34d399;
-  margin-top: 4px;
-  font-weight: 500;
-}
-
-.fp-admin-quicklinks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 24px;
-  padding: 14px 20px;
-  background: #0b1610;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  align-items: center;
-}
-
-.fp-admin-quicklinks-title {
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: #94a3b8;
-  margin-right: 8px;
-  letter-spacing: 0.05em;
-}
-
-.fp-quicklink-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  text-decoration: none !important;
-  transition: all 0.15s ease;
-}
-
-.fp-quicklink-primary {
-  background: #10b981;
-  color: #ffffff !important;
-}
-
-.fp-quicklink-primary:hover {
-  background: #059669;
-}
-
-.fp-quicklink-secondary {
-  background: rgba(255, 255, 255, 0.06);
-  color: #e2e8f0 !important;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* ---- Login Page ----------------------------------------------------------- */
-body.login {
-  background: radial-gradient(circle at 50% 30%, #0d1e15 0%, #050b07 100%) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-height: 100vh !important;
-}
-
-body.login #container {
-  width: 100% !important;
-  max-width: 440px !important;
-  background: #0c1711 !important;
-  border: 1px solid rgba(16, 185, 129, 0.25) !important;
-  border-radius: 16px !important;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6) !important;
-  overflow: hidden !important;
-}
-
-body.login #header {
-  background: #0f1f16 !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-  text-align: center !important;
-  padding: 20px !important;
-}
-
-body.login #branding h1 {
-  justify-content: center !important;
-  font-size: 1.25rem !important;
-}
-
-body.login #content {
-  padding: 24px 28px 32px !important;
-  background: #0c1711 !important;
-}
-
-body.login .form-row {
-  padding: 10px 0 !important;
-  border-bottom: none !important;
-}
-
-body.login .form-row label {
-  color: #94a3b8 !important;
-  font-weight: 600 !important;
-  font-size: 0.8rem !important;
-  margin-bottom: 6px !important;
-  display: block !important;
-}
-
-body.login .form-row input {
-  width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-body.login .submit-row {
-  padding: 16px 0 0 !important;
-  background: transparent !important;
-  border: none !important;
-  margin: 0 !important;
-  text-align: center !important;
-}
-
-body.login .submit-row input {
-  width: 100% !important;
-  padding: 10px !important;
-  font-size: 0.9rem !important;
-}
-
