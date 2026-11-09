@@ -674,7 +674,120 @@ PlanAssumption.objects.create(
     value_used='1,150 mm Normal to Above Normal',
     source_note='DCCMS Mzuzu Airport Synoptic Weather Station'
 )
-print("Strategic Crop Plan & Economic Assumptions saved.")
+
+# Plan 2: Food Security & Climate Resilience Focus (Risk-Conscious)
+plan_risk = Plan.objects.create(
+    farm=farm,
+    name='2024/25 Household Food Security & Subsistence Shield',
+    strategy_type='risk_conscious',
+    status='draft',
+    total_land_ha=Decimal('3.20'),
+    total_budget_mwk=Decimal('720000.00'),
+    total_expected_cost_mwk=Decimal('640000.00'),
+    total_expected_revenue_mwk=Decimal('4860000.00'),
+    total_expected_margin_mwk=Decimal('4220000.00'),
+    notes='Prioritizes two-year staple maize reserve (6,400 kg) plus drought-hardy groundnuts and sugar beans.'
+)
+PlanItem.objects.create(
+    plan=plan_risk,
+    crop=maize,
+    area_ha=Decimal('2.00'),
+    expected_yield_kg_per_ha=Decimal('3200.00'),
+    expected_yield_kg_total=Decimal('6400.00'),
+    expected_cost_per_ha_mwk=Decimal('235000.00'),
+    expected_total_cost_mwk=Decimal('470000.00'),
+    expected_selling_price_mwk_per_kg=Decimal('850.00'),
+    expected_revenue_mwk=Decimal('5440000.00'),
+    expected_gross_margin_mwk=Decimal('4970000.00'),
+    break_even_price_mwk_per_kg=Decimal('73.40'),
+    notes='Primary household reserve: 200% of 12-month family consumption target.'
+)
+PlanItem.objects.create(
+    plan=plan_risk,
+    crop=beans,
+    area_ha=Decimal('0.80'),
+    expected_yield_kg_per_ha=Decimal('1150.00'),
+    expected_yield_kg_total=Decimal('920.00'),
+    expected_cost_per_ha_mwk=Decimal('150000.00'),
+    expected_total_cost_mwk=Decimal('120000.00'),
+    expected_selling_price_mwk_per_kg=Decimal('2400.00'),
+    expected_revenue_mwk=Decimal('2208000.00'),
+    expected_gross_margin_mwk=Decimal('2088000.00'),
+    break_even_price_mwk_per_kg=Decimal('130.40'),
+    notes='Nutritional protein reserve and high-liquidity local cash crop.'
+)
+PlanItem.objects.create(
+    plan=plan_risk,
+    crop=groundnuts,
+    area_ha=Decimal('0.40'),
+    expected_yield_kg_per_ha=Decimal('1100.00'),
+    expected_yield_kg_total=Decimal('440.00'),
+    expected_cost_per_ha_mwk=Decimal('125000.00'),
+    expected_total_cost_mwk=Decimal('50000.00'),
+    expected_selling_price_mwk_per_kg=Decimal('1800.00'),
+    expected_revenue_mwk=Decimal('792000.00'),
+    expected_gross_margin_mwk=Decimal('742000.00'),
+    break_even_price_mwk_per_kg=Decimal('113.60'),
+    notes='Drought buffer and oilseed reserve.'
+)
+
+# Plan 3: Historical Post-Drought Commercial Strategy (Return-Focused)
+plan_commercial = Plan.objects.create(
+    farm=farm,
+    name='2023/24 Highland Bumper Commercial Export Plan',
+    strategy_type='return_focused',
+    status='completed',
+    total_land_ha=Decimal('3.20'),
+    total_budget_mwk=Decimal('950000.00'),
+    total_expected_cost_mwk=Decimal('865000.00'),
+    total_expected_revenue_mwk=Decimal('7801500.00'),
+    total_expected_margin_mwk=Decimal('6936500.00'),
+    notes='Commercial plan executed during the 2023/24 national emergency. Generated record net margin supplying southern deficit districts.'
+)
+PlanItem.objects.create(
+    plan=plan_commercial,
+    crop=beans,
+    area_ha=Decimal('1.50'),
+    expected_yield_kg_per_ha=Decimal('1200.00'),
+    expected_yield_kg_total=Decimal('1800.00'),
+    expected_cost_per_ha_mwk=Decimal('240000.00'),
+    expected_total_cost_mwk=Decimal('360000.00'),
+    expected_selling_price_mwk_per_kg=Decimal('2400.00'),
+    expected_revenue_mwk=Decimal('4320000.00'),
+    expected_gross_margin_mwk=Decimal('3960000.00'),
+    break_even_price_mwk_per_kg=Decimal('200.00'),
+    notes='Aggressive commercial sugar bean allocation sold to Blantyre aggregators.'
+)
+PlanItem.objects.create(
+    plan=plan_commercial,
+    crop=maize,
+    area_ha=Decimal('1.20'),
+    expected_yield_kg_per_ha=Decimal('3250.00'),
+    expected_yield_kg_total=Decimal('3900.00'),
+    expected_cost_per_ha_mwk=Decimal('325000.00'),
+    expected_total_cost_mwk=Decimal('390000.00'),
+    expected_selling_price_mwk_per_kg=Decimal('850.00'),
+    expected_revenue_mwk=Decimal('3315000.00'),
+    expected_gross_margin_mwk=Decimal('2925000.00'),
+    break_even_price_mwk_per_kg=Decimal('100.00'),
+    notes='Surplus grain sales above 1,200kg family needs.'
+)
+PlanItem.objects.create(
+    plan=plan_commercial,
+    crop=soybeans,
+    area_ha=Decimal('0.50'),
+    expected_yield_kg_per_ha=Decimal('1350.00'),
+    expected_yield_kg_total=Decimal('675.00'),
+    expected_cost_per_ha_mwk=Decimal('230000.00'),
+    expected_total_cost_mwk=Decimal('115000.00'),
+    expected_selling_price_mwk_per_kg=Decimal('950.00'),
+    expected_revenue_mwk=Decimal('641250.00'),
+    expected_gross_margin_mwk=Decimal('526250.00'),
+    break_even_price_mwk_per_kg=Decimal('170.30'),
+    notes='Sold to industrial poultry feed processor in Luwinga.'
+)
+
+print("Strategic Crop Plans (Balanced, Risk-Conscious, Return-Focused) saved.")
 
 # 7. Satellite Digital Twin Parcel for Miriam Chiphaka Field
 farm.satellite_parcels.all().delete()
