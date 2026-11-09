@@ -34,6 +34,8 @@ def home(request):
     if (request.user.is_staff or request.user.is_superuser or profile.role in ['admin', 'extension_officer']) and request.GET.get('view_as') != 'farmer':
         return redirect('admin_portal')
 
+    farm = Farm.objects.filter(owner=request.user).prefetch_related('preferred_crops').first()
+
     # 1. Location & District
     district_obj = None
     if farm:
