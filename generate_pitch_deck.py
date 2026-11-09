@@ -266,8 +266,8 @@ HTML_CONTENT = """<!DOCTYPE html>
       <div><strong>Event / Competition:</strong> National Innovation Showcase 2026</div>
       <div><strong>Total Time Limit:</strong> 5 Minutes (Strict Stop at 5:00)</div>
       <div><strong>Target Audience:</strong> Innovation Judges, Academic Panel, Industry Experts</div>
-      <div><strong>Live Web Instance:</strong> <a href="https://farmpulse-p6jl.onrender.com" style="color:#166534; text-decoration:none;">farmpulse-p6jl.onrender.com</a></div>
-      <div><strong>Verified Demonstration Account:</strong> <span class="demo-account-pill">miriam</span> / <span class="demo-account-pill">Password123!</span></div>
+      <div><strong>Live Web Instance:</strong> <a href="https://farmpulse-p6jl.onrender.com" style="color:#166534; text-decoration:none;">farmpulse-p6jl.onrender.com</a> (or localhost:8000)</div>
+      <div><strong>Demonstration Accounts:</strong> <span class="demo-account-pill">naffe</span> or <span class="demo-account-pill">miriam</span> (Password: <span class="demo-account-pill">Password123!</span>)</div>
       <div><strong>Agro-Zone Focus:</strong> Mzuzu Northern Highlands (1,280m ASL)</div>
       <div><strong>Dataset Span:</strong> 10 Consecutive Years (2015/16 – 2024/25)</div>
     </div>

@@ -60,17 +60,30 @@ class RegisterForm(forms.Form):
 
 
 def ensure_database_ready():
-    """Self-healing safety net: automatically runs migrations and seeds Miriam if missing."""
+    """Self-healing safety net: automatically runs migrations and seeds demo accounts."""
     try:
         from django.db import connection
         from django.core.management import call_command
         tables = connection.introspection.table_names()
         if 'auth_user' not in tables:
             call_command('migrate', interactive=False)
+
+        import runpy
         from django.contrib.auth.models import User
+
+        # Ensure naffe account is fully seeded & password verified
+        naffe = User.objects.filter(username='naffe').first()
+        if not naffe:
+            runpy.run_module('seed_naffe', run_name='__main__')
+        else:
+            if not naffe.check_password('Password123!'):
+                naffe.set_password('Password123!')
+                naffe.is_active = True
+                naffe.save()
+
+        # Ensure miriam account is fully seeded & password verified
         miriam = User.objects.filter(username='miriam').first()
         if not miriam:
-            import runpy
             runpy.run_module('seed_miriam_chiphaka', run_name='__main__')
         else:
             if not miriam.check_password('Password123!'):
