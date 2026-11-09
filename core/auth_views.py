@@ -90,6 +90,10 @@ def ensure_database_ready():
                 miriam.set_password('Password123!')
                 miriam.is_active = True
                 miriam.save()
+
+        # Ensure nationwide 12-farmer ecosystem & administrator are seeded
+        if User.objects.filter(is_staff=False).count() < 10 or not User.objects.filter(username='admin').exists():
+            runpy.run_module('seed_ten_farmers', run_name='__main__')
     except Exception as exc:
         print(f"[FarmPulse DB Auto-init Error]: {exc}")
 

@@ -22,6 +22,7 @@ urlpatterns = [
     path('settings/', core_views.settings_index, name='settings_index'),
     path('settings/export/', core_views.export_user_data, name='export_user_data'),
     path('search/', core_views.search_global, name='search_global'),
+    path('admin-portal/', core_views.admin_portal, name='admin_portal'),
     path('accounts/', include(account_patterns)),
     path('', include('farms.urls')),
     path('', include('climate.urls')),

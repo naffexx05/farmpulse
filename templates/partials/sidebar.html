@@ -108,6 +108,20 @@
       <i data-lucide="bot" class="w-4 h-4 text-purple-400"></i> Mlimi AI Farm Advisor
     </a>
 
+    <!-- Administration & Governance -->
+    <div class="pt-4 pb-1 px-1">
+      <div class="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.15em] text-muted/60 px-2 mb-1">
+        <span>Administration &amp; DADO</span>
+        <span class="bg-amber-400/15 text-amber-400 px-1.5 py-0.5 rounded text-[9px] font-semibold tracking-wide">Governance</span>
+      </div>
+    </div>
+    <a href="{% url 'admin_portal' %}" class="fp-nav-item {% if active_nav == 'admin_portal' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400"></i> Extension &amp; Admin Portal
+    </a>
+    <a href="/admin/" target="_blank" class="fp-nav-item text-muted hover:text-cream">
+      <i data-lucide="lock" class="w-4 h-4 text-emerald-400"></i> Central Django Admin
+    </a>
+
     <a href="{% url 'settings_index' %}" class="fp-nav-item {% if active_nav == 'settings' %}fp-nav-item-active{% endif %}">
       <i data-lucide="settings" class="w-4 h-4"></i> Settings
     </a>
