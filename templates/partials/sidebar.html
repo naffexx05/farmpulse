@@ -1,224 +1,261 @@
 <!-- Mobile backdrop -->
-<div
-  id="sidebar-backdrop"
-  class="fixed inset-0 bg-black/60 z-30 hidden lg:hidden"
-  onclick="closeSidebar()"
-></div>
+<div id="sidebar-backdrop" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-30 hidden lg:hidden" onclick="closeSidebar()"></div>
 
-<aside
-  id="sidebar"
-  class="fixed inset-y-0 left-0 z-40 w-64 flex flex-col
-         bg-forest-950 border-r border-white/5
-         transform -translate-x-full lg:translate-x-0 transition-transform duration-200"
->
+<aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 flex flex-col
+         transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
 
-  <!-- Logo -->
-  <div class="px-5 py-5 border-b border-white/5 flex items-center justify-between">
-    <a href="/" class="flex items-center gap-3">
-      <div class="w-8 h-8 rounded-lg bg-leaf text-forest-900 flex items-center justify-center shadow-md">
-        <i data-lucide="sprout" class="w-4 h-4"></i>
+  <!-- Logo — TERRA brand mark -->
+  <div class="px-5 py-5 flex items-center justify-between" style="border-bottom:1px solid rgba(109,190,71,0.10)">
+    <a href="/" class="flex items-center gap-3 group">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg relative overflow-hidden"
+           style="background:linear-gradient(135deg,#6DBE47,#2D6A20);box-shadow:0 0 16px rgba(109,190,71,0.4),0 2px 8px rgba(0,0,0,0.4)">
+        <i data-lucide="sprout" class="w-4.5 h-4.5 relative z-10" style="color:#071209"></i>
+        <span class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></span>
       </div>
       <div>
-        <div class="font-display font-bold text-cream leading-tight tracking-tight text-sm">FarmPulse</div>
-        <div class="text-[9px] uppercase tracking-[0.18em] text-muted font-semibold">Malawi · Agricultural Intelligence</div>
+        <div class="font-display font-extrabold leading-tight tracking-tight text-sm" style="color:#EEF4EA;letter-spacing:-0.02em">FarmPulse</div>
+        <div class="text-[9px] uppercase font-bold" style="letter-spacing:0.14em;color:rgba(168,196,170,0.5)">Malawi &middot; Ag Intelligence</div>
       </div>
     </a>
-    <button
-      class="lg:hidden fp-btn-ghost !px-2 !py-1.5"
-      onclick="closeSidebar()"
-      aria-label="Close menu"
-    >
-      <i data-lucide="x" class="w-4 h-4"></i>
+    <button class="lg:hidden rounded-lg p-1.5 transition-colors" onclick="closeSidebar()"
+            style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08)"
+            aria-label="Close menu">
+      <i data-lucide="x" class="w-4 h-4" style="color:rgba(238,244,234,0.6)"></i>
     </button>
   </div>
 
-  <!-- Role Indicator Strip -->
-  <div class="px-4 py-2.5 bg-forest-900/60 border-b border-white/5 flex items-center justify-between text-xs">
-    <div class="truncate pr-2">
-      <div class="font-bold text-cream truncate">{{ request.user.get_full_name|default:request.user.username }}</div>
-      <div class="text-[10px] text-muted truncate">
-        {% if request.user.username == 'admin' or request.user.profile.role == 'admin' %}
-          DADO National Operations
-        {% elif request.user.profile.role == 'extension_officer' %}
-          District Extension Officer
-        {% else %}
-          {{ request.user.profile.preferred_district|default:"Mzuzu" }} Smallholder
-        {% endif %}
+  <!-- User identity card -->
+  <div class="mx-3 mt-3 mb-1 rounded-xl px-3 py-2.5 flex items-center gap-2.5"
+       style="background:rgba(109,190,71,0.06);border:1px solid rgba(109,190,71,0.10)">
+    <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0"
+         style="{% if request.user.username == 'admin' or request.user.profile.role in 'admin,extension_officer' %}background:linear-gradient(135deg,#F5B800,#E8A100);color:#0C1F0E{% else %}background:linear-gradient(135deg,#6DBE47,#2D6A20);color:#071209{% endif %}">
+      {{ request.user.username|slice:":1"|upper }}
+    </div>
+    <div class="min-w-0 flex-1">
+      <div class="font-semibold text-xs truncate" style="color:#EEF4EA">{{ request.user.get_full_name|default:request.user.username }}</div>
+      <div class="text-[10px] truncate" style="color:rgba(168,196,170,0.55)">
+        {% if request.user.username == 'admin' or request.user.profile.role == 'admin' %}DADO National Operations
+        {% elif request.user.profile.role == 'extension_officer' %}District Extension Officer
+        {% else %}{{ request.user.profile.preferred_district|default:"Mzuzu" }} Smallholder{% endif %}
       </div>
     </div>
     {% if request.user.username == 'admin' or request.user.profile.role in 'admin,extension_officer' %}
-      <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-400/15 border border-amber-400/30 text-amber-400 shrink-0">
-        Admin
-      </span>
+    <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded shrink-0"
+          style="background:rgba(245,184,0,0.15);border:1px solid rgba(245,184,0,0.30);color:#F5D060">Admin</span>
     {% else %}
-      <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-leaf/15 border border-leaf/30 text-leaf shrink-0">
-        Farmer
-      </span>
+    <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded shrink-0"
+          style="background:rgba(109,190,71,0.12);border:1px solid rgba(109,190,71,0.22);color:#A8E07A">Farmer</span>
     {% endif %}
   </div>
 
   <!-- Role-Separated Navigation -->
-  <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1 text-sm">
+  <nav class="flex-1 overflow-y-auto px-3 py-3 space-y-0.5 text-sm" style="scrollbar-width:thin">
 
     {% if request.user.username == 'admin' or request.user.profile.role in 'admin,extension_officer' %}
-      <!-- ================================================================= -->
-      <!-- EXTENSION OFFICER & ADMINISTRATOR WORKSPACE                        -->
-      <!-- ================================================================= -->
-      
-      <div class="pb-1 px-1">
-        <div class="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.15em] text-amber-400/90 px-2 mb-1">
-          <span>Extension &amp; Governance</span>
-          <span class="bg-amber-400/15 text-amber-400 px-1.5 py-0.5 rounded text-[9px] font-semibold">DADO HQ</span>
-        </div>
+    <!-- ================================================================= -->
+    <!-- EXTENSION OFFICER & ADMINISTRATOR WORKSPACE                        -->
+    <!-- ================================================================= -->
+
+    <div class="pb-1 px-1">
+      <div
+        class="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.15em] text-amber-400/90 px-2 mb-1">
+        <span>Extension &amp; Governance</span>
+        <span class="bg-amber-400/15 text-amber-400 px-1.5 py-0.5 rounded text-[9px] font-semibold">DADO HQ</span>
       </div>
+    </div>
 
-      <a href="{% url 'admin_portal' %}" class="fp-nav-item {% if active_nav == 'admin_portal' %}fp-nav-item-active{% endif %}">
-        <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400"></i> Extension &amp; Admin Portal
-      </a>
+    <a href="{% url 'admin_portal' %}"
+      class="fp-nav-item {% if active_nav == 'admin_portal' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400"></i> Extension &amp; Admin Portal
+    </a>
 
-      <a href="/admin/" target="_blank" class="fp-nav-item text-muted hover:text-cream">
-        <i data-lucide="database" class="w-4 h-4 text-emerald-400"></i> Central Django Admin
-      </a>
+    <a href="/admin/" target="_blank" class="fp-nav-item text-muted hover:text-cream">
+      <i data-lucide="database" class="w-4 h-4 text-emerald-400"></i> Central Django Admin
+    </a>
 
-      <!-- Regional Intelligence Feeds -->
-      <div class="pt-3 pb-1 px-1">
-        <div class="text-[9px] font-bold uppercase tracking-[0.15em] text-muted/60 px-2 mb-1">
-          Regional Intelligence
-        </div>
+    <!-- Regional Intelligence Feeds -->
+    <div class="pt-3 pb-1 px-1">
+      <div class="text-[9px] font-bold uppercase tracking-[0.15em] text-muted/60 px-2 mb-1">
+        Regional Intelligence
       </div>
+    </div>
 
-      <a href="{% url 'climate:dashboard' %}" class="fp-nav-item {% if active_nav == 'climate' %}fp-nav-item-active{% endif %}">
-        <i data-lucide="cloud-sun" class="w-4 h-4 text-sky-400"></i> Weather &amp; Rainfall
-      </a>
+    <a href="{% url 'climate:dashboard' %}"
+      class="fp-nav-item {% if active_nav == 'climate' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="cloud-sun" class="w-4 h-4 text-sky-400"></i> Weather &amp; Rainfall
+    </a>
 
-      <a href="{% url 'market:dashboard' %}" class="fp-nav-item {% if active_nav == 'market' %}fp-nav-item-active{% endif %}">
-        <i data-lucide="trending-up" class="w-4 h-4 text-leaf"></i> Commodity Market Hubs
-      </a>
+    <a href="{% url 'market:dashboard' %}"
+      class="fp-nav-item {% if active_nav == 'market' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="trending-up" class="w-4 h-4 text-leaf"></i> Commodity Market Hubs
+    </a>
 
-      <!-- Smallholder Simulation Sandbox for Admins -->
-      <div class="pt-3 pb-1 px-1">
-        <div class="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.15em] text-muted/60 px-2 mb-1">
-          <span>Field Simulation Sandbox</span>
-          <span class="bg-white/10 text-cream/70 px-1.5 py-0.5 rounded text-[9px]">Inspect</span>
-        </div>
+    <!-- Smallholder Simulation Sandbox for Admins -->
+    <div class="pt-3 pb-1 px-1">
+      <div
+        class="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.15em] text-muted/60 px-2 mb-1">
+        <span>Field Simulation Sandbox</span>
+        <span class="bg-white/10 text-cream/70 px-1.5 py-0.5 rounded text-[9px]">Inspect</span>
       </div>
+    </div>
 
-      <a href="{% url 'home' %}?view_as=farmer" class="fp-nav-item {% if active_nav == 'overview' %}fp-nav-item-active{% endif %}">
-        <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Farmer Field View
-      </a>
+    <a href="{% url 'home' %}?view_as=farmer"
+      class="fp-nav-item {% if active_nav == 'overview' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Farmer Field View
+    </a>
 
-      <a href="{% url 'planner:planner_input' %}" class="fp-nav-item {% if active_nav in 'planner,scenarios,plans,compare' %}fp-nav-item-active{% endif %}">
-        <i data-lucide="leaf" class="w-4 h-4"></i> Crop Planning Sandbox
-      </a>
+    <a href="{% url 'planner:planner_input' %}"
+      class="fp-nav-item {% if active_nav in 'planner,scenarios,plans,compare' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="leaf" class="w-4 h-4"></i> Crop Planning Sandbox
+    </a>
 
-      <a href="{% url 'innovation:satellite_twin' %}" class="fp-nav-item {% if active_nav == 'satellite_twin' %}fp-nav-item-active{% endif %}">
-        <i data-lucide="satellite" class="w-4 h-4 text-sky-400"></i> Sentinel-2 Satellite Twin
-      </a>
+    <a href="{% url 'innovation:satellite_twin' %}"
+      class="fp-nav-item {% if active_nav == 'satellite_twin' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="satellite" class="w-4 h-4 text-sky-400"></i> Sentinel-2 Satellite Twin
+    </a>
 
-      <a href="{% url 'innovation:parametric_insurance' %}" class="fp-nav-item {% if active_nav == 'parametric_insurance' %}fp-nav-item-active{% endif %}">
-        <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i> Parametric Policy Audit
-      </a>
+    <a href="{% url 'innovation:parametric_insurance' %}"
+      class="fp-nav-item {% if active_nav == 'parametric_insurance' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i> Parametric Policy Audit
+    </a>
 
-      <a href="{% url 'innovation:ussd_simulator' %}" class="fp-nav-item {% if active_nav == 'ussd_simulator' %}fp-nav-item-active{% endif %}">
-        <i data-lucide="phone" class="w-4 h-4 text-emerald-400"></i> USSD Simulator (*384#)
-      </a>
+    <a href="{% url 'innovation:ussd_simulator' %}"
+      class="fp-nav-item {% if active_nav == 'ussd_simulator' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="phone" class="w-4 h-4 text-emerald-400"></i> USSD Simulator (*384#)
+    </a>
 
-      <a href="{% url 'innovation:mlimi_advisor' %}" class="fp-nav-item {% if active_nav == 'mlimi_advisor' %}fp-nav-item-active{% endif %}">
-        <i data-lucide="bot" class="w-4 h-4 text-purple-400"></i> Mlimi AI Advisor
-      </a>
+    <a href="{% url 'innovation:mlimi_advisor' %}"
+      class="fp-nav-item {% if active_nav == 'mlimi_advisor' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="bot" class="w-4 h-4 text-purple-400"></i> Mlimi AI Advisor
+    </a>
 
     {% else %}
-      <!-- ================================================================= -->
-      <!-- SMALLHOLDER FARMER WORKSPACE                                      -->
-      <!-- ================================================================= -->
+    <!-- ================================================================= -->
+    <!-- SMALLHOLDER FARMER WORKSPACE                                      -->
+    <!-- ================================================================= -->
 
-      <a href="{% url 'home' %}" class="fp-nav-item {% if active_nav == 'overview' %}fp-nav-item-active{% endif %}">
-        <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Overview Dashboard
+    <a href="{% url 'home' %}" class="fp-nav-item {% if active_nav == 'overview' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Overview Dashboard
+    </a>
+
+    <!-- 1. My Farm -->
+    <div>
+      <a href="{% url 'farms:my_farm' %}"
+        class="fp-nav-item {% if active_nav in 'my_farm,farm_history,season_review' %}fp-nav-item-active{% endif %}">
+        <i data-lucide="map-pin" class="w-4 h-4"></i> My Farm &amp; Plots
       </a>
-
-      <!-- 1. My Farm -->
-      <div>
-        <a href="{% url 'farms:my_farm' %}" class="fp-nav-item {% if active_nav in 'my_farm,farm_history,season_review' %}fp-nav-item-active{% endif %}">
-          <i data-lucide="map-pin" class="w-4 h-4"></i> My Farm &amp; Plots
+      {% if active_nav in 'my_farm,farm_history,season_review' %}
+      <div class="pl-7 pr-2 py-1 space-y-0.5 text-xs">
+        <a href="{% url 'farms:my_farm' %}"
+          class="block px-2.5 py-1 rounded transition-colors {% if active_nav == 'my_farm' %}text-leaf font-bold bg-leaf/10{% else %}text-muted hover:text-cream{% endif %}">
+          Profile &amp; Soil Notes
         </a>
-        {% if active_nav in 'my_farm,farm_history,season_review' %}
-          <div class="pl-7 pr-2 py-1 space-y-0.5 text-xs">
-            <a href="{% url 'farms:my_farm' %}" class="block px-2.5 py-1 rounded transition-colors {% if active_nav == 'my_farm' %}text-leaf font-bold bg-leaf/10{% else %}text-muted hover:text-cream{% endif %}">
-              Profile &amp; Soil Notes
-            </a>
-            <a href="{% url 'farms:farm_history' %}" class="block px-2.5 py-1 rounded transition-colors {% if active_nav == 'farm_history' %}text-leaf font-bold bg-leaf/10{% else %}text-muted hover:text-cream{% endif %}">
-              10-Year Field History
-            </a>
-            <a href="{% url 'farms:season_review_index' %}" class="block px-2.5 py-1 rounded transition-colors {% if active_nav == 'season_review' %}text-leaf font-bold bg-leaf/10{% else %}text-muted hover:text-cream{% endif %}">
-              Season Harvest Review
-            </a>
-          </div>
-        {% endif %}
-      </div>
-
-      <!-- 2. Weather & Rainfall -->
-      <a href="{% url 'climate:dashboard' %}" class="fp-nav-item {% if active_nav == 'climate' %}fp-nav-item-active{% endif %}">
-        <i data-lucide="cloud-sun" class="w-4 h-4"></i> Weather &amp; Rainfall
-      </a>
-
-      <!-- 3. Market Prices -->
-      <a href="{% url 'market:dashboard' %}" class="fp-nav-item {% if active_nav == 'market' %}fp-nav-item-active{% endif %}">
-        <i data-lucide="trending-up" class="w-4 h-4"></i> Market Prices
-      </a>
-
-      <!-- 4. Crop Planning -->
-      <div>
-        <a href="{% url 'planner:planner_input' %}" class="fp-nav-item {% if active_nav in 'planner,scenarios,plans,compare' %}fp-nav-item-active{% endif %}">
-          <i data-lucide="leaf" class="w-4 h-4"></i> Crop Planning
+        <a href="{% url 'farms:farm_history' %}"
+          class="block px-2.5 py-1 rounded transition-colors {% if active_nav == 'farm_history' %}text-leaf font-bold bg-leaf/10{% else %}text-muted hover:text-cream{% endif %}">
+          10-Year Field History
         </a>
-        {% if active_nav in 'planner,scenarios,plans,compare' %}
-          <div class="pl-7 pr-2 py-1 space-y-0.5 text-xs">
-            <a href="{% url 'planner:planner_input' %}" class="block px-2.5 py-1 rounded transition-colors {% if active_nav == 'planner' %}text-leaf font-bold bg-leaf/10{% else %}text-muted hover:text-cream{% endif %}">
-              New Crop Plan
-            </a>
-            <a href="{% url 'planner:plan_list' %}" class="block px-2.5 py-1 rounded transition-colors {% if active_nav == 'plans' or active_nav == 'compare' %}text-leaf font-bold bg-leaf/10{% else %}text-muted hover:text-cream{% endif %}">
-              My Saved Plans
-            </a>
-            <a href="{% url 'planner:scenario_simulator' %}" class="block px-2.5 py-1 rounded transition-colors {% if active_nav == 'scenarios' %}text-leaf font-bold bg-leaf/10{% else %}text-muted hover:text-cream{% endif %}">
-              Drought &amp; Risk Simulator
-            </a>
-          </div>
-        {% endif %}
+        <a href="{% url 'farms:season_review_index' %}"
+          class="block px-2.5 py-1 rounded transition-colors {% if active_nav == 'season_review' %}text-leaf font-bold bg-leaf/10{% else %}text-muted hover:text-cream{% endif %}">
+          Season Harvest Review
+        </a>
       </div>
+      {% endif %}
+    </div>
 
-      <!-- Flagship Innovations -->
-      <div class="pt-4 pb-1 px-1">
-        <div class="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.15em] text-muted/60 px-2 mb-1">
-          <span>Smart Ag Innovations</span>
-          <span class="bg-leaf/15 text-leaf px-1.5 py-0.5 rounded text-[9px] font-semibold tracking-wide">Farmer</span>
-        </div>
+    <!-- 2. Weather & Rainfall -->
+    <a href="{% url 'climate:dashboard' %}"
+      class="fp-nav-item {% if active_nav == 'climate' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="cloud-sun" class="w-4 h-4"></i> Weather &amp; Rainfall
+    </a>
+
+    <!-- 3. Market Prices -->
+    <a href="{% url 'market:dashboard' %}"
+      class="fp-nav-item {% if active_nav == 'market' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="trending-up" class="w-4 h-4"></i> Market Prices
+    </a>
+
+    <!-- 4. Crop Planning -->
+    <div>
+      <a href="{% url 'planner:planner_input' %}"
+        class="fp-nav-item {% if active_nav in 'planner,scenarios,plans,compare' %}fp-nav-item-active{% endif %}">
+        <i data-lucide="leaf" class="w-4 h-4"></i> Crop Planning
+      </a>
+      {% if active_nav in 'planner,scenarios,plans,compare' %}
+      <div class="pl-7 pr-2 py-1 space-y-0.5 text-xs">
+        <a href="{% url 'planner:planner_input' %}"
+          class="block px-2.5 py-1 rounded transition-colors {% if active_nav == 'planner' %}text-leaf font-bold bg-leaf/10{% else %}text-muted hover:text-cream{% endif %}">
+          New Crop Plan
+        </a>
+        <a href="{% url 'planner:plan_list' %}"
+          class="block px-2.5 py-1 rounded transition-colors {% if active_nav == 'plans' or active_nav == 'compare' %}text-leaf font-bold bg-leaf/10{% else %}text-muted hover:text-cream{% endif %}">
+          My Saved Plans
+        </a>
+        <a href="{% url 'planner:scenario_simulator' %}"
+          class="block px-2.5 py-1 rounded transition-colors {% if active_nav == 'scenarios' %}text-leaf font-bold bg-leaf/10{% else %}text-muted hover:text-cream{% endif %}">
+          Drought &amp; Risk Simulator
+        </a>
       </div>
+      {% endif %}
+    </div>
 
-      <a href="{% url 'innovation:satellite_twin' %}" class="fp-nav-item {% if active_nav == 'satellite_twin' %}fp-nav-item-active{% endif %}">
-        <i data-lucide="satellite" class="w-4 h-4 text-sky-400"></i> Satellite Field Health
-      </a>
+    <!-- Flagship Innovations -->
+    <div class="pt-4 pb-1 px-1">
+      <div
+        class="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.15em] text-muted/60 px-2 mb-1">
+        <span>Smart Ag Innovations</span>
+        <span class="bg-leaf/15 text-leaf px-1.5 py-0.5 rounded text-[9px] font-semibold tracking-wide">Farmer</span>
+      </div>
+    </div>
 
-      <a href="{% url 'innovation:ussd_simulator' %}" class="fp-nav-item {% if active_nav == 'ussd_simulator' %}fp-nav-item-active{% endif %}">
-        <i data-lucide="phone" class="w-4 h-4 text-emerald-400"></i> Basic Phone Access (*384#)
-      </a>
+    <a href="{% url 'innovation:satellite_twin' %}"
+      class="fp-nav-item {% if active_nav == 'satellite_twin' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="satellite" class="w-4 h-4 text-sky-400"></i> Satellite Field Health
+    </a>
 
-      <a href="{% url 'innovation:parametric_insurance' %}" class="fp-nav-item {% if active_nav == 'parametric_insurance' %}fp-nav-item-active{% endif %}">
-        <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i> Drought Crop Insurance
-      </a>
+    <a href="{% url 'innovation:ussd_simulator' %}"
+      class="fp-nav-item {% if active_nav == 'ussd_simulator' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="phone" class="w-4 h-4 text-emerald-400"></i> Basic Phone Access (*384#)
+    </a>
 
-      <a href="{% url 'innovation:mlimi_advisor' %}" class="fp-nav-item {% if active_nav == 'mlimi_advisor' %}fp-nav-item-active{% endif %}">
-        <i data-lucide="bot" class="w-4 h-4 text-purple-400"></i> Mlimi AI Farm Advisor
-      </a>
+    <a href="{% url 'innovation:parametric_insurance' %}"
+      class="fp-nav-item {% if active_nav == 'parametric_insurance' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i> Drought Crop Insurance
+    </a>
+
+    <a href="{% url 'innovation:mlimi_advisor' %}"
+      class="fp-nav-item {% if active_nav == 'mlimi_advisor' %}fp-nav-item-active{% endif %}">
+      <i data-lucide="bot" class="w-4 h-4 text-purple-400"></i> Mlimi AI Farm Advisor
+    </a>
 
     {% endif %}
 
     <!-- Common Settings Item -->
-    <div class="pt-3">
-      <a href="{% url 'settings_index' %}" class="fp-nav-item {% if active_nav == 'settings' %}fp-nav-item-active{% endif %}">
+    <div class="pt-2">
+      <a href="{% url 'settings_index' %}"
+        class="fp-nav-item {% if active_nav == 'settings' %}fp-nav-item-active{% endif %}">
         <i data-lucide="settings" class="w-4 h-4"></i> Settings &amp; Units
       </a>
     </div>
 
   </nav>
+
+  <!-- Sidebar Footer — Seasonal status strip -->
+  <div class="px-4 py-3 m-3 rounded-xl" style="background:rgba(109,190,71,0.06);border:1px solid rgba(109,190,71,0.10)">
+    <div class="flex items-center justify-between mb-1.5">
+      <span class="text-[10px] font-bold uppercase" style="color:rgba(168,196,170,0.5);letter-spacing:0.1em">Season Status</span>
+      <span class="flex items-center gap-1 text-[10px] font-semibold" style="color:#A8E07A">
+        <span class="w-1.5 h-1.5 rounded-full fp-live-dot" style="background:#6DBE47;display:inline-block"></span>
+        Live
+      </span>
+    </div>
+    <div class="text-xs font-semibold" style="color:#EEF4EA">2025/26 Main Season</div>
+    <div class="text-[10px] mt-0.5" style="color:rgba(168,196,170,0.45)">Nov 2025 &rarr; Apr 2026</div>
+    <div class="mt-2 h-1 rounded-full overflow-hidden" style="background:rgba(255,255,255,0.08)">
+      <div class="h-full rounded-full" style="width:35%;background:linear-gradient(90deg,#4A9B35,#6DBE47)"></div>
+    </div>
+    <div class="flex justify-between text-[9px] mt-1" style="color:rgba(168,196,170,0.4)">
+      <span>Planting</span><span>35% complete</span>
+    </div>
+  </div>
 
 </aside>

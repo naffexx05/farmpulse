@@ -1,0 +1,1043 @@
+/* =========================================================================
+   FarmPulse Malawi — TERRA Design System v3.0
+   "The Greatest Agricultural UI Ever Built"
+
+   Concept: Drawn from the actual Malawian landscape —
+   - Deep forest-floor greens (dark mode base)
+   - Living soil terracotta & golden harvest accents
+   - Sunrise amber gradients from Lake Malawi dawn
+   - Cassava-leaf texture depth with mineral clarity
+   - Bold, unapologetic typography for field-first use
+
+   Architecture:
+   1. CSS Custom Properties (single source of truth)
+   2. Global base & motion system
+   3. Dark (Forest/Night) mode — the default
+   4. Sunlight (Field) mode — premium daylight re-skin
+   5. Component library: cards, buttons, inputs, badges, nav
+   6. Micro-interaction & animation library
+   7. Data visualization chrome
+   8. Special FX: grain texture, glow halos, shimmer states
+   ========================================================================= */
+
+/* =========================================================================
+   1. CSS Custom Properties
+   ========================================================================= */
+:root {
+  /* --- Primary Brand --- */
+  --terra-green-vivid:  #6DBE47;    /* leaf-lime — high saturation for accents */
+  --terra-green-mid:    #4A9B35;    /* mid-green — interactive states */
+  --terra-green-deep:   #2D6A20;    /* forest authority */
+  --terra-gold:         #F5B800;    /* Mzuni gold — harvest, premium */
+  --terra-gold-warm:    #E8A100;    /* Mzuni gold deep */
+  --terra-amber:        #F28B30;    /* Sunrise / warning */
+  --terra-sky:          #38BDF8;    /* Lake Malawi water */
+  --terra-soil:         #8B5E3C;    /* Rich terracotta soil */
+  --terra-danger:       #EF4444;
+
+  /* --- Dark Mode Surfaces --- */
+  --ds-bg:       #040D07;   /* absolute black-green — sky at night above fields */
+  --ds-0:        #071209;   /* deepest card layer */
+  --ds-1:        #0A1A0D;   /* sidebar */
+  --ds-2:        #0D2010;   /* elevated cards */
+  --ds-3:        #112614;   /* hover / active states */
+  --ds-4:        #163019;   /* card borders, dividers */
+
+  /* --- Dark Mode Text --- */
+  --dt-primary:   #EEF4EA;
+  --dt-secondary: rgba(238,244,234,0.72);
+  --dt-muted:     rgba(168,196,170,0.55);
+  --dt-faint:     rgba(168,196,170,0.30);
+
+  /* --- Light Mode (Sunlight / Terra Day) Surfaces --- */
+  --ls-bg:    #F2F5EF;      /* warm sage parchment */
+  --ls-0:     #FFFFFF;      /* cards */
+  --ls-1:     #F7FAF4;      /* subtle inset */
+  --ls-2:     #EDF2E8;      /* hover tints */
+  --ls-3:     #E0EAD8;      /* active states */
+  --ls-border: #C8D8C0;    /* sage border */
+
+  /* --- Light Mode Text --- */
+  --lt-primary:   #0C1F0E;
+  --lt-secondary: #2B4A2F;
+  --lt-muted:     #567A5A;
+  --lt-faint:     #8DAB90;
+
+  /* --- Typography --- */
+  --font-display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Courier New', monospace;
+
+  /* --- Radii --- */
+  --r-xs:  4px;
+  --r-sm:  8px;
+  --r-md:  12px;
+  --r-lg:  16px;
+  --r-xl:  20px;
+  --r-2xl: 28px;
+
+  /* --- Transitions --- */
+  --t-fast:   120ms cubic-bezier(0.4, 0, 0.2, 1);
+  --t-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --t-slow:   350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* --- Shadows (dark) --- */
+  --shadow-card:  0 1px 3px rgba(0,0,0,0.6), 0 1px 2px rgba(0,0,0,0.5);
+  --shadow-hover: 0 8px 24px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.4);
+  --shadow-drop:  0 20px 60px rgba(0,0,0,0.6);
+  --shadow-glow-green: 0 0 20px rgba(109,190,71,0.25);
+  --shadow-glow-gold:  0 0 20px rgba(245,184,0,0.25);
+}
+
+/* =========================================================================
+   2. Global Base & Motion
+   ========================================================================= */
+
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+/* Smooth scrolling */
+html { scroll-behavior: smooth; }
+
+/* Selection highlight — Mzuni green */
+::selection {
+  background-color: rgba(109, 190, 71, 0.30);
+  color: #EEF4EA;
+}
+
+/* Focus rings — accessible & branded */
+:focus-visible {
+  outline: 2px solid var(--terra-green-vivid);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+/* Scrollbar — custom field green */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(109,190,71,0.3);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(109,190,71,0.55); }
+
+/* =========================================================================
+   3. DARK MODE — Forest Night (default)
+   ========================================================================= */
+
+body {
+  background-color: var(--ds-bg);
+  background-image:
+    radial-gradient(ellipse 80% 60% at 15% 0%, rgba(13,32,16,0.9) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 85% 100%, rgba(109,190,71,0.04) 0%, transparent 60%);
+  background-attachment: fixed;
+  color: var(--dt-primary);
+  font-family: var(--font-body);
+  transition: background-color var(--t-slow), color var(--t-slow);
+}
+
+/* Grain texture overlay for depth */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+/* ---- SIDEBAR ---- */
+aside#sidebar {
+  background: linear-gradient(180deg,
+    var(--ds-1) 0%,
+    rgba(10,26,13,0.98) 100%) !important;
+  border-right: 1px solid rgba(109,190,71,0.08) !important;
+  box-shadow: 4px 0 32px rgba(0,0,0,0.5) !important;
+  backdrop-filter: none !important;
+}
+
+/* Sidebar logo area */
+aside#sidebar > div:first-child {
+  background: linear-gradient(135deg,
+    rgba(109,190,71,0.08) 0%,
+    transparent 100%);
+  border-bottom: 1px solid rgba(109,190,71,0.10) !important;
+}
+
+/* Sidebar brand icon — premium glowing leaf */
+aside#sidebar .w-8.h-8.rounded-lg.bg-leaf {
+  background: linear-gradient(135deg, var(--terra-green-vivid), var(--terra-green-deep)) !important;
+  box-shadow: 0 0 16px rgba(109,190,71,0.4), 0 2px 8px rgba(0,0,0,0.4) !important;
+}
+
+/* Nav items */
+.fp-nav-item {
+  color: var(--dt-muted) !important;
+  background: transparent !important;
+  border-left: 2px solid transparent;
+  border-radius: var(--r-md) !important;
+  margin-bottom: 1px;
+  transition: all var(--t-fast) !important;
+  letter-spacing: 0.01em;
+}
+
+.fp-nav-item:hover {
+  background: rgba(109,190,71,0.08) !important;
+  color: var(--dt-primary) !important;
+  border-left-color: rgba(109,190,71,0.3) !important;
+  transform: translateX(2px);
+}
+
+.fp-nav-item-active {
+  background: linear-gradient(135deg,
+    rgba(109,190,71,0.18) 0%,
+    rgba(109,190,71,0.08) 100%) !important;
+  color: #A8E07A !important;
+  border-left-color: var(--terra-green-vivid) !important;
+  font-weight: 600 !important;
+  box-shadow: inset 0 1px 0 rgba(109,190,71,0.15) !important;
+}
+
+/* Nav category headers */
+.fp-nav-category,
+aside nav [class*="text-muted"][class*="tracking"] {
+  color: var(--dt-faint) !important;
+  letter-spacing: 0.12em;
+  font-size: 9px !important;
+}
+
+/* ---- TOPBAR ---- */
+header.sticky {
+  background: rgba(4,13,7,0.85) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(109,190,71,0.10) !important;
+  box-shadow: 0 1px 0 rgba(109,190,71,0.06), 0 4px 24px rgba(0,0,0,0.3) !important;
+}
+
+/* ---- CARDS ---- */
+.fp-card {
+  background: linear-gradient(145deg,
+    rgba(13,32,16,0.95) 0%,
+    rgba(10,26,13,0.90) 100%) !important;
+  border: 1px solid rgba(109,190,71,0.10) !important;
+  border-radius: var(--r-xl) !important;
+  box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.03) !important;
+  transition: box-shadow var(--t-normal), border-color var(--t-normal), transform var(--t-normal) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.fp-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 50%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.fp-card:hover {
+  border-color: rgba(109,190,71,0.22) !important;
+  box-shadow: var(--shadow-hover), inset 0 1px 0 rgba(255,255,255,0.05) !important;
+  transform: translateY(-1px);
+}
+
+.fp-glass {
+  background: rgba(10,26,13,0.65) !important;
+  backdrop-filter: blur(16px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+  border: 1px solid rgba(109,190,71,0.12) !important;
+  border-radius: var(--r-xl) !important;
+  box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.04) !important;
+}
+
+/* Stat cards with colored top-stripe */
+.fp-stat-card {
+  background: linear-gradient(145deg,
+    rgba(13,32,16,0.95) 0%,
+    rgba(10,26,13,0.90) 100%) !important;
+  border: 1px solid rgba(109,190,71,0.10) !important;
+  border-top: 2px solid var(--terra-green-vivid) !important;
+  border-radius: var(--r-xl) !important;
+  box-shadow: var(--shadow-card) !important;
+  transition: all var(--t-normal) !important;
+}
+
+.fp-stat-card:hover {
+  border-color: rgba(109,190,71,0.3) !important;
+  border-top-color: var(--terra-green-vivid) !important;
+  box-shadow: var(--shadow-hover), var(--shadow-glow-green) !important;
+  transform: translateY(-2px);
+}
+
+/* ---- BUTTONS ---- */
+.fp-btn-primary {
+  background: linear-gradient(135deg, var(--terra-green-vivid) 0%, var(--terra-green-mid) 100%) !important;
+  color: #071209 !important;
+  font-weight: 700 !important;
+  border: 1px solid rgba(109,190,71,0.6) !important;
+  box-shadow: 0 2px 12px rgba(109,190,71,0.35), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+  transition: all var(--t-fast) !important;
+  letter-spacing: 0.01em;
+}
+
+.fp-btn-primary:hover {
+  background: linear-gradient(135deg, #80D955 0%, #3E8A2A 100%) !important;
+  box-shadow: 0 4px 20px rgba(109,190,71,0.5), inset 0 1px 0 rgba(255,255,255,0.25) !important;
+  transform: translateY(-1px) !important;
+}
+
+.fp-btn-primary:active {
+  transform: translateY(0) scale(0.98) !important;
+  box-shadow: 0 1px 6px rgba(109,190,71,0.3) !important;
+}
+
+.fp-btn-ghost {
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  color: var(--dt-secondary) !important;
+  transition: all var(--t-fast) !important;
+}
+
+.fp-btn-ghost:hover {
+  background: rgba(109,190,71,0.08) !important;
+  border-color: rgba(109,190,71,0.25) !important;
+  color: var(--dt-primary) !important;
+}
+
+.fp-btn-secondary {
+  background: rgba(245,184,0,0.10) !important;
+  border: 1px solid rgba(245,184,0,0.30) !important;
+  color: #F5D060 !important;
+  transition: all var(--t-fast) !important;
+}
+
+.fp-btn-secondary:hover {
+  background: rgba(245,184,0,0.18) !important;
+  box-shadow: 0 2px 12px rgba(245,184,0,0.2) !important;
+}
+
+/* ---- INPUTS ---- */
+.fp-input {
+  background: rgba(7,18,9,0.80) !important;
+  border: 1px solid rgba(109,190,71,0.15) !important;
+  color: var(--dt-primary) !important;
+  border-radius: var(--r-md) !important;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast) !important;
+}
+
+.fp-input:focus {
+  border-color: rgba(109,190,71,0.55) !important;
+  box-shadow: 0 0 0 3px rgba(109,190,71,0.12) !important;
+  background: rgba(7,18,9,0.95) !important;
+  outline: none !important;
+}
+
+.fp-input::placeholder { color: var(--dt-faint) !important; }
+
+/* ---- BADGES ---- */
+.fp-badge-low {
+  background: rgba(109,190,71,0.12) !important;
+  color: #A8E07A !important;
+  border-color: rgba(109,190,71,0.25) !important;
+}
+
+.fp-badge-medium {
+  background: rgba(245,184,0,0.12) !important;
+  color: #F5D060 !important;
+  border-color: rgba(245,184,0,0.30) !important;
+}
+
+.fp-badge-high {
+  background: rgba(239,68,68,0.12) !important;
+  color: #FCA5A5 !important;
+  border-color: rgba(239,68,68,0.30) !important;
+}
+
+/* Demo pill — distinctive */
+.fp-demo-pill {
+  background: rgba(245,184,0,0.10) !important;
+  border: 1px solid rgba(245,184,0,0.25) !important;
+  color: #F5D060 !important;
+}
+
+/* ---- TYPOGRAPHY OVERRIDES ---- */
+h1.font-display, h2.font-display, h3.font-display, .font-display {
+  font-family: var(--font-display) !important;
+  letter-spacing: -0.02em;
+}
+
+/* ---- SPECIAL COMPONENTS ---- */
+
+/* Glowing hero section */
+.fp-hero-banner {
+  background: linear-gradient(135deg,
+    rgba(13,32,16,0.98) 0%,
+    rgba(10,26,13,0.94) 60%,
+    rgba(27,96,66,0.15) 100%) !important;
+  border: 1px solid rgba(109,190,71,0.14) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.fp-hero-banner::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(109,190,71,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Market ticker */
+#fp-market-ticker, .fp-ticker-wrap {
+  background: rgba(7,18,9,0.90) !important;
+  border-color: rgba(109,190,71,0.10) !important;
+}
+
+/* Innovation card gradient borders */
+.fp-card-innovation {
+  background: linear-gradient(145deg,
+    rgba(13,32,16,0.98) 0%,
+    rgba(27,96,66,0.08) 100%) !important;
+  border-color: rgba(109,190,71,0.20) !important;
+}
+
+/* ---- SHIMMER / SKELETON ---- */
+@keyframes terra-shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+
+.fp-skeleton {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.03) 25%,
+    rgba(109,190,71,0.06) 50%,
+    rgba(255,255,255,0.03) 75%);
+  background-size: 800px 100%;
+  animation: terra-shimmer 1.8s ease-in-out infinite;
+  border-radius: var(--r-sm);
+}
+
+/* ---- PULSE GLOW ---- */
+@keyframes terra-pulse-green {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(109,190,71,0.3); }
+  50%       { box-shadow: 0 0 0 6px rgba(109,190,71,0); }
+}
+
+.fp-pulse-live {
+  animation: terra-pulse-green 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ---- FADE IN UP ---- */
+@keyframes terra-fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fp-animate-in {
+  animation: terra-fade-up 0.4s ease forwards;
+}
+
+/* ---- CROP CARD HOVER GLOW ---- */
+article.fp-card:hover {
+  box-shadow:
+    var(--shadow-hover),
+    0 0 0 1px rgba(109,190,71,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.05) !important;
+}
+
+/* ---- TABLES ---- */
+table, .fp-table {
+  color: var(--dt-primary) !important;
+}
+
+table thead th {
+  background: rgba(7,18,9,0.9) !important;
+  border-bottom: 1px solid rgba(109,190,71,0.12) !important;
+  color: var(--dt-muted) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.06em;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+}
+
+table tbody tr {
+  border-bottom: 1px solid rgba(255,255,255,0.03) !important;
+  transition: background var(--t-fast) !important;
+}
+
+table tbody tr:hover {
+  background: rgba(109,190,71,0.04) !important;
+}
+
+/* ---- UTILITY OVERRIDES ---- */
+.text-leaf { color: #A8E07A !important; }
+.text-muted { color: var(--dt-muted) !important; }
+.text-cream { color: var(--dt-primary) !important; }
+
+/* AEZ green accents */
+.bg-leaf\/15, .bg-leaf\/20 {
+  background-color: rgba(109,190,71,0.12) !important;
+}
+.border-leaf\/30 {
+  border-color: rgba(109,190,71,0.22) !important;
+}
+.text-emerald-400, .text-emerald-300 {
+  color: #86EFAC !important;
+}
+.text-amber-300, .text-amber-400 {
+  color: #FCD34D !important;
+}
+.text-sky-400 { color: #38BDF8 !important; }
+.text-purple-400 { color: #C084FC !important; }
+
+/* =========================================================================
+   4. SUNLIGHT (Terra Day) MODE — Premium Field Daylight Theme
+   "The world's most beautiful agricultural light theme"
+   ========================================================================= */
+
+html.theme-sunlight {
+  color-scheme: light;
+}
+
+html.theme-sunlight body,
+html.theme-sunlight body[data-theme="sunlight"] {
+  background-color: var(--ls-bg) !important;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 10% 0%, rgba(220,255,200,0.3) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 100%, rgba(245,184,0,0.04) 0%, transparent 60%) !important;
+  background-attachment: fixed !important;
+  color: var(--lt-primary) !important;
+}
+
+/* Remove grain in daylight */
+html.theme-sunlight body::before {
+  display: none !important;
+}
+
+/* Selection */
+html.theme-sunlight ::selection {
+  background-color: rgba(74,155,53,0.25);
+  color: #0C1F0E;
+}
+
+/* Scrollbar */
+html.theme-sunlight ::-webkit-scrollbar-thumb {
+  background: rgba(74,155,53,0.3);
+}
+
+/* ---- SIDEBAR (Sunlight) ---- */
+html.theme-sunlight aside#sidebar {
+  background: linear-gradient(180deg,
+    #FFFFFF 0%,
+    #F5FAF2 100%) !important;
+  border-right: 1px solid var(--ls-border) !important;
+  box-shadow: 4px 0 24px rgba(44,100,30,0.08) !important;
+}
+
+html.theme-sunlight aside#sidebar > div:first-child {
+  background: linear-gradient(135deg,
+    rgba(109,190,71,0.06) 0%,
+    transparent 100%) !important;
+  border-bottom: 1px solid var(--ls-border) !important;
+}
+
+html.theme-sunlight aside#sidebar .w-8.h-8.rounded-lg.bg-leaf {
+  background: linear-gradient(135deg, #5CB83A, #2D6A20) !important;
+  box-shadow: 0 4px 16px rgba(74,155,53,0.35) !important;
+}
+
+html.theme-sunlight .fp-nav-item {
+  color: var(--lt-muted) !important;
+  background: transparent !important;
+  border-left-color: transparent !important;
+}
+
+html.theme-sunlight .fp-nav-item:hover {
+  background: rgba(109,190,71,0.08) !important;
+  color: var(--lt-primary) !important;
+  border-left-color: rgba(74,155,53,0.4) !important;
+}
+
+html.theme-sunlight .fp-nav-item-active {
+  background: linear-gradient(135deg,
+    rgba(109,190,71,0.14) 0%,
+    rgba(109,190,71,0.06) 100%) !important;
+  color: #2D6A20 !important;
+  border-left-color: #5CB83A !important;
+  font-weight: 700 !important;
+}
+
+/* ---- TOPBAR (Sunlight) ---- */
+html.theme-sunlight header.sticky {
+  background: rgba(255,255,255,0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid var(--ls-border) !important;
+  box-shadow: 0 1px 0 rgba(109,190,71,0.08), 0 4px 16px rgba(44,100,30,0.06) !important;
+}
+
+/* ---- CARDS (Sunlight) ---- */
+html.theme-sunlight .fp-card {
+  background: #FFFFFF !important;
+  background-image: none !important;
+  border: 1px solid var(--ls-border) !important;
+  border-radius: var(--r-xl) !important;
+  box-shadow: 0 1px 4px rgba(44,100,30,0.06), 0 4px 16px rgba(44,100,30,0.04) !important;
+  color: var(--lt-primary) !important;
+}
+
+html.theme-sunlight .fp-card::before {
+  display: none !important;
+}
+
+html.theme-sunlight .fp-card:hover {
+  border-color: rgba(74,155,53,0.3) !important;
+  box-shadow: 0 4px 20px rgba(44,100,30,0.12), 0 1px 4px rgba(44,100,30,0.08) !important;
+  transform: translateY(-1px) !important;
+}
+
+html.theme-sunlight .fp-glass {
+  background: rgba(255,255,255,0.90) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid var(--ls-border) !important;
+  box-shadow: 0 1px 4px rgba(44,100,30,0.06) !important;
+}
+
+html.theme-sunlight .fp-stat-card {
+  background: #FFFFFF !important;
+  border: 1px solid var(--ls-border) !important;
+  border-top: 2px solid #5CB83A !important;
+  box-shadow: 0 1px 4px rgba(44,100,30,0.06) !important;
+}
+
+html.theme-sunlight .fp-stat-card:hover {
+  box-shadow: 0 6px 24px rgba(44,100,30,0.14) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ---- BUTTONS (Sunlight) ---- */
+html.theme-sunlight .fp-btn-primary {
+  background: linear-gradient(135deg, #5CB83A 0%, #3A8A25 100%) !important;
+  color: #FFFFFF !important;
+  border-color: rgba(74,155,53,0.5) !important;
+  box-shadow: 0 2px 10px rgba(74,155,53,0.30), inset 0 1px 0 rgba(255,255,255,0.15) !important;
+}
+
+html.theme-sunlight .fp-btn-primary:hover {
+  background: linear-gradient(135deg, #4CA82D 0%, #2D7020 100%) !important;
+  box-shadow: 0 4px 18px rgba(74,155,53,0.40) !important;
+}
+
+html.theme-sunlight .fp-btn-ghost {
+  background: #FFFFFF !important;
+  border: 1px solid var(--ls-border) !important;
+  color: var(--lt-secondary) !important;
+  box-shadow: 0 1px 3px rgba(44,100,30,0.06) !important;
+}
+
+html.theme-sunlight .fp-btn-ghost:hover {
+  background: var(--ls-2) !important;
+  border-color: rgba(74,155,53,0.3) !important;
+  color: var(--lt-primary) !important;
+}
+
+html.theme-sunlight .fp-btn-secondary {
+  background: rgba(245,184,0,0.10) !important;
+  border-color: rgba(245,184,0,0.35) !important;
+  color: #92650A !important;
+}
+
+html.theme-sunlight .fp-btn-secondary:hover {
+  background: rgba(245,184,0,0.18) !important;
+}
+
+/* ---- INPUTS (Sunlight) ---- */
+html.theme-sunlight .fp-input,
+html.theme-sunlight input[type="number"],
+html.theme-sunlight input[type="text"],
+html.theme-sunlight input[type="search"],
+html.theme-sunlight select,
+html.theme-sunlight textarea {
+  background: #FFFFFF !important;
+  border: 1px solid var(--ls-border) !important;
+  color: var(--lt-primary) !important;
+  box-shadow: 0 1px 2px rgba(44,100,30,0.06) !important;
+}
+
+html.theme-sunlight .fp-input:focus,
+html.theme-sunlight input:focus,
+html.theme-sunlight select:focus {
+  border-color: rgba(74,155,53,0.5) !important;
+  box-shadow: 0 0 0 3px rgba(74,155,53,0.12) !important;
+}
+
+html.theme-sunlight .fp-input::placeholder,
+html.theme-sunlight input::placeholder { color: var(--lt-faint) !important; }
+
+html.theme-sunlight select option {
+  background: #FFFFFF !important;
+  color: var(--lt-primary) !important;
+}
+
+/* ---- TYPOGRAPHY (Sunlight) ---- */
+html.theme-sunlight .text-cream { color: var(--lt-primary) !important; }
+html.theme-sunlight .text-cream\/90,
+html.theme-sunlight .text-cream\/85,
+html.theme-sunlight .text-cream\/80,
+html.theme-sunlight .text-cream\/75,
+html.theme-sunlight .text-cream\/70 { color: var(--lt-secondary) !important; }
+html.theme-sunlight .text-cream\/60,
+html.theme-sunlight .text-cream\/50 { color: var(--lt-muted) !important; }
+html.theme-sunlight .text-cream\/40,
+html.theme-sunlight .text-cream\/35,
+html.theme-sunlight .text-cream\/30 { color: var(--lt-faint) !important; }
+html.theme-sunlight .text-muted { color: var(--lt-muted) !important; }
+
+html.theme-sunlight .text-leaf { color: #3A8A25 !important; }
+html.theme-sunlight .text-emerald-400,
+html.theme-sunlight .text-emerald-300 { color: #2D7020 !important; }
+html.theme-sunlight .text-amber-300,
+html.theme-sunlight .text-amber-400 { color: #9A6500 !important; }
+html.theme-sunlight .text-sky-400,
+html.theme-sunlight .text-water { color: #0369A1 !important; }
+html.theme-sunlight .text-purple-400,
+html.theme-sunlight .text-purple-300 { color: #7C3AED !important; }
+html.theme-sunlight .text-rose-400,
+html.theme-sunlight .text-rose-500 { color: #DC2626 !important; }
+html.theme-sunlight .text-risk-high { color: #DC2626 !important; }
+
+/* ---- BORDERS (Sunlight) ---- */
+html.theme-sunlight .border-white\/5,
+html.theme-sunlight .border-white\/8,
+html.theme-sunlight .border-white\/10,
+html.theme-sunlight .border-white\/12,
+html.theme-sunlight .border-white\/15,
+html.theme-sunlight .border-white\/20,
+html.theme-sunlight .border-white\/30 {
+  border-color: var(--ls-border) !important;
+}
+
+html.theme-sunlight .divide-white\/5,
+html.theme-sunlight .divide-white\/10 {
+  --tw-divide-opacity: 1;
+  border-color: var(--ls-border) !important;
+}
+
+/* ---- BACKGROUNDS (Sunlight) ---- */
+html.theme-sunlight .bg-forest-950,
+html.theme-sunlight .bg-forest-900 {
+  background-color: var(--ls-1) !important;
+  color: var(--lt-primary) !important;
+}
+
+html.theme-sunlight .bg-forest-800,
+html.theme-sunlight .bg-forest-850 {
+  background-color: #FFFFFF !important;
+  color: var(--lt-primary) !important;
+}
+
+html.theme-sunlight .bg-forest-700,
+html.theme-sunlight .bg-forest-700\/40,
+html.theme-sunlight .bg-forest-700\/50,
+html.theme-sunlight .bg-forest-700\/60,
+html.theme-sunlight .bg-forest-700\/80,
+html.theme-sunlight .bg-forest-900\/40,
+html.theme-sunlight .bg-forest-900\/60,
+html.theme-sunlight .bg-forest-900\/80,
+html.theme-sunlight .bg-forest-800\/60,
+html.theme-sunlight .bg-forest-800\/70,
+html.theme-sunlight .bg-forest-800\/80,
+html.theme-sunlight .bg-forest-900\/90 {
+  background-color: var(--ls-1) !important;
+  color: var(--lt-primary) !important;
+}
+
+html.theme-sunlight .bg-forest-950\/60,
+html.theme-sunlight .bg-forest-950\/80 {
+  background-color: var(--ls-2) !important;
+}
+
+/* ---- BADGE CHIPS (Sunlight) ---- */
+html.theme-sunlight .fp-badge-low {
+  background: rgba(74,155,53,0.12) !important;
+  color: #2D7020 !important;
+  border-color: rgba(74,155,53,0.25) !important;
+}
+
+html.theme-sunlight .fp-badge-medium {
+  background: rgba(245,184,0,0.12) !important;
+  color: #9A6500 !important;
+  border-color: rgba(245,184,0,0.30) !important;
+}
+
+html.theme-sunlight .fp-badge-high {
+  background: rgba(220,38,38,0.08) !important;
+  color: #DC2626 !important;
+  border-color: rgba(220,38,38,0.20) !important;
+}
+
+html.theme-sunlight .fp-demo-pill {
+  background: rgba(245,184,0,0.10) !important;
+  border-color: rgba(245,184,0,0.30) !important;
+  color: #92650A !important;
+}
+
+/* ---- COLORED CHIPS (Sunlight) ---- */
+html.theme-sunlight .bg-leaf\/10,
+html.theme-sunlight .bg-leaf\/15,
+html.theme-sunlight .bg-leaf\/20 {
+  background-color: rgba(74,155,53,0.10) !important;
+  color: #2D7020 !important;
+}
+
+html.theme-sunlight .border-leaf\/30 {
+  border-color: rgba(74,155,53,0.25) !important;
+}
+
+html.theme-sunlight .bg-amber-400\/10,
+html.theme-sunlight .bg-amber-400\/15,
+html.theme-sunlight .bg-amber-500\/15,
+html.theme-sunlight .bg-amber-500\/20 {
+  background-color: rgba(245,184,0,0.10) !important;
+  color: #9A6500 !important;
+}
+
+html.theme-sunlight .bg-water\/15,
+html.theme-sunlight .bg-water\/20,
+html.theme-sunlight .bg-sky-500\/15 {
+  background-color: rgba(56,189,248,0.10) !important;
+  color: #0369A1 !important;
+}
+
+html.theme-sunlight .bg-purple-500\/15,
+html.theme-sunlight .bg-purple-600\/20 {
+  background-color: rgba(124,58,237,0.08) !important;
+  color: #6D28D9 !important;
+}
+
+html.theme-sunlight .bg-rose-500\/15,
+html.theme-sunlight .bg-risk-high\/15 {
+  background-color: rgba(239,68,68,0.08) !important;
+  color: #DC2626 !important;
+}
+
+html.theme-sunlight .bg-emerald-500\/10,
+html.theme-sunlight .bg-emerald-500\/20 {
+  background-color: rgba(16,185,129,0.10) !important;
+  color: #047857 !important;
+}
+
+/* ---- SPECIAL SECTIONS (Sunlight) ---- */
+
+/* Hero banner — crisp morning light */
+html.theme-sunlight .fp-hero-banner {
+  background: linear-gradient(135deg,
+    #F0F8EA 0%,
+    #FFFFFF 50%,
+    #F5FBF0 100%) !important;
+  border: 1px solid var(--ls-border) !important;
+  box-shadow: 0 4px 24px rgba(44,100,30,0.08) !important;
+}
+
+html.theme-sunlight .fp-hero-banner::after { display: none !important; }
+
+html.theme-sunlight .fp-hero-banner h1,
+html.theme-sunlight .fp-hero-banner h1.text-cream {
+  color: var(--lt-primary) !important;
+  text-shadow: none !important;
+}
+
+html.theme-sunlight .fp-hero-banner p,
+html.theme-sunlight .fp-hero-banner .text-cream,
+html.theme-sunlight .fp-hero-banner .text-cream\/75 {
+  color: var(--lt-secondary) !important;
+}
+
+/* Market ticker */
+html.theme-sunlight #fp-market-ticker,
+html.theme-sunlight .fp-ticker-wrap {
+  background: #FFFFFF !important;
+  border-color: var(--ls-border) !important;
+  color: var(--lt-primary) !important;
+}
+
+html.theme-sunlight #fp-market-ticker .text-cream { color: var(--lt-primary) !important; }
+html.theme-sunlight #fp-market-ticker .text-cream\/50 { color: var(--lt-muted) !important; }
+
+/* ---- USER MENUS (Sunlight) ---- */
+html.theme-sunlight #user-menu,
+html.theme-sunlight #notifications-menu {
+  background: #FFFFFF !important;
+  border: 1px solid var(--ls-border) !important;
+  box-shadow: 0 10px 40px rgba(44,100,30,0.12), 0 2px 8px rgba(0,0,0,0.05) !important;
+  color: var(--lt-primary) !important;
+}
+
+html.theme-sunlight #user-menu a:hover,
+html.theme-sunlight #notifications-menu .hover\:bg-white\/5:hover {
+  background-color: var(--ls-1) !important;
+}
+
+/* ---- TABLES (Sunlight) ---- */
+html.theme-sunlight table, html.theme-sunlight .fp-table {
+  color: var(--lt-primary) !important;
+}
+
+html.theme-sunlight table thead th {
+  background-color: var(--ls-1) !important;
+  border-bottom-color: var(--ls-border) !important;
+  color: var(--lt-muted) !important;
+}
+
+html.theme-sunlight table tbody tr:hover {
+  background-color: var(--ls-1) !important;
+}
+
+html.theme-sunlight table td {
+  color: var(--lt-primary) !important;
+  border-color: var(--ls-border) !important;
+}
+
+/* ---- MAP CONTROLS (Sunlight) ---- */
+html.theme-sunlight .map-filter-btn {
+  color: var(--lt-muted) !important;
+}
+
+html.theme-sunlight .map-filter-btn:hover {
+  color: var(--lt-primary) !important;
+  background-color: var(--ls-2) !important;
+}
+
+html.theme-sunlight .map-filter-btn.bg-forest-700 {
+  background-color: var(--lt-primary) !important;
+  color: #FFFFFF !important;
+}
+
+/* ---- AFFORDABILITY VERDICT (Sunlight) ---- */
+html.theme-sunlight #affordability-verdict {
+  background: #FFFFFF !important;
+  border-color: var(--ls-border) !important;
+  color: var(--lt-primary) !important;
+}
+
+/* ---- CLOCK PILL (Sunlight) ---- */
+html.theme-sunlight .fp-clock-pill,
+html.theme-sunlight div[title*="Malawi"] {
+  background: var(--ls-1) !important;
+  border-color: var(--ls-border) !important;
+  color: var(--lt-secondary) !important;
+}
+
+html.theme-sunlight #malawi-clock { color: var(--lt-primary) !important; }
+
+/* ---- MODALS (Sunlight) ---- */
+html.theme-sunlight .fp-card.border.border-white\/20 {
+  background: #FFFFFF !important;
+  border-color: var(--ls-border) !important;
+}
+
+/* ---- INNOVATION CARD (Sunlight) ---- */
+html.theme-sunlight .fp-card-innovation {
+  background: linear-gradient(135deg, #F0F8EA 0%, #FFFFFF 100%) !important;
+  border-color: rgba(74,155,53,0.25) !important;
+  color: var(--lt-primary) !important;
+}
+
+/* ---- SUNLIGHT SPECIAL EFFECTS ---- */
+
+/* Soft leaf watermark in sunlight hero */
+html.theme-sunlight .fp-hero-animated {
+  opacity: 0.03 !important;
+  filter: invert(1) !important;
+  display: block !important;
+}
+
+/* =========================================================================
+   5. Animation Library
+   ========================================================================= */
+
+/* Equalizer for audio voiceover */
+@keyframes eq-wave {
+  0%, 100% { height: 4px; }
+  50%       { height: 16px; }
+}
+
+.fp-eq-bar {
+  display: inline-block;
+  width: 3px;
+  background: linear-gradient(to top, var(--terra-green-mid), var(--terra-green-vivid));
+  border-radius: 2px;
+  animation: eq-wave 0.8s ease-in-out infinite;
+}
+.fp-eq-bar:nth-child(2) { animation-delay: 0.15s; height: 10px; }
+.fp-eq-bar:nth-child(3) { animation-delay: 0.30s; height: 6px; }
+.fp-eq-bar:nth-child(4) { animation-delay: 0.10s; height: 12px; }
+
+/* Route flow animation for map polylines */
+@keyframes flowDash {
+  to { stroke-dashoffset: -40; }
+}
+
+.fp-animated-route {
+  stroke-dasharray: 8, 8;
+  animation: flowDash 2.5s linear infinite;
+}
+
+/* Stat counter pop */
+@keyframes terra-pop {
+  0%   { transform: scale(0.92); opacity: 0; }
+  60%  { transform: scale(1.03); }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
+.fp-stat-pop { animation: terra-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+/* Gold harvest shimmer on Mzuni elements */
+@keyframes gold-shimmer {
+  0%   { background-position: -300px 0; }
+  100% { background-position:  300px 0; }
+}
+
+.fp-gold-shimmer {
+  background: linear-gradient(90deg,
+    rgba(245,184,0,0.0) 0%,
+    rgba(245,184,0,0.3) 50%,
+    rgba(245,184,0,0.0) 100%);
+  background-size: 600px 100%;
+  animation: gold-shimmer 2.5s ease-in-out infinite;
+}
+
+/* Breathing glow for live indicators */
+@keyframes breathe-green {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.3); }
+}
+
+.fp-live-dot {
+  animation: breathe-green 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* =========================================================================
+   6. Responsive Mobile Enhancements
+   ========================================================================= */
+
+@media (max-width: 768px) {
+  .fp-card { border-radius: var(--r-lg) !important; }
+  .fp-btn-primary { font-size: 14px !important; }
+}
+
+/* =========================================================================
+   7. Print Reset
+   ========================================================================= */
+
+@media print {
+  body { background: white !important; color: black !important; }
+  aside, header { display: none !important; }
+  .fp-card { box-shadow: none !important; border: 1px solid #ddd !important; }
+}
