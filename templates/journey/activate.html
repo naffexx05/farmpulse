@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Activate Season Journey · FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
+
+  <header class="fp-page-header">
+    <div>
+      <div class="fp-breadcrumb">
+        <a href="{% url 'journey:journey_list' %}">Season Journey</a>
+        <span class="fp-breadcrumb-sep">/</span>
+        <span class="text-cream font-medium">Activate</span>
+      </div>
+      <h1 class="font-display text-2xl font-bold text-cream tracking-tight">Activate Season Journey</h1>
+      <p class="fp-page-header-desc">
+        You are about to start monitoring <strong class="text-cream">{{ plan.farm.name }}</strong>
+        using the plan <strong class="text-leaf">{{ plan.name }}</strong>.
+        Set your expected dates and the system will guide you weekly until harvest.
+      </p>
+    </div>
+  </header>
+
+  <!-- Plan Summary Card -->
+  <div class="fp-card p-5 space-y-3">
+    <div class="flex items-center gap-2 mb-1">
+      <i data-lucide="bookmark" class="w-4 h-4 text-leaf"></i>
+      <span class="font-display text-sm font-bold text-cream">Plan Summary</span>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+      <div>
+        <div class="fp-label">Farm</div>
+        <div class="text-cream font-semibold">{{ plan.farm.name }}</div>
+      </div>
+      <div>
+        <div class="fp-label">Strategy</div>
+        <div class="text-cream font-semibold">{{ plan.get_strategy_type_display }}</div>
+      </div>
+      <div>
+        <div class="fp-label">Total Area</div>
+        <div class="text-cream font-semibold font-mono">{{ plan.total_land_ha|floatformat:1 }} ha</div>
+      </div>
+      <div>
+        <div class="fp-label">Projected Cost</div>
+        <div class="text-risk-high font-mono font-semibold">MWK {{ plan.total_expected_cost_mwk|floatformat:0|intcomma }}</div>
+      </div>
+      <div>
+        <div class="fp-label">Projected Margin</div>
+        <div class="{% if plan.total_expected_margin_mwk >= 0 %}text-leaf{% else %}text-risk-high{% endif %} font-mono font-semibold">
+          MWK {{ plan.total_expected_margin_mwk|floatformat:0|intcomma }}
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-wrap gap-1.5 pt-1 border-t border-white/5">
+      {% for item in plan.items.all %}
+        <span class="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded bg-forest-900/80 border border-white/10 text-cream/85 font-mono">
+          <span class="w-1.5 h-1.5 rounded-full bg-leaf"></span>
+          {{ item.crop.name }} <strong class="text-cream">{{ item.area_ha|floatformat:1 }} ha</strong>
+        </span>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Activation Form -->
+  <form method="POST" class="fp-card p-6 space-y-5">
+    {% csrf_token %}
+
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <label class="fp-label" for="season_label">Season Label</label>
+        <input id="season_label" name="season_label" type="text" class="fp-input"
+               value="2025/26" placeholder="e.g. 2025/26">
+        <p class="text-[11px] text-cream/40 mt-1">The growing season this journey covers.</p>
+      </div>
+      <div></div>
+      <div>
+        <label class="fp-label" for="expected_plant_date">Expected Planting Date</label>
+        <input id="expected_plant_date" name="expected_plant_date" type="date" class="fp-input">
+      </div>
+      <div>
+        <label class="fp-label" for="expected_harvest_date">Expected Harvest Date</label>
+        <input id="expected_harvest_date" name="expected_harvest_date" type="date" class="fp-input">
+      </div>
+    </div>
+
+    <div class="bg-leaf/5 border border-leaf/20 rounded-lg p-4 text-xs text-cream/70 leading-relaxed">
+      <i data-lucide="info" class="w-3.5 h-3.5 text-leaf inline mr-1.5"></i>
+      Once activated, your Season Journey dashboard will track weekly check-ins, farm expenses,
+      advisory messages, and final harvest data against this plan. You can log activities any time.
+    </div>
+
+    <div class="flex items-center gap-3 pt-2">
+      <button type="submit" class="fp-btn-primary text-sm">
+        <i data-lucide="play" class="w-4 h-4"></i> Activate Season Journey
+      </button>
+      <a href="{% url 'planner:plan_list' %}" class="fp-btn-ghost text-sm">Cancel</a>
+    </div>
+  </form>
+
+</div>
+{% endblock %}
+

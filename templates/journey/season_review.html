@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Season Report · {{ journey.farm.name }} · FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-6" id="season-report">
+
+  <!-- Page Header -->
+  <header class="fp-page-header">
+    <div>
+      <div class="fp-breadcrumb">
+        <a href="{% url 'journey:journey_list' %}">Season Journey</a>
+        <span class="fp-breadcrumb-sep">/</span>
+        <span class="text-cream font-medium">Season Report</span>
+      </div>
+      <h1 class="font-display text-2xl sm:text-3xl font-bold text-cream tracking-tight">
+        Season Report &mdash; {{ journey.season_label }}
+      </h1>
+      <p class="fp-page-header-desc">{{ journey.farm.name }} &bull; {{ checkin_count }} check-ins recorded
+        {% if duration_days %}&bull; {{ duration_days }} day season{% endif %}
+      </p>
+    </div>
+    <div class="flex items-center gap-2 shrink-0 pt-1 print:hidden">
+      <button onclick="window.print()" class="fp-btn-ghost text-xs">
+        <i data-lucide="printer" class="w-4 h-4"></i> Print Report
+      </button>
+      <a href="{% url 'journey:journey_list' %}" class="fp-btn-primary text-xs">
+        <i data-lucide="plus" class="w-4 h-4"></i> New Journey
+      </a>
+    </div>
+  </header>
+
+  <!-- Plan Accuracy Score -->
+  {% if plan_accuracy %}
+    <div class="fp-card p-6 text-center space-y-2">
+      <div class="fp-label mb-1">Plan Accuracy Score</div>
+      <div class="font-display text-6xl font-bold
+        {% if plan_accuracy >= 80 %}text-leaf{% elif plan_accuracy >= 50 %}text-amber-300{% else %}text-risk-high{% endif %}">
+        {{ plan_accuracy }}%
+      </div>
+      <div class="text-xs text-muted">
+        {% if plan_accuracy >= 80 %}
+          Excellent season execution. Your plan was highly accurate.
+        {% elif plan_accuracy >= 60 %}
+          Good season. Minor deviations from plan — review inputs for next season.
+        {% elif plan_accuracy >= 40 %}
+          Moderate accuracy. Significant factors affected yields. Review assumptions.
+        {% else %}
+          Low accuracy. Major deviations from plan. Document lessons for next season.
+        {% endif %}
+      </div>
+      <div class="flex items-center justify-center gap-2 pt-1">
+        <div class="h-2 rounded-full bg-forest-800 w-48 overflow-hidden">
+          <div class="h-full rounded-full transition-all duration-700
+            {% if plan_accuracy >= 80 %}bg-leaf{% elif plan_accuracy >= 50 %}bg-amber-400{% else %}bg-risk-high{% endif %}"
+            style="width: {{ plan_accuracy }}%"></div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Financial Summary -->
+  <div class="fp-card p-5 space-y-4">
+    <div class="flex items-center gap-2 mb-1">
+      <i data-lucide="wallet" class="w-4 h-4 text-amber-300"></i>
+      <span class="font-display text-sm font-bold text-cream">Season Financial Summary</span>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div class="fp-glass rounded-lg p-4 text-center">
+        <div class="fp-label mb-1">Total Expenses</div>
+        <div class="font-mono text-xl font-bold text-risk-high">MWK {{ total_expenses|floatformat:0|intcomma }}</div>
+        {% if planned_cost %}
+          <div class="text-[11px] text-muted mt-1">Planned: MWK {{ planned_cost|floatformat:0|intcomma }}</div>
+          {% widthratio total_expenses planned_cost 100 as cost_pct %}
+          <div class="text-[11px] {% if cost_pct > 110 %}text-risk-high{% elif cost_pct > 100 %}text-amber-300{% else %}text-leaf{% endif %} font-semibold">{{ cost_pct }}% of budget</div>
+        {% endif %}
+      </div>
+      <div class="fp-glass rounded-lg p-4 text-center">
+        <div class="fp-label mb-1">Total Revenue</div>
+        <div class="font-mono text-xl font-bold text-leaf">MWK {{ total_income|floatformat:0|intcomma }}</div>
+      </div>
+      <div class="fp-glass rounded-lg p-4 text-center">
+        <div class="fp-label mb-1">Net Profit / Loss</div>
+        <div class="font-mono text-xl font-bold {% if actual_net >= 0 %}text-leaf{% else %}text-risk-high{% endif %}">
+          MWK {{ actual_net|floatformat:0|intcomma }}
+        </div>
+        {% if planned_margin %}
+          <div class="text-[11px] text-muted mt-1">Planned: MWK {{ planned_margin|floatformat:0|intcomma }}</div>
+        {% endif %}
+      </div>
+      <div class="fp-glass rounded-lg p-4 text-center">
+        <div class="fp-label mb-1">Check-Ins Done</div>
+        <div class="font-mono text-xl font-bold text-sky-400">{{ checkin_count }}</div>
+        <div class="text-[11px] text-muted mt-1">weeks monitored</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Crop-by-Crop Comparison -->
+  {% if comparison_rows %}
+    <div class="fp-card p-5 space-y-4">
+      <div class="flex items-center gap-2 mb-1">
+        <i data-lucide="bar-chart-2" class="w-4 h-4 text-leaf"></i>
+        <span class="font-display text-sm font-bold text-cream">Planned vs Actual — Crop Performance</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs">
+          <thead>
+            <tr class="border-b border-white/10">
+              <th class="fp-label text-left pb-2">Crop</th>
+              <th class="fp-label text-right pb-2">Plan (ha)</th>
+              <th class="fp-label text-right pb-2">Actual (ha)</th>
+              <th class="fp-label text-right pb-2">Plan Yield (kg)</th>
+              <th class="fp-label text-right pb-2">Actual Yield (kg)</th>
+              <th class="fp-label text-right pb-2">Revenue (MWK)</th>
+              <th class="fp-label text-right pb-2">Accuracy</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in comparison_rows %}
+              <tr class="border-b border-white/5">
+                <td class="py-2.5 text-cream font-semibold">{{ row.crop }}</td>
+                <td class="py-2.5 text-right font-mono text-cream/60">{{ row.planned_ha|floatformat:1 }}</td>
+                <td class="py-2.5 text-right font-mono text-cream">{{ row.actual_ha|floatformat:1 }}</td>
+                <td class="py-2.5 text-right font-mono text-cream/60">
+                  {% if row.planned_yield_kg > 0 %}{{ row.planned_yield_kg|floatformat:0|intcomma }}{% else %}-{% endif %}
+                </td>
+                <td class="py-2.5 text-right font-mono text-cream">
+                  {% if row.actual_yield_kg > 0 %}{{ row.actual_yield_kg|floatformat:0|intcomma }}{% else %}-{% endif %}
+                </td>
+                <td class="py-2.5 text-right font-mono text-leaf">{{ row.actual_revenue|floatformat:0|intcomma }}</td>
+                <td class="py-2.5 text-right">
+                  {% if row.accuracy > 0 %}
+                    <span class="inline-flex items-center gap-1 font-mono font-bold
+                      {% if row.accuracy >= 80 %}text-leaf{% elif row.accuracy >= 50 %}text-amber-300{% else %}text-risk-high{% endif %}">
+                      {{ row.accuracy }}%
+                    </span>
+                  {% else %}
+                    <span class="text-muted">-</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Harvest Records Detail -->
+  {% if harvest_records %}
+    <div class="fp-card p-5 space-y-3">
+      <div class="flex items-center gap-2">
+        <i data-lucide="wheat" class="w-4 h-4 text-amber-300"></i>
+        <span class="font-display text-sm font-bold text-cream">Harvest Records</span>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-3">
+        {% for hr in harvest_records %}
+          <div class="fp-glass rounded-lg p-4 space-y-2">
+            <div class="font-display font-bold text-cream">{{ hr.crop.name }}</div>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <div class="fp-label">Area</div>
+                <div class="text-cream font-mono">{{ hr.actual_area_ha|floatformat:1 }} ha</div>
+              </div>
+              <div>
+                <div class="fp-label">Total Yield</div>
+                <div class="text-cream font-mono">{{ hr.actual_yield_kg|floatformat:0|intcomma }} kg</div>
+              </div>
+              <div>
+                <div class="fp-label">Bags (50kg)</div>
+                <div class="text-amber-300 font-mono font-bold">{{ hr.bags_50kg }}</div>
+              </div>
+              <div>
+                <div class="fp-label">Yield/ha</div>
+                <div class="text-cream font-mono">{{ hr.yield_per_ha|floatformat:0 }} kg/ha</div>
+              </div>
+              <div>
+                <div class="fp-label">Price / kg</div>
+                <div class="text-cream font-mono">MWK {{ hr.selling_price_mwk|floatformat:0|intcomma }}</div>
+              </div>
+              <div>
+                <div class="fp-label">Revenue</div>
+                <div class="text-leaf font-mono font-bold">MWK {{ hr.actual_revenue_mwk|floatformat:0|intcomma }}</div>
+              </div>
+            </div>
+            {% if hr.notes %}
+              <div class="text-[11px] text-muted/70 italic border-t border-white/5 pt-2">{{ hr.notes }}</div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Recommendations for Next Season -->
+  <div class="fp-card p-5 space-y-3">
+    <div class="flex items-center gap-2">
+      <i data-lucide="lightbulb" class="w-4 h-4 text-amber-300"></i>
+      <span class="font-display text-sm font-bold text-cream">Recommendations for Next Season</span>
+    </div>
+    <div class="space-y-3 text-xs text-cream/75 leading-relaxed">
+      {% if plan_accuracy >= 80 %}
+        <div class="flex items-start gap-2">
+          <i data-lucide="check-circle" class="w-3.5 h-3.5 text-leaf shrink-0 mt-0.5"></i>
+          Your plan assumptions were highly accurate this season. Consider scaling up your operation confidently.
+        </div>
+        <div class="flex items-start gap-2">
+          <i data-lucide="trending-up" class="w-3.5 h-3.5 text-leaf shrink-0 mt-0.5"></i>
+          Explore higher-value crop additions or input optimisation to improve margins further.
+        </div>
+      {% elif plan_accuracy >= 50 %}
+        <div class="flex items-start gap-2">
+          <i data-lucide="alert-circle" class="w-3.5 h-3.5 text-amber-300 shrink-0 mt-0.5"></i>
+          Review input cost assumptions — actual costs likely deviated from projections. Update benchmarks for next season.
+        </div>
+        <div class="flex items-start gap-2">
+          <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-amber-300 shrink-0 mt-0.5"></i>
+          Identify which crops underperformed and investigate causes (pest damage, weather, soil health).
+        </div>
+      {% else %}
+        <div class="flex items-start gap-2">
+          <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-risk-high shrink-0 mt-0.5"></i>
+          Significant gaps between plan and actual. Consult your extension officer before next season's planning.
+        </div>
+        <div class="flex items-start gap-2">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-risk-high shrink-0 mt-0.5"></i>
+          Consider reducing risk by diversifying crop mix and including drought-resilient varieties.
+        </div>
+      {% endif %}
+      <div class="flex items-start gap-2">
+        <i data-lucide="book-open" class="w-3.5 h-3.5 text-sky-400 shrink-0 mt-0.5"></i>
+        Use this season's actual costs and yields to generate a more accurate plan for next season in the Crop Planner.
+      </div>
+      <div class="flex items-start gap-2">
+        <i data-lucide="users" class="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5"></i>
+        Share this season report with your extension officer to access improved advisory support.
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Bar -->
+  <div class="fp-card p-4 flex flex-wrap items-center gap-3 print:hidden">
+    <a href="{% url 'journey:journey_list' %}" class="fp-btn-ghost text-xs">
+      <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> My Journeys
+    </a>
+    <a href="{% url 'planner:planner_input' %}" class="fp-btn-ghost text-xs text-leaf">
+      <i data-lucide="leaf" class="w-3.5 h-3.5"></i> Plan Next Season
+    </a>
+    <button onclick="window.print()" class="fp-btn-ghost text-xs ml-auto">
+      <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print
+    </button>
+  </div>
+
+</div>
+
+<style>
+@media print {
+  #season-report { max-width: 100%; }
+  .fp-card { border: 1px solid #ccc; }
+}
+</style>
+{% endblock %}

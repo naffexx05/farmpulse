@@ -100,6 +100,9 @@
               </div>
 
               <div class="flex items-center gap-2">
+                <a href="{% url 'journey:activate' p.pk %}" class="fp-btn-primary text-xs !px-3 !py-1.5 bg-leaf/90 hover:bg-leaf" title="Activate this plan as a Season Journey">
+                  <i data-lucide="play" class="w-3.5 h-3.5"></i> Start Journey
+                </a>
                 <a href="{% url 'planner:scenario_simulator' %}?plan={{ p.pk }}" class="fp-btn-ghost text-xs !px-3 !py-1.5 text-amber-300 hover:text-amber-200" title="Run stress test and climate simulation on this plan">
                   <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> Stress Test
                 </a>

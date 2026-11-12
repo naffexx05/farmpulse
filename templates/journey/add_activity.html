@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Log Activity · FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
+
+  <header class="fp-page-header">
+    <div>
+      <div class="fp-breadcrumb">
+        <a href="{% url 'journey:journey_list' %}">Season Journey</a>
+        <span class="fp-breadcrumb-sep">/</span>
+        <a href="{% url 'journey:detail' journey.pk %}">{{ journey.farm.name }}</a>
+        <span class="fp-breadcrumb-sep">/</span>
+        <span class="text-cream font-medium">Log Activity</span>
+      </div>
+      <h1 class="font-display text-2xl font-bold text-cream tracking-tight">Log Farm Activity</h1>
+      <p class="fp-page-header-desc">Record what you spent, what you did, and when. Every entry builds your season financial record.</p>
+    </div>
+  </header>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="fp-card p-4 border-l-4 border-risk-high text-risk-high bg-rose-500/5 text-sm flex items-center gap-3">
+        <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0"></i> {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="POST" class="fp-card p-6 space-y-5">
+    {% csrf_token %}
+
+    <!-- Type Toggle -->
+    <div>
+      <label class="fp-label">Entry Type</label>
+      <div class="flex gap-3 mt-1">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="radio" name="is_income" value="0" checked class="accent-amber-400">
+          <span class="text-sm text-cream/80">Expense (money spent)</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="radio" name="is_income" value="1" class="accent-leaf">
+          <span class="text-sm text-cream/80">Income (money received)</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-4">
+      <!-- Category -->
+      <div>
+        <label class="fp-label" for="category">Category <span class="text-risk-high">*</span></label>
+        <select id="category" name="category" class="fp-input" required>
+          <option value="">-- Select category --</option>
+          {% for key, label in categories %}
+            <option value="{{ key }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Date -->
+      <div>
+        <label class="fp-label" for="activity_date">Date <span class="text-risk-high">*</span></label>
+        <input id="activity_date" name="activity_date" type="date" class="fp-input" value="{{ today }}" required>
+      </div>
+
+      <!-- Amount -->
+      <div>
+        <label class="fp-label" for="amount_mwk">Amount (MWK)</label>
+        <input id="amount_mwk" name="amount_mwk" type="number" step="0.01" min="0" class="fp-input" placeholder="0">
+      </div>
+
+      <!-- Crop (optional) -->
+      <div>
+        <label class="fp-label" for="crop">Related Crop (optional)</label>
+        <select id="crop" name="crop" class="fp-input">
+          <option value="">-- Not crop-specific --</option>
+          {% for c in crops %}
+            <option value="{{ c.pk }}">{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div>
+      <label class="fp-label" for="description">Description <span class="text-risk-high">*</span></label>
+      <input id="description" name="description" type="text" class="fp-input"
+             placeholder="e.g. Purchased 2 bags of D-Compound fertiliser" required maxlength="255">
+    </div>
+
+    <!-- Product / Quantity row -->
+    <div class="grid sm:grid-cols-3 gap-4">
+      <div>
+        <label class="fp-label" for="product_name">Product / Supplier</label>
+        <input id="product_name" name="product_name" type="text" class="fp-input"
+               placeholder="e.g. Optichem D-Compound">
+      </div>
+      <div>
+        <label class="fp-label" for="quantity">Quantity</label>
+        <input id="quantity" name="quantity" type="number" step="0.01" min="0" class="fp-input" placeholder="e.g. 2">
+      </div>
+      <div>
+        <label class="fp-label" for="unit">Unit</label>
+        <select id="unit" name="unit" class="fp-input">
+          <option value="">--</option>
+          <option value="bags">bags</option>
+          <option value="kg">kg</option>
+          <option value="litres">litres</option>
+          <option value="hours">hours (labour)</option>
+          <option value="days">days (labour)</option>
+          <option value="hectares">hectares</option>
+          <option value="pieces">pieces</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div>
+      <label class="fp-label" for="notes">Notes (optional)</label>
+      <textarea id="notes" name="notes" rows="2" class="fp-input resize-none"
+                placeholder="Any extra details..."></textarea>
+    </div>
+
+    <div class="flex items-center gap-3 pt-2">
+      <button type="submit" class="fp-btn-primary text-sm">
+        <i data-lucide="save" class="w-4 h-4"></i> Save Activity
+      </button>
+      <a href="{% url 'journey:activity_log' journey.pk %}" class="fp-btn-ghost text-sm">Cancel</a>
+    </div>
+  </form>
+
+</div>
+{% endblock %}

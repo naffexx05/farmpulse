@@ -166,6 +166,11 @@
         <i data-lucide="trending-up" class="w-4 h-4"></i> Market Prices
       </a>
 
+      <!-- 5. Season Journey -->
+      <a href="{% url 'journey:journey_list' %}" class="fp-nav-item {% if active_nav == 'journey' %}fp-nav-item-active{% endif %}">
+        <i data-lucide="activity" class="w-4 h-4 text-leaf"></i> Season Journey
+      </a>
+
       <!-- 4. Crop Planning -->
       <div>
         <a href="{% url 'planner:planner_input' %}" class="fp-nav-item {% if active_nav in 'planner,scenarios,plans,compare' %}fp-nav-item-active{% endif %}">

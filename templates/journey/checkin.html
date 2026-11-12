@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Weekly Check-In · FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
+
+  <header class="fp-page-header">
+    <div>
+      <div class="fp-breadcrumb">
+        <a href="{% url 'journey:journey_list' %}">Season Journey</a>
+        <span class="fp-breadcrumb-sep">/</span>
+        <a href="{% url 'journey:detail' journey.pk %}">{{ journey.farm.name }}</a>
+        <span class="fp-breadcrumb-sep">/</span>
+        <span class="text-cream font-medium">Weekly Check-In</span>
+      </div>
+      <h1 class="font-display text-2xl font-bold text-cream tracking-tight">Weekly Field Check-In</h1>
+      <p class="fp-page-header-desc">
+        Week {{ journey.week_number }} of your {{ journey.season_label }} season.
+        Answer honestly — your advisories are only as good as your observations.
+      </p>
+    </div>
+  </header>
+
+  <form method="POST" class="space-y-5">
+    {% csrf_token %}
+
+    <!-- Growth Stage -->
+    <div class="fp-card p-5">
+      <label class="fp-label text-sm font-bold mb-3 block">
+        <i data-lucide="git-branch" class="w-3.5 h-3.5 text-leaf inline mr-1"></i>
+        Current Growth Stage
+      </label>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {% for key, label in growth_stages %}
+          <label class="cursor-pointer">
+            <input type="radio" name="stage" value="{{ key }}" class="peer hidden" {% if forloop.first %}checked{% endif %}>
+            <div class="p-3 rounded-lg border border-white/10 text-center text-xs text-muted
+                        peer-checked:border-leaf peer-checked:bg-leaf/10 peer-checked:text-leaf
+                        hover:border-white/25 transition-all">
+              {{ label }}
+            </div>
+          </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Pest & Disease -->
+    <div class="fp-card p-5 grid sm:grid-cols-2 gap-6">
+      <div>
+        <label class="fp-label text-sm font-bold mb-3 block">
+          <i data-lucide="bug" class="w-3.5 h-3.5 text-amber-300 inline mr-1"></i>
+          Pest Pressure
+        </label>
+        <div class="space-y-2">
+          {% for key, label in pressure_levels %}
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="pest_pressure" value="{{ key }}" {% if forloop.first %}checked{% endif %}
+                     class="accent-amber-400">
+              <span class="text-sm text-cream/80">{{ label }}</span>
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div>
+        <label class="fp-label text-sm font-bold mb-3 block">
+          <i data-lucide="biohazard" class="w-3.5 h-3.5 text-purple-400 inline mr-1"></i>
+          Disease Pressure
+        </label>
+        <div class="space-y-2">
+          {% for key, label in pressure_levels %}
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="disease_pressure" value="{{ key }}" {% if forloop.first %}checked{% endif %}
+                     class="accent-purple-400">
+              <span class="text-sm text-cream/80">{{ label }}</span>
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Soil Moisture Score -->
+    <div class="fp-card p-5">
+      <label class="fp-label text-sm font-bold mb-4 block">
+        <i data-lucide="droplets" class="w-3.5 h-3.5 text-sky-400 inline mr-1"></i>
+        Soil Moisture Level
+      </label>
+      <div class="space-y-3">
+        <input type="range" name="moisture_score" id="moisture_score" min="1" max="5" value="3"
+               class="w-full accent-sky-400" oninput="updateMoistureLabel(this.value)">
+        <div class="flex justify-between text-[11px] text-muted">
+          <span>1 - Very Dry</span>
+          <span>2 - Dry</span>
+          <span>3 - Adequate</span>
+          <span>4 - Moist</span>
+          <span>5 - Waterlogged</span>
+        </div>
+        <div class="text-center">
+          <span id="moisture-label" class="text-sm font-bold text-sky-400">Adequate</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Canopy Cover -->
+    <div class="fp-card p-5">
+      <label class="fp-label text-sm font-bold mb-4 block">
+        <i data-lucide="trees" class="w-3.5 h-3.5 text-leaf inline mr-1"></i>
+        Estimated Canopy Cover
+        <span id="canopy-pct-label" class="text-leaf ml-2">50%</span>
+      </label>
+      <input type="range" name="canopy_cover_pct" id="canopy_cover" min="0" max="100" value="50" step="5"
+             class="w-full accent-leaf" oninput="document.getElementById('canopy-pct-label').textContent = this.value + '%'">
+      <div class="flex justify-between text-[11px] text-muted mt-2">
+        <span>0% (bare soil)</span>
+        <span>50% (half cover)</span>
+        <span>100% (full canopy)</span>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="fp-card p-5">
+      <label class="fp-label text-sm font-bold mb-2 block" for="notes">
+        Field Observations (optional)
+      </label>
+      <textarea id="notes" name="notes" rows="3" class="fp-input resize-none"
+                placeholder="What did you observe this week? Any unusual signs, weather events, or concerns?"></textarea>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button type="submit" class="fp-btn-primary text-sm">
+        <i data-lucide="clipboard-check" class="w-4 h-4"></i> Submit Check-In &amp; Get Advisory
+      </button>
+      <a href="{% url 'journey:detail' journey.pk %}" class="fp-btn-ghost text-sm">Cancel</a>
+    </div>
+  </form>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const moistureLabels = { 1: 'Very Dry', 2: 'Dry', 3: 'Adequate', 4: 'Moist', 5: 'Waterlogged' };
+function updateMoistureLabel(val) {
+  document.getElementById('moisture-label').textContent = moistureLabels[val] || val;
+}
+</script>
+{% endblock %}

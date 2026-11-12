@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "market",
     "planner",
     "innovation",
+    "journey",
     "django.contrib.humanize",
 ]
 

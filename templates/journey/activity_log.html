@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Activity Log · {{ journey.farm.name }} · FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-6">
+
+  <!-- Header -->
+  <header class="fp-page-header">
+    <div>
+      <div class="fp-breadcrumb">
+        <a href="{% url 'journey:journey_list' %}">Season Journey</a>
+        <span class="fp-breadcrumb-sep">/</span>
+        <a href="{% url 'journey:detail' journey.pk %}">{{ journey.farm.name }}</a>
+        <span class="fp-breadcrumb-sep">/</span>
+        <span class="text-cream font-medium">Activity Log</span>
+      </div>
+      <h1 class="font-display text-2xl font-bold text-cream tracking-tight">Farm Activity Log</h1>
+      <p class="fp-page-header-desc">{{ journey.farm.name }} &bull; Season {{ journey.season_label }} &bull; {{ activities.count }} entries</p>
+    </div>
+    <div class="flex items-center gap-2 shrink-0 pt-1">
+      <a href="{% url 'journey:add_activity' journey.pk %}" class="fp-btn-primary text-xs">
+        <i data-lucide="plus" class="w-4 h-4"></i> Log Activity
+      </a>
+    </div>
+  </header>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="fp-card p-4 border-l-4 {% if message.tags == 'success' %}border-leaf text-leaf bg-leaf/5{% else %}border-risk-high text-risk-high bg-rose-500/5{% endif %} text-sm flex items-center gap-3">
+        <i data-lucide="{% if message.tags == 'success' %}check-circle{% else %}alert-triangle{% endif %}" class="w-4 h-4 shrink-0"></i>
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Financial Summary -->
+  <div class="grid grid-cols-3 gap-4">
+    <div class="fp-card p-4 text-center">
+      <div class="fp-label mb-1">Total Expenses</div>
+      <div class="font-mono text-xl font-bold text-risk-high">MWK {{ total_expenses|floatformat:0|intcomma }}</div>
+    </div>
+    <div class="fp-card p-4 text-center">
+      <div class="fp-label mb-1">Total Income</div>
+      <div class="font-mono text-xl font-bold text-leaf">MWK {{ total_income|floatformat:0|intcomma }}</div>
+    </div>
+    <div class="fp-card p-4 text-center">
+      <div class="fp-label mb-1">Net Balance</div>
+      <div class="font-mono text-xl font-bold {% if net >= 0 %}text-leaf{% else %}text-risk-high{% endif %}">MWK {{ net|floatformat:0|intcomma }}</div>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-6">
+
+    <!-- Expense Breakdown -->
+    {% if expense_by_category %}
+      <div class="fp-card p-5 space-y-3">
+        <div class="flex items-center gap-2 mb-1">
+          <i data-lucide="pie-chart" class="w-4 h-4 text-amber-300"></i>
+          <span class="font-display text-sm font-bold text-cream">Expense Breakdown</span>
+        </div>
+        {% for row in expense_by_category %}
+          <div>
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="text-cream/75">{{ row.label }}</span>
+              <span class="font-mono text-cream/80">MWK {{ row.total|floatformat:0|intcomma }}</span>
+            </div>
+            {% if total_expenses > 0 %}
+              {% widthratio row.total total_expenses 100 as pct %}
+              <div class="h-1.5 bg-forest-800 rounded-full overflow-hidden">
+                <div class="h-full bg-amber-400 rounded-full" style="width: {{ pct }}%"></div>
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <!-- Activity List -->
+    <div class="{% if expense_by_category %}lg:col-span-2{% else %}lg:col-span-3{% endif %} fp-card p-5">
+      <div class="font-display text-sm font-bold text-cream mb-4">All Activities</div>
+      {% if activities %}
+        <div class="space-y-2">
+          {% for act in activities %}
+            <div class="flex items-start justify-between gap-3 p-3 rounded-lg bg-forest-900/40 border border-white/5 hover:border-white/15 transition-colors group">
+              <div class="flex items-start gap-3 min-w-0">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5
+                  {% if act.is_income %}bg-leaf/15 text-leaf{% else %}bg-amber-400/15 text-amber-300{% endif %}">
+                  {% if act.category == 'land_prep' %}<i data-lucide="shovel" class="w-3.5 h-3.5"></i>
+                  {% elif act.category == 'input' %}<i data-lucide="package" class="w-3.5 h-3.5"></i>
+                  {% elif act.category == 'planting' %}<i data-lucide="sprout" class="w-3.5 h-3.5"></i>
+                  {% elif act.category == 'labour' %}<i data-lucide="users" class="w-3.5 h-3.5"></i>
+                  {% elif act.category == 'pest' %}<i data-lucide="bug" class="w-3.5 h-3.5"></i>
+                  {% elif act.category == 'harvest' or act.category == 'sale' %}<i data-lucide="wheat" class="w-3.5 h-3.5"></i>
+                  {% else %}<i data-lucide="clipboard" class="w-3.5 h-3.5"></i>{% endif %}
+                </div>
+                <div class="min-w-0">
+                  <div class="text-sm text-cream font-semibold leading-tight">{{ act.description }}</div>
+                  <div class="text-[11px] text-muted mt-0.5 flex flex-wrap gap-2">
+                    <span>{{ act.get_category_display }}</span>
+                    <span>&bull;</span>
+                    <span>{{ act.activity_date|date:"d M Y" }}</span>
+                    {% if act.crop %}<span>&bull; {{ act.crop.name }}</span>{% endif %}
+                    {% if act.product_name %}<span>&bull; {{ act.product_name }}</span>{% endif %}
+                    {% if act.quantity %}<span>&bull; {{ act.quantity }} {{ act.unit }}</span>{% endif %}
+                  </div>
+                  {% if act.notes %}
+                    <div class="text-[11px] text-muted/60 mt-0.5 italic">{{ act.notes|truncatechars:80 }}</div>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <div class="text-right">
+                  <div class="font-mono text-sm font-bold {% if act.is_income %}text-leaf{% else %}text-cream/80{% endif %}">
+                    {% if act.is_income %}+{% endif %}MWK {{ act.amount_mwk|floatformat:0|intcomma }}
+                  </div>
+                  {% if act.is_income %}
+                    <div class="text-[10px] text-leaf/60 font-semibold uppercase tracking-wide">Income</div>
+                  {% endif %}
+                </div>
+                <form method="POST" action="{% url 'journey:delete_activity' act.pk %}" class="opacity-0 group-hover:opacity-100 transition-opacity">
+                  {% csrf_token %}
+                  <button type="submit"
+                    class="fp-btn-ghost !p-1.5 text-risk-high hover:bg-rose-500/10"
+                    title="Delete"
+                    onclick="return confirm('Delete this activity entry?')">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center py-12">
+          <i data-lucide="clipboard" class="w-8 h-8 text-muted mx-auto mb-3"></i>
+          <p class="text-sm text-muted mb-3">No activities logged yet.</p>
+          <a href="{% url 'journey:add_activity' journey.pk %}" class="fp-btn-primary text-xs inline-flex items-center gap-1.5">
+            <i data-lucide="plus" class="w-4 h-4"></i> Log First Activity
+          </a>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <div class="flex items-center gap-3">
+    <a href="{% url 'journey:detail' journey.pk %}" class="fp-btn-ghost text-xs">
+      <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Back to Dashboard
+    </a>
+  </div>
+
+</div>
+{% endblock %}

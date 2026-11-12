@@ -29,4 +29,5 @@ urlpatterns = [
     path('', include('market.urls')),
     path('', include('planner.urls')),
     path('', include('innovation.urls')),
+    path('journey/', include('journey.urls', namespace='journey')),
 ]

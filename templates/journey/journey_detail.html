@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}{{ journey.farm.name }} Journey · FarmPulse Malawi{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-6">
+
+  <!-- Page Header -->
+  <header class="fp-page-header">
+    <div>
+      <div class="fp-breadcrumb">
+        <a href="{% url 'journey:journey_list' %}">Season Journey</a>
+        <span class="fp-breadcrumb-sep">/</span>
+        <span class="text-cream font-medium">{{ journey.farm.name }}</span>
+      </div>
+      <h1 class="font-display text-2xl sm:text-3xl font-bold text-cream tracking-tight">
+        {{ journey.farm.name }}
+        <span class="fp-badge {% if journey.status == 'active' %}fp-badge-green{% elif journey.status == 'completed' %}fp-badge-blue{% else %}fp-badge-amber{% endif %} text-xs ml-2 align-middle">
+          {{ journey.get_status_display }}
+        </span>
+      </h1>
+      <p class="fp-page-header-desc">
+        Season {{ journey.season_label }} &bull; Day {{ journey.days_active }} of journey
+        {% if journey.plan %}&bull; Plan: {{ journey.plan.name }}{% endif %}
+      </p>
+    </div>
+    <div class="flex items-center gap-2 shrink-0 pt-1">
+      {% if journey.status == 'active' %}
+        <a href="{% url 'journey:add_activity' journey.pk %}" class="fp-btn-ghost text-xs">
+          <i data-lucide="plus-circle" class="w-4 h-4 text-amber-300"></i> Log Activity
+        </a>
+        <a href="{% url 'journey:checkin' journey.pk %}" class="fp-btn-primary text-xs">
+          <i data-lucide="clipboard-check" class="w-4 h-4"></i> Weekly Check-In
+        </a>
+      {% else %}
+        <a href="{% url 'journey:review' journey.pk %}" class="fp-btn-primary text-xs">
+          <i data-lucide="file-text" class="w-4 h-4"></i> Season Report
+        </a>
+      {% endif %}
+    </div>
+  </header>
+
+  <!-- Alert: Check-In Due -->
+  {% if checkin_due and journey.status == 'active' %}
+    <div class="fp-card p-4 border-l-4 border-amber-400 bg-amber-400/5 text-amber-300 text-sm flex items-start gap-3">
+      <i data-lucide="bell" class="w-4 h-4 shrink-0 mt-0.5"></i>
+      <div>
+        <strong>Weekly check-in is due.</strong>
+        {% if days_since_checkin is None %}
+          No check-ins recorded yet — do your first check-in to start receiving advisories.
+        {% else %}
+          Last check-in was {{ days_since_checkin }} day{{ days_since_checkin|pluralize }} ago.
+        {% endif %}
+        <a href="{% url 'journey:checkin' journey.pk %}" class="underline ml-1">Check in now</a>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="fp-card p-4 border-l-4 {% if message.tags == 'error' %}border-risk-high text-risk-high bg-rose-500/5{% elif message.tags == 'warning' %}border-amber-400 text-amber-300 bg-amber-400/5{% else %}border-leaf text-leaf bg-leaf/5{% endif %} text-sm flex items-start gap-3">
+        <i data-lucide="{% if message.tags == 'error' %}alert-triangle{% elif message.tags == 'warning' %}alert-circle{% else %}check-circle{% endif %}" class="w-4 h-4 shrink-0 mt-0.5"></i>
+        <span>{{ message }}</span>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Stage Progress Timeline -->
+  <div class="fp-card p-5">
+    <div class="flex items-center gap-2 mb-4">
+      <i data-lucide="git-branch" class="w-4 h-4 text-leaf"></i>
+      <span class="font-display text-sm font-bold text-cream">Season Stage Progress</span>
+    </div>
+    <div class="relative">
+      <!-- Progress Line -->
+      <div class="absolute top-5 left-5 right-5 h-0.5 bg-white/10"></div>
+      <div class="absolute top-5 left-5 h-0.5 bg-leaf transition-all duration-500"
+           style="width: calc({{ current_stage_index }} * (100% - 2.5rem) / 6)"></div>
+      <!-- Stage nodes -->
+      <div class="relative flex justify-between">
+        {% for stage_key, stage_label in all_stages %}
+          {% with forloop.counter0 as idx %}
+            <div class="flex flex-col items-center gap-2 text-center" style="width: 14%">
+              <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all
+                {% if idx < current_stage_index %}
+                  bg-leaf border-leaf text-forest-900
+                {% elif idx == current_stage_index %}
+                  bg-leaf/20 border-leaf text-leaf shadow-[0_0_12px_rgba(143,203,98,0.4)]
+                {% else %}
+                  bg-forest-800 border-white/15 text-muted
+                {% endif %}
+              ">
+                {% if idx < current_stage_index %}
+                  <i data-lucide="check" class="w-4 h-4"></i>
+                {% elif idx == current_stage_index %}
+                  <i data-lucide="activity" class="w-4 h-4"></i>
+                {% else %}
+                  <span class="text-xs font-mono font-bold">{{ forloop.counter }}</span>
+                {% endif %}
+              </div>
+              <span class="text-[10px] leading-tight font-medium
+                {% if idx == current_stage_index %}text-leaf font-bold{% elif idx < current_stage_index %}text-cream/70{% else %}text-muted{% endif %}
+              ">{{ stage_label }}</span>
+            </div>
+          {% endwith %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Financial Summary + Last Advisory -->
+  <div class="grid lg:grid-cols-3 gap-4">
+
+    <!-- Financial KPIs -->
+    <div class="lg:col-span-2 fp-card p-5 space-y-4">
+      <div class="flex items-center gap-2 mb-1">
+        <i data-lucide="wallet" class="w-4 h-4 text-amber-300"></i>
+        <span class="font-display text-sm font-bold text-cream">Season Finances</span>
+        <a href="{% url 'journey:activity_log' journey.pk %}" class="ml-auto text-[11px] text-leaf hover:underline flex items-center gap-1">
+          Full log <i data-lucide="arrow-right" class="w-3 h-3"></i>
+        </a>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="fp-glass rounded-lg p-3">
+          <div class="fp-label">Total Spent</div>
+          <div class="font-mono text-lg font-bold text-risk-high mt-0.5">MWK {{ total_expenses|floatformat:0|intcomma }}</div>
+        </div>
+        <div class="fp-glass rounded-lg p-3">
+          <div class="fp-label">Income / Sales</div>
+          <div class="font-mono text-lg font-bold text-leaf mt-0.5">MWK {{ total_income|floatformat:0|intcomma }}</div>
+        </div>
+        <div class="fp-glass rounded-lg p-3">
+          <div class="fp-label">Net Balance</div>
+          <div class="font-mono text-lg font-bold {% if net_balance >= 0 %}text-leaf{% else %}text-risk-high{% endif %} mt-0.5">
+            MWK {{ net_balance|floatformat:0|intcomma }}
+          </div>
+        </div>
+        {% if planned_cost %}
+          <div class="fp-glass rounded-lg p-3">
+            <div class="fp-label">Budget Used</div>
+            {% if planned_cost > 0 %}
+              {% widthratio total_expenses planned_cost 100 as pct %}
+              <div class="font-mono text-lg font-bold text-amber-300 mt-0.5">{{ pct }}%</div>
+              <div class="text-[10px] text-cream/40 mt-0.5">of MWK {{ planned_cost|floatformat:0|intcomma }}</div>
+            {% else %}
+              <div class="font-mono text-lg font-bold text-muted mt-0.5">-</div>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Recent Activities -->
+      {% if recent_activities %}
+        <div class="border-t border-white/5 pt-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-cream/70 uppercase tracking-wider">Recent Activities</span>
+            <a href="{% url 'journey:add_activity' journey.pk %}" class="text-[11px] text-leaf hover:underline flex items-center gap-1">
+              <i data-lucide="plus" class="w-3 h-3"></i> Add
+            </a>
+          </div>
+          <div class="space-y-2">
+            {% for act in recent_activities %}
+              <div class="flex items-center justify-between text-xs py-1.5 border-b border-white/5 last:border-0">
+                <div class="flex items-center gap-2">
+                  <span class="w-1.5 h-1.5 rounded-full {% if act.is_income %}bg-leaf{% else %}bg-amber-400{% endif %}"></span>
+                  <span class="text-cream/80">{{ act.description|truncatechars:40 }}</span>
+                  <span class="text-muted">{{ act.activity_date|date:"d M" }}</span>
+                </div>
+                <span class="font-mono {% if act.is_income %}text-leaf{% else %}text-cream/70{% endif %}">
+                  {% if act.is_income %}+{% endif %}MWK {{ act.amount_mwk|floatformat:0|intcomma }}
+                </span>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% else %}
+        <div class="border-t border-white/5 pt-4 text-center py-6">
+          <i data-lucide="clipboard" class="w-6 h-6 text-muted mx-auto mb-2"></i>
+          <p class="text-xs text-muted">No activities logged yet.</p>
+          <a href="{% url 'journey:add_activity' journey.pk %}" class="fp-btn-ghost text-xs mt-2 inline-flex items-center gap-1">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Log First Activity
+          </a>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Latest Advisory -->
+    <div class="fp-card p-5 space-y-4">
+      <div class="flex items-center gap-2">
+        <i data-lucide="bot" class="w-4 h-4 text-purple-400"></i>
+        <span class="font-display text-sm font-bold text-cream">Latest Advisory</span>
+      </div>
+
+      {% if latest_checkin %}
+        <div class="space-y-2">
+          <div class="flex items-center gap-2 text-xs">
+            <span class="fp-badge fp-badge-blue text-[10px]">Week {{ latest_checkin.week_number }}</span>
+            <span class="text-muted">{{ latest_checkin.checked_in_at|date:"d M Y" }}</span>
+          </div>
+          <div class="flex gap-3 text-xs">
+            <div>
+              <div class="fp-label">Stage</div>
+              <div class="text-cream">{{ latest_checkin.get_stage_display }}</div>
+            </div>
+            <div>
+              <div class="fp-label">Pests</div>
+              <div class="{% if latest_checkin.pest_pressure == 'severe' %}text-risk-high{% elif latest_checkin.pest_pressure == 'moderate' %}text-amber-300{% else %}text-leaf{% endif %}">
+                {{ latest_checkin.get_pest_pressure_display }}
+              </div>
+            </div>
+            <div>
+              <div class="fp-label">Moisture</div>
+              <div class="{% if latest_checkin.moisture_score <= 2 %}text-risk-high{% elif latest_checkin.moisture_score >= 5 %}text-sky-400{% else %}text-leaf{% endif %}">
+                {{ latest_checkin.moisture_score }}/5
+              </div>
+            </div>
+          </div>
+          {% if latest_checkin.advisory %}
+            <div class="bg-forest-900/60 rounded-lg p-3 text-[11px] text-cream/75 leading-relaxed whitespace-pre-line border border-white/5 max-h-48 overflow-y-auto">{{ latest_checkin.advisory }}</div>
+          {% endif %}
+        </div>
+        <a href="{% url 'journey:checkin' journey.pk %}" class="fp-btn-ghost text-xs w-full justify-center">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> New Check-In
+        </a>
+      {% else %}
+        <div class="text-center py-6">
+          <i data-lucide="clipboard-check" class="w-6 h-6 text-muted mx-auto mb-2"></i>
+          <p class="text-xs text-muted mb-3">No check-ins yet. Do your first check-in to get personalised advisories.</p>
+          <a href="{% url 'journey:checkin' journey.pk %}" class="fp-btn-primary text-xs inline-flex items-center gap-1.5">
+            <i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i> First Check-In
+          </a>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <!-- Harvest Records (if any) -->
+  {% if harvest_records %}
+    <section class="fp-card p-5 space-y-4">
+      <div class="flex items-center gap-2">
+        <i data-lucide="wheat" class="w-4 h-4 text-amber-300"></i>
+        <span class="font-display text-sm font-bold text-cream">Harvest Records</span>
+        <a href="{% url 'journey:review' journey.pk %}" class="ml-auto text-[11px] text-leaf hover:underline flex items-center gap-1">
+          Full report <i data-lucide="arrow-right" class="w-3 h-3"></i>
+        </a>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs">
+          <thead>
+            <tr class="border-b border-white/10">
+              <th class="fp-label text-left pb-2">Crop</th>
+              <th class="fp-label text-right pb-2">Area (ha)</th>
+              <th class="fp-label text-right pb-2">Yield (kg)</th>
+              <th class="fp-label text-right pb-2">Bags (50kg)</th>
+              <th class="fp-label text-right pb-2">Revenue (MWK)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for hr in harvest_records %}
+              <tr class="border-b border-white/5">
+                <td class="py-2 text-cream font-semibold">{{ hr.crop.name }}</td>
+                <td class="py-2 text-right font-mono text-cream/70">{{ hr.actual_area_ha|floatformat:1 }}</td>
+                <td class="py-2 text-right font-mono text-cream/70">{{ hr.actual_yield_kg|floatformat:0|intcomma }}</td>
+                <td class="py-2 text-right font-mono text-amber-300">{{ hr.bags_50kg }}</td>
+                <td class="py-2 text-right font-mono text-leaf">{{ hr.actual_revenue_mwk|floatformat:0|intcomma }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+
+  <!-- Action Bar (bottom) -->
+  {% if journey.status == 'active' %}
+    <div class="fp-card p-4 flex flex-wrap items-center gap-3">
+      <span class="text-xs text-muted flex-1">Journey actions</span>
+      <a href="{% url 'journey:activity_log' journey.pk %}" class="fp-btn-ghost text-xs">
+        <i data-lucide="list" class="w-3.5 h-3.5 text-leaf"></i> Full Activity Log
+      </a>
+      <a href="{% url 'journey:harvest' journey.pk %}" class="fp-btn-ghost text-xs text-amber-300">
+        <i data-lucide="wheat" class="w-3.5 h-3.5"></i> Record Harvest
+      </a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
