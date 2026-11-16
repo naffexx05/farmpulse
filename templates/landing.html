@@ -6,272 +6,954 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FarmPulse Malawi — National Agricultural Intelligence &amp; Decision Support Platform</title>
+
+  <!-- Typography & Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,700&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
+
+  <!-- Core Styles -->
   <link rel="stylesheet" href="{% static 'css/dist/output.css' %}">
   <link rel="stylesheet" href="{% static 'css/farmpulse-professional.css' %}">
+
+  <!-- Icons -->
   <script src="https://unpkg.com/lucide@0.453.0/dist/umd/lucide.min.js"></script>
+
+  <style>
+    /* Custom High-Impact Kinetic Styling */
+    :root {
+      --fp-leaf: #8FCB62;
+      --fp-leaf-glow: rgba(143, 203, 98, 0.4);
+      --fp-gold: #F5B800;
+      --fp-forest-dark: #030A05;
+      --fp-forest-base: #06140A;
+      --fp-forest-card: rgba(10, 32, 17, 0.75);
+    }
+
+    /* Living bioluminescent backdrop */
+    .fp-living-bg {
+      background: radial-gradient(circle at 50% 10%, rgba(143, 203, 98, 0.12) 0%, transparent 50%),
+                  radial-gradient(circle at 85% 30%, rgba(245, 184, 0, 0.08) 0%, transparent 45%),
+                  radial-gradient(circle at 15% 70%, rgba(56, 189, 248, 0.07) 0%, transparent 50%),
+                  #030A05;
+    }
+
+    /* Shimmering Gold Champion Badge */
+    .fp-badge-gold-shimmer {
+      background: linear-gradient(90deg, rgba(245, 184, 0, 0.15) 0%, rgba(245, 184, 0, 0.35) 50%, rgba(245, 184, 0, 0.15) 100%);
+      background-size: 200% 100%;
+      animation: goldShimmer 3.5s infinite linear;
+      border: 1px solid rgba(245, 184, 0, 0.45);
+    }
+    @keyframes goldShimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Floating subtle organic canvas */
+    #particle-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* 3D Tilt Card Container */
+    .fp-tilt-card {
+      transform-style: preserve-3d;
+      transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+      will-change: transform;
+    }
+
+    /* Radar sweep animation */
+    @keyframes radarSweep {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .fp-radar-beam {
+      animation: radarSweep 5s infinite linear;
+      transform-origin: center center;
+    }
+
+    /* Pulse wave for NDVI */
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.35; transform: scale(1); }
+      50% { opacity: 0.75; transform: scale(1.04); }
+    }
+    .fp-pulse-wave {
+      animation: pulseGlow 4s infinite ease-in-out;
+    }
+
+    /* Ticker animation */
+    @keyframes tickerScroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .fp-ticker-track {
+      display: flex;
+      width: max-content;
+      animation: tickerScroll 28s linear infinite;
+    }
+    .fp-ticker-track:hover {
+      animation-play-state: paused;
+    }
+
+    /* Glass card effects */
+    .fp-glass-premium {
+      background: rgba(8, 26, 14, 0.72);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    .fp-glass-premium:hover {
+      border-color: rgba(143, 203, 98, 0.35);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 25px rgba(143, 203, 98, 0.12);
+    }
+
+    /* Interactive phone screen simulation */
+    .fp-phone-screen {
+      background: #0d1e11;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Scroll reveal transitions */
+    .fp-reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .fp-reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .fp-delay-1 { transition-delay: 0.1s; }
+    .fp-delay-2 { transition-delay: 0.2s; }
+    .fp-delay-3 { transition-delay: 0.3s; }
+    .fp-delay-4 { transition-delay: 0.4s; }
+
+    /* Custom range slider styling */
+    input[type=range].fp-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      background: rgba(255, 255, 255, 0.1);
+      height: 6px;
+      border-radius: 9999px;
+      outline: none;
+    }
+    input[type=range].fp-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #8FCB62;
+      box-shadow: 0 0 10px rgba(143, 203, 98, 0.7);
+      cursor: pointer;
+      border: 2px solid #030A05;
+      transition: transform 0.15s ease;
+    }
+    input[type=range].fp-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.25);
+    }
+  </style>
 </head>
 
-<body class="min-h-full font-sans bg-forest-950 text-cream selection:bg-leaf/30 selection:text-cream">
+<body class="min-h-full font-sans fp-living-bg text-cream selection:bg-leaf/30 selection:text-cream relative overflow-x-hidden">
 
-  <!-- Top Announcement Bar -->
-  <div
-    class="bg-forest-900/90 border-b border-white/5 py-2 px-4 text-center text-xs text-muted flex items-center justify-center gap-2">
-    <span
-      class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-leaf/10 border border-leaf/30 text-leaf text-[10px] font-bold uppercase tracking-wider">
-      <span class="w-1.5 h-1.5 rounded-full bg-leaf animate-pulse"></span> Live System
-    </span>
-    <span>Aligned with <strong>Malawi 2063 Pillar 1</strong>: Agricultural Productivity and Commercialization</span>
-    <span class="hidden md:inline text-white/20">&bull;</span>
-    <span class="hidden md:inline text-amber-400 font-semibold">Mzuzu University ICT Exhibition 2026</span>
+  <!-- ========================================================================= -->
+  <!-- 1. LIVE NATIONAL COMMODITY & SATELLITE PULSE TICKER                      -->
+  <!-- ========================================================================= -->
+  <div class="bg-forest-950/90 border-b border-white/5 py-2 overflow-hidden text-xs text-cream/70 z-50 relative backdrop-blur-md">
+    <div class="fp-ticker-track items-center gap-8 whitespace-nowrap">
+      
+      <!-- Ticker Items Set 1 -->
+      <div class="inline-flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-leaf animate-pulse"></span>
+        <span class="font-bold text-cream">MZUZU ICT EXHIBITION 2026:</span>
+        <span class="text-amber-300 font-semibold">1st Place Winner in Agricultural Innovation</span>
+      </div>
+      <span class="text-white/20">&bull;</span>
+      <div class="inline-flex items-center gap-2">
+        <i data-lucide="trending-up" class="w-3.5 h-3.5 text-leaf"></i>
+        <span>Maize (Mzuzu Central Market): <strong>MWK 840/kg</strong></span>
+        <span class="text-leaf text-[11px] font-mono">(+4.8%)</span>
+      </div>
+      <span class="text-white/20">&bull;</span>
+      <div class="inline-flex items-center gap-2">
+        <i data-lucide="satellite" class="w-3.5 h-3.5 text-sky-400"></i>
+        <span>Sentinel-2 Earth Observation: <strong>48.5 ha Active Canopy Scanned</strong></span>
+      </div>
+      <span class="text-white/20">&bull;</span>
+      <div class="inline-flex items-center gap-2">
+        <i data-lucide="cloud-rain" class="w-3.5 h-3.5 text-sky-300"></i>
+        <span>DCCMS Weather Radar: <strong>Kasungu Basin 38mm Inflow Expected</strong></span>
+      </div>
+      <span class="text-white/20">&bull;</span>
+      <div class="inline-flex items-center gap-2">
+        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-400"></i>
+        <span>Parametric Drought Fund: <strong>MWK 4,800,000 Zero-Claim Guarantee</strong></span>
+      </div>
+      <span class="text-white/20">&bull;</span>
+      <div class="inline-flex items-center gap-2">
+        <i data-lucide="phone" class="w-3.5 h-3.5 text-emerald-400"></i>
+        <span>Airtel / TNM Basic Access: <strong>Dial *384# (Chichewa / Tumbuka)</strong></span>
+      </div>
+      <span class="text-white/20">&bull;</span>
+
+      <!-- Ticker Items Set 2 (for continuous loop) -->
+      <div class="inline-flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-leaf animate-pulse"></span>
+        <span class="font-bold text-cream">MZUZU ICT EXHIBITION 2026:</span>
+        <span class="text-amber-300 font-semibold">1st Place Winner in Agricultural Innovation</span>
+      </div>
+      <span class="text-white/20">&bull;</span>
+      <div class="inline-flex items-center gap-2">
+        <i data-lucide="trending-up" class="w-3.5 h-3.5 text-leaf"></i>
+        <span>Maize (Mzuzu Central Market): <strong>MWK 840/kg</strong></span>
+        <span class="text-leaf text-[11px] font-mono">(+4.8%)</span>
+      </div>
+      <span class="text-white/20">&bull;</span>
+      <div class="inline-flex items-center gap-2">
+        <i data-lucide="satellite" class="w-3.5 h-3.5 text-sky-400"></i>
+        <span>Sentinel-2 Earth Observation: <strong>48.5 ha Active Canopy Scanned</strong></span>
+      </div>
+      <span class="text-white/20">&bull;</span>
+      <div class="inline-flex items-center gap-2">
+        <i data-lucide="cloud-rain" class="w-3.5 h-3.5 text-sky-300"></i>
+        <span>DCCMS Weather Radar: <strong>Kasungu Basin 38mm Inflow Expected</strong></span>
+      </div>
+
+    </div>
   </div>
 
-  <!-- Navigation -->
-  <header class="sticky top-0 z-40 bg-forest-950/80 backdrop-blur-xl border-b border-white/10">
+  <!-- ========================================================================= -->
+  <!-- 2. MODERN NAVIGATION BAR                                                  -->
+  <!-- ========================================================================= -->
+  <header class="sticky top-0 z-40 bg-forest-950/85 backdrop-blur-xl border-b border-white/10 transition-all duration-300" id="main-nav">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
 
-      <!-- Brand Logo -->
-      <a href="/" class="flex items-center gap-3">
-        <div
-          class="w-10 h-10 rounded-xl bg-leaf text-forest-950 flex items-center justify-center shadow-lg shadow-leaf/20">
-          <i data-lucide="sprout" class="w-6 h-6"></i>
+      <!-- Brand Logo with animated sprout -->
+      <a href="/" class="flex items-center gap-3 group">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-leaf to-emerald-600 text-forest-950 flex items-center justify-center shadow-lg shadow-leaf/25 group-hover:scale-105 group-hover:rotate-3 transition-transform duration-300">
+          <i data-lucide="sprout" class="w-6 h-6 stroke-[2.2]"></i>
         </div>
         <div>
-          <div class="font-display font-extrabold text-xl text-cream tracking-tight flex items-center gap-2">
-            FarmPulse <span
-              class="text-xs px-2 py-0.5 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-400 font-mono font-bold">Malawi</span>
+          <div class="font-display font-black text-xl sm:text-2xl text-cream tracking-tight flex items-center gap-2">
+            FarmPulse <span class="text-[11px] px-2 py-0.5 rounded-full fp-badge-gold-shimmer text-amber-300 font-mono font-bold tracking-wider">MALAWI</span>
           </div>
-          <div class="text-[10px] uppercase tracking-[0.18em] text-muted font-semibold">Agricultural Intelligence &amp;
-            Governance</div>
+          <div class="text-[9px] uppercase tracking-[0.22em] text-leaf font-bold">Agricultural Intelligence &amp; Resilience</div>
         </div>
       </a>
 
-      <!-- Navigation Links & CTAs -->
-      <div class="flex items-center gap-3 sm:gap-4">
-        <a href="#roles"
-          class="hidden sm:inline-flex text-xs font-semibold text-cream/80 hover:text-leaf transition-colors">
-          Role Portals
+      <!-- Navigation Links -->
+      <nav class="hidden lg:flex items-center gap-7 text-xs font-semibold text-cream/75">
+        <a href="#simulator" class="hover:text-leaf transition-colors flex items-center gap-1.5">
+          <i data-lucide="calculator" class="w-3.5 h-3.5 text-leaf"></i> Live Simulator
         </a>
-        <a href="#features"
-          class="hidden md:inline-flex text-xs font-semibold text-cream/80 hover:text-leaf transition-colors">
-          Intelligence Pillars
+        <a href="#satellite-tech" class="hover:text-leaf transition-colors flex items-center gap-1.5">
+          <i data-lucide="satellite" class="w-3.5 h-3.5 text-sky-400"></i> Satellite Twin
         </a>
+        <a href="#ussd-demo" class="hover:text-leaf transition-colors flex items-center gap-1.5">
+          <i data-lucide="phone" class="w-3.5 h-3.5 text-emerald-400"></i> *384# USSD
+        </a>
+        <a href="#journey-flow" class="hover:text-leaf transition-colors flex items-center gap-1.5">
+          <i data-lucide="activity" class="w-3.5 h-3.5 text-amber-400"></i> Season Journey
+        </a>
+        <a href="#roles" class="hover:text-leaf transition-colors flex items-center gap-1.5">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-purple-400"></i> Portals
+        </a>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2.5 sm:gap-3.5">
+        <!-- Audio Greeting & Chichewa Voice Button -->
+        <button id="oral-welcome-btn"
+                class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-forest-900 border border-white/10 text-xs font-semibold text-cream hover:border-leaf/40 hover:text-leaf transition-all"
+                title="Mvetserani m'Chichewa (Listen to Audio Welcome)">
+          <i data-lucide="volume-2" class="w-4 h-4 text-leaf"></i>
+          <span class="text-[11px]">Chichewa Audio</span>
+        </button>
+
         <a href="{% url 'accounts:login' %}?role=farmer"
-          class="fp-btn-secondary text-xs py-2 px-3.5 flex items-center gap-1.5">
-          <i data-lucide="user" class="w-3.5 h-3.5 text-leaf"></i> Farmer Login
+           class="fp-btn-primary text-xs !py-2.5 !px-4 flex items-center gap-1.5 shadow-lg shadow-leaf/20 hover:scale-[1.02] active:scale-[0.98] transition-transform">
+          <i data-lucide="user" class="w-3.5 h-3.5 text-forest-950"></i> Farmer Sign In
         </a>
+
         <a href="{% url 'accounts:login' %}?role=admin"
-          class="fp-btn-primary text-xs py-2 px-3.5 flex items-center gap-1.5">
-          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> DADO / Admin Login
+           class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-amber-400/40 text-amber-300 bg-amber-400/10 text-xs font-semibold hover:bg-amber-400/20 hover:border-amber-400 transition-all">
+          <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-amber-400"></i> DADO Admin
         </a>
       </div>
 
     </div>
   </header>
 
-  <!-- Hero Section -->
-  <section class="relative pt-16 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-    <!-- Background Glow -->
-    <div
-      class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-leaf/10 blur-[130px] rounded-full pointer-events-none -z-10">
-    </div>
-    <div
-      class="absolute top-1/3 right-10 w-[400px] h-[300px] bg-amber-400/5 blur-[120px] rounded-full pointer-events-none -z-10">
-    </div>
+  <!-- ========================================================================= -->
+  <!-- 3. HERO SECTION WITH LIVING CANVAS & DYNAMIC VALUE PROP                  -->
+  <!-- ========================================================================= -->
+  <section class="relative pt-16 pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden min-h-[90vh] flex flex-col justify-center">
+    
+    <!-- Canvas for floating pollen & organic particles -->
+    <canvas id="particle-canvas"></canvas>
 
-    <div class="max-w-5xl mx-auto text-center space-y-6">
+    <!-- Ambient glowing orbs -->
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[450px] bg-leaf/15 blur-[160px] rounded-full pointer-events-none -z-10"></div>
+    <div class="absolute top-1/3 right-5 w-[500px] h-[350px] bg-amber-400/10 blur-[140px] rounded-full pointer-events-none -z-10"></div>
+    <div class="absolute bottom-10 left-10 w-[450px] h-[350px] bg-sky-500/10 blur-[140px] rounded-full pointer-events-none -z-10"></div>
 
-      <div
-        class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-forest-900 border border-white/10 text-xs font-semibold text-cream/90 shadow-inner">
-        <span class="w-2 h-2 rounded-full bg-leaf"></span>
-        <span>Sovereign AgTech Infrastructure for Smallholder Resilience</span>
+    <div class="max-w-6xl mx-auto text-center space-y-8 relative z-10">
+
+      <!-- Award and Affiliation Pill -->
+      <div class="inline-flex flex-wrap items-center justify-center gap-2 px-4 py-1.5 rounded-full fp-glass-premium text-xs font-semibold text-cream shadow-2xl fp-reveal active">
+        <span class="w-2.5 h-2.5 rounded-full bg-leaf shadow-[0_0_8px_#8FCB62] animate-ping"></span>
+        <span class="text-amber-300 font-bold">Mzuzu University ICT Exhibition 2026 Champion</span>
+        <span class="text-white/30 hidden sm:inline">&bull;</span>
+        <span class="text-cream/80 hidden sm:inline">Empowering Malawi 2063 Pillar 1</span>
+        <span class="px-2 py-0.5 rounded-full bg-leaf/20 text-leaf text-[10px] font-mono font-bold uppercase">Live Production</span>
       </div>
 
-      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-display font-extrabold text-cream tracking-tight leading-[1.1]">
-        Transforming Malawian Agriculture from <span
-          class="bg-gradient-to-r from-leaf to-amber-300 bg-clip-text text-transparent">Climate Guesswork</span> into
-        Profitable Enterprise.
+      <!-- Main Catchphrase with Glowing Gradient -->
+      <h1 class="text-4xl sm:text-6xl lg:text-7xl font-display font-black text-cream tracking-tight leading-[1.08] fp-reveal active fp-delay-1 max-w-5xl mx-auto">
+        Turn Land into <span class="bg-gradient-to-r from-leaf via-emerald-300 to-amber-300 bg-clip-text text-transparent">Guaranteed Harvest</span>.
+        <br class="hidden sm:inline">
+        Turn Uncertainty into <span class="underline decoration-leaf/40 decoration-wavy underline-offset-8">Science</span>.
       </h1>
 
-      <p class="text-sm sm:text-base lg:text-lg text-cream/70 max-w-3xl mx-auto leading-relaxed">
-        FarmPulse Malawi integrates localized climate risk modeling, dynamic enterprise crop planning, Sentinel-2
-        satellite Earth Observation, and zero-adjuster parametric drought insurance into one sovereign decision
-        platform.
+      <p class="text-base sm:text-lg lg:text-xl text-cream/80 max-w-3xl mx-auto leading-relaxed fp-reveal active fp-delay-2 font-normal">
+        Malawi’s premier agricultural intelligence platform. We combine <strong>10-year localized climate models</strong>, 
+        <strong>multi-strategy crop planning</strong>, <strong>Sentinel-2 satellite health</strong>, and <strong>zero-adjuster parametric drought payouts</strong> 
+        so every farmer profits with certainty.
       </p>
 
-      <!-- National Telemetry Counter Strip -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto pt-4">
-        <div class="bg-forest-900/80 border border-white/10 rounded-xl p-4 text-center">
-          <div class="text-2xl sm:text-3xl font-extrabold font-display text-leaf">15</div>
-          <div class="text-[11px] text-muted uppercase tracking-wider font-semibold mt-0.5">Active Farmers</div>
-          <div class="text-[10px] text-cream/50">Across 12 Districts</div>
+      <!-- Primary CTAs & Quick Credentials Preview -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2 fp-reveal active fp-delay-3">
+        <a href="#simulator"
+           class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-leaf to-emerald-500 text-forest-950 font-display font-bold text-base flex items-center justify-center gap-2.5 shadow-xl shadow-leaf/25 hover:shadow-leaf/40 hover:scale-105 active:scale-95 transition-all">
+          <i data-lucide="play-circle" class="w-5 h-5 text-forest-950"></i> Try Live Crop Simulator
+        </a>
+
+        <a href="{% url 'accounts:login' %}?role=farmer"
+           class="w-full sm:w-auto px-8 py-4 rounded-2xl fp-glass-premium font-display font-bold text-base text-cream flex items-center justify-center gap-2.5 hover:border-leaf/60 hover:text-leaf transition-all">
+          <i data-lucide="log-in" class="w-5 h-5 text-leaf"></i> Open Smallholder Portal
+        </a>
+      </div>
+
+      <!-- One-Click Demo Access Bar -->
+      <div class="pt-4 flex flex-wrap items-center justify-center gap-3 text-xs text-cream/70 font-mono fp-reveal active fp-delay-4">
+        <span class="text-cream/50">Instant Demo Login:</span>
+        <a href="{% url 'accounts:login' %}?role=farmer" class="px-3 py-1.5 rounded-lg bg-forest-900/80 border border-leaf/30 text-leaf hover:bg-leaf/10 transition-colors inline-flex items-center gap-1.5">
+          <i data-lucide="user" class="w-3.5 h-3.5"></i> Farmer: <strong>naffe</strong> / <strong>Password123!</strong>
+        </a>
+        <a href="{% url 'accounts:login' %}?role=admin" class="px-3 py-1.5 rounded-lg bg-forest-900/80 border border-amber-400/30 text-amber-300 hover:bg-amber-400/10 transition-colors inline-flex items-center gap-1.5">
+          <i data-lucide="shield" class="w-3.5 h-3.5"></i> Admin: <strong>admin</strong> / <strong>Password123!</strong>
+        </a>
+      </div>
+
+      <!-- Real-time National Telemetry Metrics Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto pt-8 fp-reveal active">
+        <div class="fp-glass-premium p-5 rounded-2xl text-center group hover:-translate-y-1 transition-all">
+          <div class="w-10 h-10 rounded-xl bg-leaf/15 text-leaf flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
+            <i data-lucide="users" class="w-5 h-5"></i>
+          </div>
+          <div class="text-2xl sm:text-3xl font-display font-black text-leaf" data-counter="15">15</div>
+          <div class="text-xs font-bold text-cream uppercase tracking-wider mt-0.5">Active Farmers</div>
+          <div class="text-[11px] text-cream/50 mt-1">12 Malawian Districts</div>
         </div>
-        <div class="bg-forest-900/80 border border-white/10 rounded-xl p-4 text-center">
-          <div class="text-2xl sm:text-3xl font-extrabold font-display text-sky-400">48.5 ha</div>
-          <div class="text-[11px] text-muted uppercase tracking-wider font-semibold mt-0.5">Monitored Farmland</div>
-          <div class="text-[10px] text-cream/50">Sentinel-2 Satellites</div>
+
+        <div class="fp-glass-premium p-5 rounded-2xl text-center group hover:-translate-y-1 transition-all">
+          <div class="w-10 h-10 rounded-xl bg-sky-400/15 text-sky-400 flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
+            <i data-lucide="satellite" class="w-5 h-5"></i>
+          </div>
+          <div class="text-2xl sm:text-3xl font-display font-black text-sky-400" data-counter="48.5">48.5 ha</div>
+          <div class="text-xs font-bold text-cream uppercase tracking-wider mt-0.5">Monitored Farmland</div>
+          <div class="text-[11px] text-cream/50 mt-1">Sentinel-2 10m Scans</div>
         </div>
-        <div class="bg-forest-900/80 border border-white/10 rounded-xl p-4 text-center">
-          <div class="text-2xl sm:text-3xl font-extrabold font-display text-emerald-400">MWK 28.6M</div>
-          <div class="text-[11px] text-muted uppercase tracking-wider font-semibold mt-0.5">Harvest Revenue</div>
-          <div class="text-[10px] text-cream/50">194 Season Records</div>
+
+        <div class="fp-glass-premium p-5 rounded-2xl text-center group hover:-translate-y-1 transition-all">
+          <div class="w-10 h-10 rounded-xl bg-emerald-400/15 text-emerald-400 flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
+            <i data-lucide="trending-up" class="w-5 h-5"></i>
+          </div>
+          <div class="text-2xl sm:text-3xl font-display font-black text-emerald-400">MWK 28.6M</div>
+          <div class="text-xs font-bold text-cream uppercase tracking-wider mt-0.5">Harvest Value Logged</div>
+          <div class="text-[11px] text-cream/50 mt-1">194 Season Records</div>
         </div>
-        <div class="bg-forest-900/80 border border-white/10 rounded-xl p-4 text-center">
-          <div class="text-2xl sm:text-3xl font-extrabold font-display text-amber-400">MWK 4.8M</div>
-          <div class="text-[11px] text-muted uppercase tracking-wider font-semibold mt-0.5">Parametric Sum Insured</div>
-          <div class="text-[10px] text-cream/50">Auto Mobile Payouts</div>
+
+        <div class="fp-glass-premium p-5 rounded-2xl text-center group hover:-translate-y-1 transition-all">
+          <div class="w-10 h-10 rounded-xl bg-amber-400/15 text-amber-400 flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <div class="text-2xl sm:text-3xl font-display font-black text-amber-300">MWK 4.8M</div>
+          <div class="text-xs font-bold text-cream uppercase tracking-wider mt-0.5">Drought Cover Sum</div>
+          <div class="text-[11px] text-cream/50 mt-1">Instant Mobile Payouts</div>
         </div>
       </div>
 
     </div>
   </section>
 
-  <!-- ROLE GATEWAYS: THE DUAL ENTRY PORTALS -->
-  <section id="roles" class="py-16 px-4 sm:px-6 lg:px-8 bg-forest-900/40 border-y border-white/5">
-    <div class="max-w-6xl mx-auto space-y-8">
+  <!-- ========================================================================= -->
+  <!-- 4. INTERACTIVE WOW FEATURE: THE LIVE CROP SIMULATOR WIDGET               -->
+  <!-- ========================================================================= -->
+  <section id="simulator" class="py-20 px-4 sm:px-6 lg:px-8 relative bg-forest-900/40 border-y border-white/5">
+    <div class="max-w-6xl mx-auto space-y-12">
 
-      <div class="text-center space-y-2">
-        <div class="text-xs font-bold uppercase tracking-[0.18em] text-leaf">Separation of Roles</div>
-        <h2 class="text-2xl sm:text-3xl font-display font-extrabold text-cream">
-          Select Your Workspace Gateway
+      <div class="text-center space-y-3 max-w-3xl mx-auto">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-leaf/15 border border-leaf/30 text-leaf text-xs font-bold uppercase tracking-wider">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Interactive Intelligence Sandbox
+        </div>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-display font-black text-cream">
+          Experience the Crop Optimization Engine Right Here
         </h2>
-        <p class="text-xs sm:text-sm text-muted max-w-xl mx-auto">
-          Tailored user experiences and access boundaries for smallholder producers and national extension leadership.
+        <p class="text-sm sm:text-base text-cream/70 leading-relaxed">
+          Slide your land and budget below. Watch our multi-variable linear model allocate certified seeds, 
+          fertilizer benchmarks (D-Compound &amp; Urea), and forecast your harvest revenue in real time.
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+      <!-- The Interactive Simulator Box -->
+      <div class="fp-glass-premium rounded-3xl p-6 sm:p-10 border border-leaf/30 shadow-2xl relative overflow-hidden">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          
+          <!-- Left Controls (5 cols) -->
+          <div class="lg:col-span-5 space-y-6">
+            
+            <!-- Land Size Slider -->
+            <div class="space-y-2">
+              <div class="flex justify-between items-center text-sm">
+                <span class="font-bold text-cream flex items-center gap-2">
+                  <i data-lucide="maximize" class="w-4 h-4 text-leaf"></i> Total Land Size
+                </span>
+                <span class="font-mono font-bold text-leaf text-lg" id="sim-land-val">2.5 Hectares</span>
+              </div>
+              <input type="range" min="0.5" max="10.0" step="0.5" value="2.5" id="sim-land-slider" class="w-full fp-slider">
+              <div class="flex justify-between text-[11px] text-cream/40 font-mono">
+                <span>0.5 ha (Smallholder)</span>
+                <span>5.0 ha</span>
+                <span>10.0 ha (Commercial)</span>
+              </div>
+            </div>
+
+            <!-- Input Budget Slider -->
+            <div class="space-y-2">
+              <div class="flex justify-between items-center text-sm">
+                <span class="font-bold text-cream flex items-center gap-2">
+                  <i data-lucide="wallet" class="w-4 h-4 text-amber-400"></i> Seasonal Input Budget
+                </span>
+                <span class="font-mono font-bold text-amber-300 text-lg" id="sim-budget-val">MWK 750,000</span>
+              </div>
+              <input type="range" min="200000" max="3000000" step="50000" value="750000" id="sim-budget-slider" class="w-full fp-slider">
+              <div class="flex justify-between text-[11px] text-cream/40 font-mono">
+                <span>MWK 200,000</span>
+                <span>MWK 1.5M</span>
+                <span>MWK 3,000,000</span>
+              </div>
+            </div>
+
+            <!-- Strategy Selector Toggle -->
+            <div class="space-y-2">
+              <label class="text-xs font-bold text-cream/80 block uppercase tracking-wider">Strategy Preference</label>
+              <div class="grid grid-cols-3 gap-2">
+                <button type="button" class="sim-strat-btn active py-2.5 px-3 rounded-xl border border-leaf bg-leaf/20 text-leaf text-xs font-bold text-center transition-all" data-strat="balanced">
+                  Balanced Mix
+                </button>
+                <button type="button" class="sim-strat-btn py-2.5 px-3 rounded-xl border border-white/10 bg-forest-900 text-cream/70 text-xs font-bold text-center hover:border-white/30 transition-all" data-strat="food">
+                  Food Security
+                </button>
+                <button type="button" class="sim-strat-btn py-2.5 px-3 rounded-xl border border-white/10 bg-forest-900 text-cream/70 text-xs font-bold text-center hover:border-white/30 transition-all" data-strat="cash">
+                  High Cash
+                </button>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-forest-950/80 border border-white/5 text-xs text-cream/65 flex items-start gap-2.5">
+              <i data-lucide="info" class="w-4 h-4 text-leaf shrink-0 mt-0.5"></i>
+              <span>Uses official AIP 2025/2026 subsidy rates &amp; DCCMS agro-ecological rainfall probabilities for Malawi.</span>
+            </div>
+
+          </div>
+
+          <!-- Right Live Outputs (7 cols) -->
+          <div class="lg:col-span-7 bg-forest-950/80 border border-white/10 rounded-2xl p-6 sm:p-8 space-y-6">
+            
+            <div class="flex items-center justify-between pb-4 border-b border-white/10">
+              <div>
+                <span class="text-xs font-bold text-leaf uppercase tracking-wider">Forecast Output</span>
+                <div class="font-display font-bold text-xl text-cream" id="sim-plan-name">Balanced Enterprise Plan</div>
+              </div>
+              <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-leaf/15 text-leaf border border-leaf/30" id="sim-roi-badge">+184% Margin ROI</span>
+            </div>
+
+            <!-- Crop Acreage Bar Visualization -->
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs font-semibold">
+                <span class="text-cream">Recommended Land Allocation</span>
+                <span class="text-cream/50" id="sim-alloc-summary">Maize: 1.5 ha &bull; Soya: 1.0 ha</span>
+              </div>
+              <div class="h-4 rounded-full overflow-hidden flex bg-forest-900 border border-white/10 p-0.5 gap-1">
+                <div id="sim-bar-maize" class="bg-amber-400 rounded-full h-full transition-all duration-500" style="width: 60%;" title="Hybrid Maize"></div>
+                <div id="sim-bar-soya" class="bg-leaf rounded-full h-full transition-all duration-500" style="width: 40%;" title="Soybeans"></div>
+                <div id="sim-bar-nuts" class="bg-sky-400 rounded-full h-full transition-all duration-500" style="width: 0%;" title="Groundnuts"></div>
+              </div>
+              <div class="flex gap-4 text-[11px] font-mono text-cream/70 pt-1">
+                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400"></span> Maize: <strong class="text-cream" id="sim-txt-maize">1.5 ha</strong></span>
+                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-leaf"></span> Soybeans: <strong class="text-cream" id="sim-txt-soya">1.0 ha</strong></span>
+                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-sky-400"></span> Legumes: <strong class="text-cream" id="sim-txt-nuts">0.0 ha</strong></span>
+              </div>
+            </div>
+
+            <!-- Financial Forecast Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+              <div class="p-4 rounded-xl bg-forest-900 border border-white/5">
+                <div class="text-[11px] font-semibold text-muted uppercase">Projected Harvest</div>
+                <div class="font-mono text-lg font-bold text-cream mt-0.5" id="sim-yield-kg">6,200 kg</div>
+                <div class="text-[10px] text-cream/40">~124 Bags (50kg)</div>
+              </div>
+
+              <div class="p-4 rounded-xl bg-forest-900 border border-white/5">
+                <div class="text-[11px] font-semibold text-muted uppercase">Gross Revenue</div>
+                <div class="font-mono text-lg font-bold text-emerald-400 mt-0.5" id="sim-gross-rev">MWK 4,340,000</div>
+                <div class="text-[10px] text-cream/40">At Mzuzu wholesale</div>
+              </div>
+
+              <div class="p-4 rounded-xl bg-leaf/10 border border-leaf/30">
+                <div class="text-[11px] font-semibold text-leaf uppercase">Expected Net Profit</div>
+                <div class="font-mono text-xl font-bold text-leaf mt-0.5" id="sim-net-profit">MWK 3,590,000</div>
+                <div class="text-[10px] text-leaf/70 font-semibold">After all inputs</div>
+              </div>
+            </div>
+
+            <!-- Direct Jump CTA -->
+            <div class="pt-2 flex items-center justify-between">
+              <span class="text-xs text-cream/60">Want to save this exact strategy to your farm?</span>
+              <a href="{% url 'accounts:login' %}?role=farmer" class="fp-btn-primary text-xs !py-2 !px-4 flex items-center gap-1.5">
+                Adopt This Plan <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </a>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 5. INTERACTIVE SENTINEL-2 SATELLITE DIGITAL TWIN (THE WOW FACTOR)        -->
+  <!-- ========================================================================= -->
+  <section id="satellite-tech" class="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    
+    <div class="max-w-6xl mx-auto space-y-12">
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+        
+        <!-- Left: Text Explanation -->
+        <div class="lg:col-span-5 space-y-5">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-400/15 border border-sky-400/30 text-sky-400 text-xs font-bold uppercase tracking-wider">
+            <i data-lucide="satellite" class="w-3.5 h-3.5"></i> Copernicus Sentinel-2 Integration
+          </div>
+          <h2 class="text-3xl sm:text-4xl font-display font-black text-cream tracking-tight leading-tight">
+            See Your Field from 786 km in Space Before Stress Kills Your Crop
+          </h2>
+          <p class="text-sm sm:text-base text-cream/70 leading-relaxed">
+            Every 5 days, the European Space Agency’s Sentinel-2 constellation orbits over Malawi. FarmPulse parses 
+            optical (Band 4) and Near-Infrared (Band 8) reflectance to map chlorophyll vigor (NDVI) and topsoil moisture across every registered boundary.
+          </p>
+
+          <div class="space-y-3 pt-2 text-xs text-cream/80 font-medium">
+            <div class="flex items-start gap-2.5">
+              <div class="w-5 h-5 rounded-full bg-leaf/20 text-leaf flex items-center justify-center shrink-0 mt-0.5 font-bold">1</div>
+              <span><strong>Chlorophyll Canopy Index (NDVI):</strong> Detect nitrogen deficiency or Fall Armyworm attacks 2 weeks before yellowing is visible to the naked eye.</span>
+            </div>
+            <div class="flex items-start gap-2.5">
+              <div class="w-5 h-5 rounded-full bg-sky-400/20 text-sky-400 flex items-center justify-center shrink-0 mt-0.5 font-bold">2</div>
+              <span><strong>Moisture Anomaly Tracking:</strong> High-resolution soil moisture maps alert farmers to localized dry-spell hot-spots.</span>
+            </div>
+            <div class="flex items-start gap-2.5">
+              <div class="w-5 h-5 rounded-full bg-amber-400/20 text-amber-300 flex items-center justify-center shrink-0 mt-0.5 font-bold">3</div>
+              <span><strong>Sub-Hectare Farm Geometry:</strong> Polygons accurate down to 10-meter pixel resolution tailored for Malawian fragmented plots.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Interactive Satellite Scanner Graphic -->
+        <div class="lg:col-span-7 fp-glass-premium rounded-3xl p-6 border border-sky-400/30 relative overflow-hidden shadow-2xl">
+          
+          <!-- Mock Satellite Viewfinder Header -->
+          <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs font-mono">
+            <div class="flex items-center gap-2 text-sky-400">
+              <span class="w-2 h-2 rounded-full bg-sky-400 animate-ping"></span>
+              <span>SENTINEL-2 L2A &bull; PASS #1082</span>
+            </div>
+            <span class="text-cream/50">CHIKONDI FARM, MZUZU (-11.439, 33.987)</span>
+          </div>
+
+          <!-- Radar Screen Area -->
+          <div class="relative h-72 sm:h-80 rounded-2xl overflow-hidden my-4 border border-white/10 bg-forest-950 flex items-center justify-center">
+            
+            <!-- Farm Field Grid Background -->
+            <div class="absolute inset-0 opacity-40" 
+                 style="background-image: linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px); background-size: 24px 24px;"></div>
+
+            <!-- Field Polygon Visual Simulation -->
+            <svg class="absolute inset-0 w-full h-full" viewBox="0 0 400 300">
+              <!-- Field Boundaries -->
+              <polygon points="60,60 220,40 340,120 310,240 120,260 50,180" 
+                       fill="rgba(143, 203, 98, 0.25)" stroke="#8FCB62" stroke-width="2" stroke-dasharray="4 2" class="fp-pulse-wave"/>
+              
+              <!-- High Vigour Zone -->
+              <circle cx="160" cy="140" r="45" fill="rgba(143, 203, 98, 0.45)" filter="blur(8px)"/>
+              
+              <!-- Stressed Zone Alert -->
+              <circle cx="270" cy="180" r="30" fill="rgba(244, 63, 94, 0.45)" filter="blur(6px)"/>
+              
+              <!-- Text Pins -->
+              <text x="135" y="145" fill="#ffffff" font-size="10" font-family="monospace" font-weight="bold">NDVI 0.78 (Healthy)</text>
+              <text x="245" y="185" fill="#f43f5e" font-size="9" font-family="monospace" font-weight="bold">Moisture Deficit</text>
+            </svg>
+
+            <!-- Radar Sweep Line -->
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div class="w-64 h-64 rounded-full border border-sky-400/30 flex items-center justify-center relative">
+                <div class="w-48 h-48 rounded-full border border-sky-400/20"></div>
+                <div class="w-24 h-24 rounded-full border border-sky-400/20"></div>
+                <div class="absolute inset-0 fp-radar-beam" style="background: conic-gradient(from 0deg at 50% 50%, rgba(56, 189, 248, 0.35) 0deg, transparent 60deg);"></div>
+              </div>
+            </div>
+
+            <!-- Target Crosshair -->
+            <div class="absolute top-4 right-4 bg-forest-900/90 border border-white/10 rounded-lg p-2.5 text-[11px] font-mono text-cream space-y-1">
+              <div>Mean NDVI: <strong class="text-leaf">0.72 (+12%)</strong></div>
+              <div>Chlorophyll: <strong class="text-sky-300">Adequate</strong></div>
+              <div>Water Stress: <strong class="text-amber-300">Low (8%)</strong></div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Status Strip -->
+          <div class="flex flex-wrap items-center justify-between text-xs text-cream/70 pt-2 gap-2">
+            <span class="inline-flex items-center gap-1.5 text-leaf font-semibold">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i> Cloud Coverage: 4.2% &bull; Confidence 99.1%
+            </span>
+            <a href="{% url 'accounts:login' %}?role=farmer" class="text-sky-400 hover:underline flex items-center gap-1 text-[11px]">
+              Inspect Live Satellite Tile <i data-lucide="arrow-right" class="w-3 h-3"></i>
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 6. INTERACTIVE USSD FEATURE PHONE SIMULATOR (*384#)                      -->
+  <!-- ========================================================================= -->
+  <section id="ussd-demo" class="py-24 px-4 sm:px-6 lg:px-8 bg-forest-900/30 border-y border-white/5 relative">
+    
+    <div class="max-w-6xl mx-auto space-y-12">
+
+      <div class="text-center space-y-3 max-w-3xl mx-auto">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-400/15 border border-emerald-400/30 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+          <i data-lucide="phone" class="w-3.5 h-3.5"></i> Universal Smallholder Inclusion
+        </div>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-display font-black text-cream">
+          No Smartphone? No Internet? Dial *384#
+        </h2>
+        <p class="text-sm sm:text-base text-cream/70 leading-relaxed">
+          Over 75% of Malawian farmers carry basic feature phones. FarmPulse runs seamlessly on GSM USSD protocol.
+          Try the clickable interactive phone below to test the Chichewa menus right now!
+        </p>
+      </div>
+
+      <!-- Feature Phone Simulator Component -->
+      <div class="max-w-md mx-auto fp-glass-premium rounded-[3rem] p-6 sm:p-8 border-2 border-white/20 shadow-2xl relative">
+        
+        <!-- Phone Top Speaker & Camera -->
+        <div class="flex justify-center items-center gap-3 mb-5">
+          <div class="w-14 h-1.5 bg-white/20 rounded-full"></div>
+          <div class="w-2.5 h-2.5 bg-white/20 rounded-full"></div>
+        </div>
+
+        <!-- Phone LCD Screen -->
+        <div class="fp-phone-screen rounded-2xl p-5 border-2 border-emerald-500/40 text-emerald-400 space-y-3 shadow-inner min-h-[220px]">
+          
+          <div class="flex justify-between items-center text-[10px] pb-1.5 border-b border-emerald-500/20 text-emerald-300">
+            <span>AIRTEL MW / TNM</span>
+            <span>*384# ACTIVE</span>
+          </div>
+
+          <div id="ussd-screen-text" class="text-xs leading-relaxed space-y-1">
+            <div class="font-bold text-cream">FARMPULSE MALAWI (*384#)</div>
+            <div>Sankhani chithandizo:</div>
+            <div>1. Mitengo ya Mbewu (Market Prices)</div>
+            <div>2. Mpweya &amp; Mvula (DCCMS Weather)</div>
+            <div>3. Upangiri wa Mlimi (Farm Advice)</div>
+            <div>4. Inshuwaransi ya Chilala (Insurance)</div>
+          </div>
+
+          <div class="pt-2 border-t border-emerald-500/20 flex items-center gap-2">
+            <span class="text-xs font-bold text-cream">&gt;</span>
+            <input type="text" id="ussd-input-box" class="bg-transparent border-none text-xs text-cream outline-none font-mono w-full" placeholder="Dinani nambala..." readonly>
+          </div>
+
+        </div>
+
+        <!-- Phone Keypad -->
+        <div class="mt-6 space-y-3">
+          
+          <!-- Quick Interactive Number Buttons -->
+          <div class="grid grid-cols-3 gap-2.5 text-center">
+            <button onclick="pressUssdKey('1')" class="py-3 rounded-xl bg-forest-900 border border-white/10 text-cream font-bold hover:bg-forest-800 active:scale-95 transition-all">
+              1 <span class="block text-[9px] text-muted font-normal">Prices</span>
+            </button>
+            <button onclick="pressUssdKey('2')" class="py-3 rounded-xl bg-forest-900 border border-white/10 text-cream font-bold hover:bg-forest-800 active:scale-95 transition-all">
+              2 <span class="block text-[9px] text-muted font-normal">Weather</span>
+            </button>
+            <button onclick="pressUssdKey('3')" class="py-3 rounded-xl bg-forest-900 border border-white/10 text-cream font-bold hover:bg-forest-800 active:scale-95 transition-all">
+              3 <span class="block text-[9px] text-muted font-normal">Advisory</span>
+            </button>
+            <button onclick="pressUssdKey('4')" class="py-3 rounded-xl bg-forest-900 border border-white/10 text-cream font-bold hover:bg-forest-800 active:scale-95 transition-all">
+              4 <span class="block text-[9px] text-muted font-normal">Insurance</span>
+            </button>
+            <button onclick="resetUssd()" class="py-3 rounded-xl bg-rose-950/60 border border-rose-500/30 text-rose-300 font-bold hover:bg-rose-900/60 active:scale-95 transition-all">
+              CLR <span class="block text-[9px] font-normal">Bwererani</span>
+            </button>
+            <button onclick="sendUssd()" class="py-3 rounded-xl bg-leaf/20 border border-leaf/40 text-leaf font-bold hover:bg-leaf/30 active:scale-95 transition-all">
+              SEND <span class="block text-[9px] font-normal">Tumizani</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 7. THE 6-STAGE SEASON JOURNEY TIMELINE (RETENTION ENGINE)                -->
+  <!-- ========================================================================= -->
+  <section id="journey-flow" class="py-24 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-6xl mx-auto space-y-12">
+
+      <div class="text-center space-y-3 max-w-3xl mx-auto">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-400 text-xs font-bold uppercase tracking-wider">
+          <i data-lucide="git-commit" class="w-3.5 h-3.5"></i> End-to-End Retention System
+        </div>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-display font-black text-cream">
+          From First Seed to Final Harvest Report
+        </h2>
+        <p class="text-sm sm:text-base text-cream/70 leading-relaxed">
+          FarmPulse does not abandon the farmer after generating a plan. The <strong>Season Journey</strong> walks hand-in-hand 
+          through all 6 stages of production with weekly check-ins and financial bookkeeping.
+        </p>
+      </div>
+
+      <!-- 6 Stage Interactive Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <div class="fp-glass-premium p-6 rounded-2xl space-y-3 border-l-4 border-l-amber-400 hover:-translate-y-1 transition-all">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-mono font-bold text-amber-400">STAGE 01</span>
+            <span class="text-cream/50">Month 0</span>
+          </div>
+          <h3 class="font-display font-bold text-lg text-cream">1. Plan Adoption</h3>
+          <p class="text-xs text-cream/70 leading-relaxed">
+            Farmer activates their optimized strategy (e.g. Balanced 2.5 ha). Budget is locked, benchmarks set, and target yields registered.
+          </p>
+        </div>
+
+        <div class="fp-glass-premium p-6 rounded-2xl space-y-3 border-l-4 border-l-sky-400 hover:-translate-y-1 transition-all">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-mono font-bold text-sky-400">STAGE 02</span>
+            <span class="text-cream/50">Weeks 1 - 2</span>
+          </div>
+          <h3 class="font-display font-bold text-lg text-cream">2. Land Prep &amp; Inputs</h3>
+          <p class="text-xs text-cream/70 leading-relaxed">
+            Record tractor hire, seed purchases, and basal D-Compound applications in the digital ledger. DCCMS confirms planting moisture window.
+          </p>
+        </div>
+
+        <div class="fp-glass-premium p-6 rounded-2xl space-y-3 border-l-4 border-l-leaf hover:-translate-y-1 transition-all">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-mono font-bold text-leaf">STAGE 03</span>
+            <span class="text-cream/50">Weeks 3 - 4</span>
+          </div>
+          <h3 class="font-display font-bold text-lg text-cream">3. Planting &amp; Germination</h3>
+          <p class="text-xs text-cream/70 leading-relaxed">
+            Farmer logs emergence rate. Smart advisory engine alerts on gap-filling if emergence drops below 85% to protect projected yields.
+          </p>
+        </div>
+
+        <div class="fp-glass-premium p-6 rounded-2xl space-y-3 border-l-4 border-l-purple-400 hover:-translate-y-1 transition-all">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-mono font-bold text-purple-400">STAGE 04</span>
+            <span class="text-cream/50">Weeks 5 - 12</span>
+          </div>
+          <h3 class="font-display font-bold text-lg text-cream">4. Growth Watch &amp; Advisories</h3>
+          <p class="text-xs text-cream/70 leading-relaxed">
+            Weekly 60-second check-ins: pest pressure, top-dress Urea timing at knee-height, and satellite chlorophyll verification.
+          </p>
+        </div>
+
+        <div class="fp-glass-premium p-6 rounded-2xl space-y-3 border-l-4 border-l-emerald-400 hover:-translate-y-1 transition-all">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-mono font-bold text-emerald-400">STAGE 05</span>
+            <span class="text-cream/50">Weeks 16 - 20</span>
+          </div>
+          <h3 class="font-display font-bold text-lg text-cream">5. Harvest Recording</h3>
+          <p class="text-xs text-cream/70 leading-relaxed">
+            Log actual 50kg bags harvested, market sale prices, and buyer contacts. Income automatically credited against input expenses.
+          </p>
+        </div>
+
+        <div class="fp-glass-premium p-6 rounded-2xl space-y-3 border-l-4 border-l-gold-400 hover:-translate-y-1 transition-all fp-badge-gold-shimmer">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-mono font-bold text-amber-300">STAGE 06</span>
+            <span class="text-cream/70 font-bold">Annual Review</span>
+          </div>
+          <h3 class="font-display font-bold text-lg text-cream">6. Season Report &amp; Accuracy</h3>
+          <p class="text-xs text-cream/80 leading-relaxed">
+            System calculates Plan Accuracy Score (e.g. 92%), net ROI, and generates actionable improvements for the upcoming 2026/27 cycle.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 8. ROLE GATEWAYS: THE DUAL ENTRY PORTALS                                 -->
+  <!-- ========================================================================= -->
+  <section id="roles" class="py-24 px-4 sm:px-6 lg:px-8 bg-forest-900/40 border-y border-white/5">
+    <div class="max-w-6xl mx-auto space-y-12">
+
+      <div class="text-center space-y-2">
+        <div class="text-xs font-bold uppercase tracking-[0.18em] text-leaf">Separation of Roles</div>
+        <h2 class="text-3xl sm:text-4xl font-display font-extrabold text-cream">
+          Choose Your Dedicated Operational Gateway
+        </h2>
+        <p class="text-xs sm:text-sm text-cream/70 max-w-xl mx-auto">
+          Tailored user experiences and strict data boundaries for smallholder producers and national agricultural extension leadership.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 
         <!-- GATEWAY 1: SMALLHOLDER FARMER -->
-        <div
-          class="bg-gradient-to-b from-forest-900 to-forest-950 border border-leaf/30 rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden group hover:border-leaf/60 transition-all">
-          <div class="space-y-4 z-10">
+        <div class="fp-glass-premium border border-leaf/40 rounded-3xl p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden group hover:border-leaf transition-all duration-300">
+          
+          <div class="space-y-5 z-10">
             <div class="flex items-center justify-between">
-              <div
-                class="w-12 h-12 rounded-xl bg-leaf/15 border border-leaf/30 text-leaf flex items-center justify-center">
-                <i data-lucide="sprout" class="w-6 h-6"></i>
+              <div class="w-14 h-14 rounded-2xl bg-leaf/20 border border-leaf/40 text-leaf flex items-center justify-center shadow-lg shadow-leaf/20 group-hover:scale-110 transition-transform">
+                <i data-lucide="sprout" class="w-7 h-7"></i>
               </div>
-              <span
-                class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-leaf/15 text-leaf border border-leaf/30">
+              <span class="px-3.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-leaf/15 text-leaf border border-leaf/30">
                 Primary Producer Portal
               </span>
             </div>
 
             <div>
-              <h3 class="text-xl sm:text-2xl font-display font-bold text-cream">Smallholder Farmer Workspace</h3>
-              <p class="text-xs sm:text-sm text-cream/70 mt-1 leading-relaxed">
-                Designed for farmers planning their acreage, optimizing fertilizer input budgets, tracking satellite
-                canopy vigor, and safeguarding investments with parametric drought insurance.
+              <h3 class="text-2xl font-display font-black text-cream">Smallholder Farmer Workspace</h3>
+              <p class="text-xs sm:text-sm text-cream/75 mt-1.5 leading-relaxed">
+                Empowering producers with precision acreage split models, input cost tracking, Sentinel-2 canopy vigor, 
+                and automated drought payouts.
               </p>
             </div>
 
-            <!-- Role Permissions & Access Checklist -->
-            <div class="space-y-2.5 pt-2 text-xs">
-              <div class="flex items-start gap-2.5 text-cream/80">
+            <div class="space-y-3 pt-2 text-xs text-cream/80">
+              <div class="flex items-start gap-2.5">
                 <i data-lucide="check-circle-2" class="w-4 h-4 text-leaf shrink-0 mt-0.5"></i>
-                <span><strong>10-Year Field History &amp; Yields:</strong> Track multi-season performance and calculate
-                  gross margins.</span>
+                <span><strong>Multi-Year Field History:</strong> Track multi-season yields and exact gross margins per plot.</span>
               </div>
-              <div class="flex items-start gap-2.5 text-cream/80">
+              <div class="flex items-start gap-2.5">
                 <i data-lucide="check-circle-2" class="w-4 h-4 text-leaf shrink-0 mt-0.5"></i>
-                <span><strong>Crop Planner &amp; Dynamic Allocator:</strong> Balance seed and AIP fertilizer against
-                  seasonal budget.</span>
+                <span><strong>AIP Crop Planner:</strong> Dynamic allocator balancing seed and fertilizer against seasonal cash.</span>
               </div>
-              <div class="flex items-start gap-2.5 text-cream/80">
+              <div class="flex items-start gap-2.5">
                 <i data-lucide="check-circle-2" class="w-4 h-4 text-leaf shrink-0 mt-0.5"></i>
-                <span><strong>Sentinel-2 Satellite Digital Twin:</strong> Monitor canopy chlorophyll (NDVI) and topsoil
-                  moisture.</span>
+                <span><strong>Sentinel-2 Digital Twin:</strong> Monitor canopy chlorophyll and topsoil moisture remotely.</span>
               </div>
-              <div class="flex items-start gap-2.5 text-cream/80">
+              <div class="flex items-start gap-2.5">
                 <i data-lucide="check-circle-2" class="w-4 h-4 text-leaf shrink-0 mt-0.5"></i>
-                <span><strong>Parametric Drought Insurance:</strong> Auto-dispatched mobile money payouts on
-                  Airtel/TNM.</span>
-              </div>
-              <div class="flex items-start gap-2.5 text-cream/80">
-                <i data-lucide="check-circle-2" class="w-4 h-4 text-leaf shrink-0 mt-0.5"></i>
-                <span><strong>Basic Phone Access (*384# USSD):</strong> Offline agromet alerts in Chichewa &amp;
-                  Tumbuka.</span>
+                <span><strong>Parametric Drought Insurance:</strong> Automatic mobile money payouts on Airtel Money &amp; Mpamba.</span>
               </div>
             </div>
           </div>
 
-          <div class="pt-6 border-t border-white/10 mt-6 z-10 space-y-3">
+          <div class="pt-8 border-t border-white/10 mt-8 z-10 space-y-3">
             <a href="{% url 'accounts:login' %}?role=farmer"
-              class="fp-btn-primary w-full py-3 justify-center text-sm font-semibold flex items-center gap-2">
-              <i data-lucide="log-in" class="w-4 h-4"></i> Enter as Smallholder Farmer
+               class="fp-btn-primary w-full !py-3.5 justify-center text-sm font-bold flex items-center gap-2 shadow-xl shadow-leaf/20 hover:scale-[1.02] transition-transform">
+              <i data-lucide="log-in" class="w-4 h-4"></i> Enter Farmer Portal
             </a>
-            <div class="flex items-center justify-between text-[11px] text-muted">
-              <span>Demo Farmer: <strong>naffe</strong> / <strong>Password123!</strong></span>
-              <span class="text-leaf font-medium">Mzuzu Highlands</span>
+            <div class="flex items-center justify-between text-[11px] text-cream/60 font-mono">
+              <span>Demo: <strong>naffe</strong> / <strong>Password123!</strong></span>
+              <span class="text-leaf font-bold">Mzuzu Highlands</span>
             </div>
           </div>
         </div>
 
         <!-- GATEWAY 2: DADO / ADMIN -->
-        <div
-          class="bg-gradient-to-b from-forest-900 to-forest-950 border border-amber-400/30 rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden group hover:border-amber-400/60 transition-all">
-          <div class="space-y-4 z-10">
+        <div class="fp-glass-premium border border-amber-400/40 rounded-3xl p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden group hover:border-amber-400 transition-all duration-300">
+          
+          <div class="space-y-5 z-10">
             <div class="flex items-center justify-between">
-              <div
-                class="w-12 h-12 rounded-xl bg-amber-400/15 border border-amber-400/30 text-amber-400 flex items-center justify-center">
-                <i data-lucide="shield-alert" class="w-6 h-6"></i>
+              <div class="w-14 h-14 rounded-2xl bg-amber-400/20 border border-amber-400/40 text-amber-300 flex items-center justify-center shadow-lg shadow-amber-400/20 group-hover:scale-110 transition-transform">
+                <i data-lucide="shield-alert" class="w-7 h-7"></i>
               </div>
-              <span
-                class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-400/15 text-amber-400 border border-amber-400/30">
+              <span class="px-3.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-400/15 text-amber-300 border border-amber-400/30">
                 Operations &amp; Governance
               </span>
             </div>
 
             <div>
-              <h3 class="text-xl sm:text-2xl font-display font-bold text-cream">Extension &amp; DADO Control Portal</h3>
-              <p class="text-xs sm:text-sm text-cream/70 mt-1 leading-relaxed">
-                Designed for District Agricultural Development Officers (DADOs), cooperative managers, and platform
-                administrators overseeing regional farmer cohorts, disaster radars, and policy claims.
+              <h3 class="text-2xl font-display font-black text-cream">Extension &amp; DADO Control Portal</h3>
+              <p class="text-xs sm:text-sm text-cream/75 mt-1.5 leading-relaxed">
+                Command console for District Agricultural Development Officers (DADOs) and AEDOs overseeing 
+                regional farmer cohorts, disaster monitoring, and policy payouts.
               </p>
             </div>
 
-            <!-- Role Permissions & Access Checklist -->
-            <div class="space-y-2.5 pt-2 text-xs">
-              <div class="flex items-start gap-2.5 text-cream/80">
+            <div class="space-y-3 pt-2 text-xs text-cream/80">
+              <div class="flex items-start gap-2.5">
                 <i data-lucide="check-circle-2" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i>
-                <span><strong>National Smallholder Registry:</strong> Oversight of 15 farmers across 12 Malawian
-                  districts.</span>
+                <span><strong>National Smallholder Registry:</strong> Oversight across 12 Malawian districts and 15 pilot farms.</span>
               </div>
-              <div class="flex items-start gap-2.5 text-cream/80">
+              <div class="flex items-start gap-2.5">
                 <i data-lucide="check-circle-2" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i>
-                <span><strong>Climate Threat &amp; Dry Spell Radar:</strong> Automated monitoring of rainfall deficits
-                  (e.g. Balaka trigger).</span>
+                <span><strong>Drought Threat &amp; Dry Spell Radar:</strong> Automated monitoring of rainfall deficit triggers.</span>
               </div>
-              <div class="flex items-start gap-2.5 text-cream/80">
+              <div class="flex items-start gap-2.5">
                 <i data-lucide="check-circle-2" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i>
-                <span><strong>Emergency Agromet SMS Console:</strong> Push verified weather &amp; pest advisories via
-                  Airtel/TNM.</span>
+                <span><strong>Emergency Agromet SMS Console:</strong> Push verified weather &amp; pest advisories via Airtel &amp; TNM.</span>
               </div>
-              <div class="flex items-start gap-2.5 text-cream/80">
+              <div class="flex items-start gap-2.5">
                 <i data-lucide="check-circle-2" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i>
-                <span><strong>Aggregate Crop Acreage Breakdown:</strong> National yield projections to prevent food
-                  deficits.</span>
-              </div>
-              <div class="flex items-start gap-2.5 text-cream/80">
-                <i data-lucide="check-circle-2" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i>
-                <span><strong>Central Database Admin (/admin/):</strong> Curate official input subsidy prices &amp;
-                  audit claims.</span>
+                <span><strong>Aggregate Crop Acreage Breakdown:</strong> National yield projections to prevent food security deficits.</span>
               </div>
             </div>
           </div>
 
-          <div class="pt-6 border-t border-white/10 mt-6 z-10 space-y-3">
+          <div class="pt-8 border-t border-white/10 mt-8 z-10 space-y-3">
             <a href="{% url 'accounts:login' %}?role=admin"
-              class="fp-btn-secondary w-full py-3 justify-center text-sm font-semibold flex items-center gap-2 border-amber-400/40 text-amber-400 hover:bg-amber-400/10">
-              <i data-lucide="lock" class="w-4 h-4"></i> Enter as Extension Officer / Admin
+               class="w-full !py-3.5 justify-center text-sm font-bold flex items-center gap-2 rounded-xl border border-amber-400/40 text-amber-300 bg-amber-400/15 hover:bg-amber-400/25 transition-all">
+              <i data-lucide="lock" class="w-4 h-4"></i> Enter DADO Admin Portal
             </a>
-            <div class="flex items-center justify-between text-[11px] text-muted">
-              <span>Admin Lead: <strong>admin</strong> / <strong>Password123!</strong></span>
-              <span class="text-amber-400 font-medium">DADO National HQ</span>
+            <div class="flex items-center justify-between text-[11px] text-cream/60 font-mono">
+              <span>Admin: <strong>admin</strong> / <strong>Password123!</strong></span>
+              <span class="text-amber-400 font-bold">DADO National HQ</span>
             </div>
           </div>
         </div>
@@ -281,84 +963,282 @@
     </div>
   </section>
 
-  <!-- THE THREE CORE INTELLIGENCE PILLARS -->
-  <section id="features" class="py-16 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-6xl mx-auto space-y-10">
-
-      <div class="text-center space-y-2">
-        <div class="text-xs font-bold uppercase tracking-[0.18em] text-muted">System Architecture</div>
-        <h2 class="text-2xl sm:text-3xl font-display font-extrabold text-cream">
-          Three Foundational Intelligence Pillars
-        </h2>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-        <!-- Pillar 1 -->
-        <div class="bg-forest-900 border border-white/5 rounded-2xl p-6 space-y-3">
-          <div class="w-10 h-10 rounded-xl bg-sky-400/10 text-sky-400 flex items-center justify-center">
-            <i data-lucide="cloud-sun" class="w-5 h-5"></i>
+  <!-- ========================================================================= -->
+  <!-- 9. INSTITUTIONAL FOOTER WITH MZUZU UNIVERSITY ACCREDITATION              -->
+  <!-- ========================================================================= -->
+  <footer class="bg-forest-950 border-t border-white/10 py-12 px-4 sm:px-6 lg:px-8 text-xs text-cream/60">
+    <div class="max-w-7xl mx-auto space-y-8">
+      
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-white/10">
+        
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-leaf text-forest-950 flex items-center justify-center font-bold text-lg">FP</div>
+          <div>
+            <div class="font-display font-bold text-cream text-base">FarmPulse Malawi</div>
+            <div class="text-[11px] text-leaf">Mzuzu University &middot; ICT Department Exhibition Winner 2026</div>
           </div>
-          <h3 class="text-lg font-display font-bold text-cream">1. Climate Intelligence</h3>
-          <p class="text-xs text-muted leading-relaxed">
-            Integrates DCCMS weather stations and 10-year historical rainfall curves to evaluate dry-spell probability,
-            heat stress windows, and optimal planting dates before capital is spent.
-          </p>
         </div>
 
-        <!-- Pillar 2 -->
-        <div class="bg-forest-900 border border-white/5 rounded-2xl p-6 space-y-3">
-          <div class="w-10 h-10 rounded-xl bg-emerald-400/10 text-emerald-400 flex items-center justify-center">
-            <i data-lucide="trending-up" class="w-5 h-5"></i>
-          </div>
-          <h3 class="text-lg font-display font-bold text-cream">2. Market Intelligence</h3>
-          <p class="text-xs text-muted leading-relaxed">
-            Monitors commodity prices across 6 trading hubs (Lilongwe, Mzuzu, Limbe, Luchenza). Features a
-            transport-cost calculator that proves whether shipping grain yields higher net profit.
-          </p>
-        </div>
-
-        <!-- Pillar 3 -->
-        <div class="bg-forest-900 border border-white/5 rounded-2xl p-6 space-y-3">
-          <div class="w-10 h-10 rounded-xl bg-leaf/10 text-leaf flex items-center justify-center">
-            <i data-lucide="calculator" class="w-5 h-5"></i>
-          </div>
-          <h3 class="text-lg font-display font-bold text-cream">3. Enterprise Crop Planning</h3>
-          <p class="text-xs text-muted leading-relaxed">
-            Algorithms balance available land, capital, and labor against certified input costs. Generates Food
-            Security, High-Margin, and Climate-Resilient strategies with exact breakeven metrics.
-          </p>
+        <div class="flex flex-wrap items-center gap-6 text-cream/70 font-semibold">
+          <a href="{% url 'accounts:login' %}?role=farmer" class="hover:text-leaf transition-colors">Smallholder Portal</a>
+          <a href="{% url 'accounts:login' %}?role=admin" class="hover:text-amber-400 transition-colors">Extension &amp; DADO Console</a>
+          <a href="/admin/" target="_blank" class="hover:text-cream transition-colors">Central Django Admin</a>
+          <a href="#simulator" class="hover:text-cream transition-colors">Crop Sandbox</a>
         </div>
 
       </div>
 
-    </div>
-  </section>
-
-  <!-- Institutional Footer -->
-  <footer class="bg-forest-950 border-t border-white/10 py-10 px-4 sm:px-6 lg:px-8 text-xs text-muted">
-    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <div class="w-7 h-7 rounded-lg bg-leaf text-forest-950 flex items-center justify-center font-bold">FP</div>
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-cream/50">
         <div>
-          <div class="font-bold text-cream">FarmPulse Malawi</div>
-          <div class="text-[10px]">Mzuzu University &middot; Department of ICT Exhibition 2026</div>
+          <span>Principal Architects: <strong class="text-cream">Brian Nankhuni &amp; Miriam Chiphaka</strong> &bull; Mzuzu University, Malawi</span>
+        </div>
+        <div>
+          <span>Data Sources: DCCMS &bull; WFP VAM &bull; Sentinel-2 &bull; Ministry of Agriculture AIP 2025/26</span>
         </div>
       </div>
-      <div class="flex items-center gap-6">
-        <a href="{% url 'accounts:login' %}?role=farmer" class="hover:text-cream">Farmer Portal</a>
-        <a href="{% url 'accounts:login' %}?role=admin" class="hover:text-cream">Extension Portal</a>
-        <a href="/admin/" target="_blank" class="hover:text-cream">Central Admin</a>
-      </div>
-      <div>
-        <span>Lead Developer: <strong>Brian Nankhuni. Miriam Chiphaka</strong></span>
-      </div>
+
     </div>
   </footer>
 
+  <!-- ========================================================================= -->
+  <!-- 10. JAVASCRIPT KINETICS, PARTICLES & INTERACTIVE SIMULATORS               -->
+  <!-- ========================================================================= -->
   <script>
-    if (window.lucide) lucide.createIcons();
-  </script>
-</body>
+    // Initialize Lucide Icons
+    if (window.lucide) {
+      lucide.createIcons();
+    }
 
+    // =========================================================================
+    // Organic Particle Canvas (Floating pollen & golden dust)
+    // =========================================================================
+    (function initParticles() {
+      const canvas = document.getElementById('particle-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let width = canvas.width = window.innerWidth;
+      let height = canvas.height = window.innerHeight;
+
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      });
+
+      const particles = [];
+      const particleCount = Math.min(Math.floor(width / 35), 45);
+
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          radius: Math.random() * 2.2 + 0.8,
+          speedX: (Math.random() - 0.5) * 0.4,
+          speedY: -Math.random() * 0.5 - 0.1,
+          color: Math.random() > 0.4 ? 'rgba(143, 203, 98, ' : 'rgba(245, 184, 0, ',
+          opacity: Math.random() * 0.5 + 0.2
+        });
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+        particles.forEach(p => {
+          p.x += p.speedX;
+          p.y += p.speedY;
+          if (p.y < 0) p.y = height;
+          if (p.x < 0) p.x = width;
+          if (p.x > width) p.x = 0;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = p.color + p.opacity + ')';
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = p.color + '0.6)';
+          ctx.fill();
+        });
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+
+    // =========================================================================
+    // Live Simulator Logic
+    // =========================================================================
+    (function initSimulator() {
+      const landSlider = document.getElementById('sim-land-slider');
+      const budgetSlider = document.getElementById('sim-budget-slider');
+      const landVal = document.getElementById('sim-land-val');
+      const budgetVal = document.getElementById('sim-budget-val');
+      const stratButtons = document.querySelectorAll('.sim-strat-btn');
+
+      let currentStrat = 'balanced';
+
+      stratButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          stratButtons.forEach(b => {
+            b.classList.remove('active', 'border-leaf', 'bg-leaf/20', 'text-leaf');
+            b.classList.add('border-white/10', 'bg-forest-900', 'text-cream/70');
+          });
+          btn.classList.add('active', 'border-leaf', 'bg-leaf/20', 'text-leaf');
+          btn.classList.remove('border-white/10', 'bg-forest-900', 'text-cream/70');
+          currentStrat = btn.getAttribute('data-strat');
+          recalculate();
+        });
+      });
+
+      function recalculate() {
+        if (!landSlider || !budgetSlider) return;
+        const land = parseFloat(landSlider.value);
+        const budget = parseFloat(budgetSlider.value);
+
+        landVal.textContent = land.toFixed(1) + ' Hectares';
+        budgetVal.textContent = 'MWK ' + budget.toLocaleString();
+
+        let maizeHa = 0, soyaHa = 0, nutsHa = 0;
+        let planTitle = "Balanced Enterprise Plan";
+
+        if (currentStrat === 'balanced') {
+          maizeHa = land * 0.6;
+          soyaHa = land * 0.4;
+          planTitle = "Balanced Food & Cash Portfolio";
+        } else if (currentStrat === 'food') {
+          maizeHa = land * 0.85;
+          nutsHa = land * 0.15;
+          planTitle = "Food Security Staple Priority";
+        } else {
+          maizeHa = land * 0.3;
+          soyaHa = land * 0.5;
+          nutsHa = land * 0.2;
+          planTitle = "High-Margin Export Cash Strategy";
+        }
+
+        // Expected metrics
+        const totalYieldKg = (maizeHa * 3200) + (soyaHa * 1400) + (nutsHa * 1200);
+        const grossRevenue = (maizeHa * 3200 * 840) + (soyaHa * 1400 * 1150) + (nutsHa * 1200 * 1400);
+        const netProfit = Math.max(0, grossRevenue - budget);
+        const roi = Math.round((netProfit / (budget || 1)) * 100);
+
+        document.getElementById('sim-plan-name').textContent = planTitle;
+        document.getElementById('sim-roi-badge').textContent = '+' + roi + '% Net ROI';
+
+        // Bars
+        const pMaize = (maizeHa / land) * 100;
+        const pSoya = (soyaHa / land) * 100;
+        const pNuts = (nutsHa / land) * 100;
+
+        document.getElementById('sim-bar-maize').style.width = pMaize + '%';
+        document.getElementById('sim-bar-soya').style.width = pSoya + '%';
+        document.getElementById('sim-bar-nuts').style.width = pNuts + '%';
+
+        document.getElementById('sim-txt-maize').textContent = maizeHa.toFixed(1) + ' ha';
+        document.getElementById('sim-txt-soya').textContent = soyaHa.toFixed(1) + ' ha';
+        document.getElementById('sim-txt-nuts').textContent = nutsHa.toFixed(1) + ' ha';
+
+        document.getElementById('sim-yield-kg').textContent = Math.round(totalYieldKg).toLocaleString() + ' kg';
+        document.getElementById('sim-gross-rev').textContent = 'MWK ' + Math.round(grossRevenue).toLocaleString();
+        document.getElementById('sim-net-profit').textContent = 'MWK ' + Math.round(netProfit).toLocaleString();
+      }
+
+      if (landSlider) landSlider.addEventListener('input', recalculate);
+      if (budgetSlider) budgetSlider.addEventListener('input', recalculate);
+      recalculate();
+    })();
+
+    // =========================================================================
+    // USSD Interactive Phone Simulator
+    // =========================================================================
+    const ussdStates = {
+      root: {
+        text: `FARMPULSE MALAWI (*384#)<br>Sankhani chithandizo:<br>1. Mitengo ya Mbewu (Market Prices)<br>2. Mpweya &amp; Mvula (DCCMS Weather)<br>3. Upangiri wa Mlimi (Farm Advice)<br>4. Inshuwaransi ya Chilala (Insurance)`
+      },
+      '1': {
+        text: `MITENGO YA MBEWU (MZUZU)<br>1. Chimanga: MWK 840/kg<br>2. Soya: MWK 1,150/kg<br>3. Mtedza: MWK 1,400/kg<br>4. Nyemba: MWK 2,100/kg<br>0. Bwererani (Back)`
+      },
+      '2': {
+        text: `DCCMS WEATHER RADAR<br>Boma: Mzuzu / Kasungu<br>Mvula ikuyembekezeka sabata ino.<br>Dry-spell risk: YOTSITSA (Low)<br>Dzala: SC403 / Pan 53 tsopano.<br>0. Bwererani (Back)`
+      },
+      '3': {
+        text: `UPANGIRI WA MLIMI (MLIMI AI)<br>Mbewu yanu ili pa knee-height?<br>Thirirani Urea kapena CAN 23%<br>Musanagwe mvula ya lero.<br>0. Bwererani (Back)`
+      },
+      '4': {
+        text: `INSHUWARANSI YA CHILALA<br>Mfundo: POL-2026-CHIKONDI<br>Chitetezo: MWK 450,000<br>Mvula: Yolandiridwa yokwanira.<br>Palibe vuto (Status: Active)<br>0. Bwererani (Back)`
+      }
+    };
+
+    let currentUssdScreen = 'root';
+
+    function pressUssdKey(key) {
+      document.getElementById('ussd-input-box').value = key;
+    }
+
+    function sendUssd() {
+      const input = document.getElementById('ussd-input-box').value.trim();
+      const screenEl = document.getElementById('ussd-screen-text');
+      
+      if (input === '0' || input === '') {
+        resetUssd();
+        return;
+      }
+
+      if (ussdStates[input]) {
+        screenEl.innerHTML = ussdStates[input].text;
+        document.getElementById('ussd-input-box').value = '';
+      } else {
+        screenEl.innerHTML = `Cholakwika. Dinani 1, 2, 3 kapena 4.<br>0. Bwererani`;
+        document.getElementById('ussd-input-box').value = '';
+      }
+    }
+
+    function resetUssd() {
+      document.getElementById('ussd-screen-text').innerHTML = ussdStates.root.text;
+      document.getElementById('ussd-input-box').value = '';
+    }
+
+    // =========================================================================
+    // Oral Chichewa Audio Speech Welcome
+    // =========================================================================
+    const audioBtn = document.getElementById('oral-welcome-btn');
+    if (audioBtn) {
+      audioBtn.addEventListener('click', () => {
+        if (!('speechSynthesis' in window)) {
+          alert('Speech synthesis is not supported on this browser.');
+          return;
+        }
+
+        if (window.speechSynthesis.speaking) {
+          window.speechSynthesis.cancel();
+          audioBtn.innerHTML = '<i data-lucide="volume-2" class="w-4 h-4 text-leaf"></i><span class="text-[11px]">Chichewa Audio</span>';
+          if (window.lucide) lucide.createIcons();
+          return;
+        }
+
+        const msg = new SpeechSynthesisUtterance("Takulandirani ku FarmPulse Malawi. Pulatifomu ya nzeru za ulimi ku Mzuzu University. Konzani minda yanu, dziwani mitengo ya mbewu, ndipo thandizani banja lanu kukhala ndi chakudya chokwanira.");
+        msg.rate = 0.9;
+        msg.pitch = 1.0;
+        
+        audioBtn.innerHTML = '<span class="w-2 h-2 rounded-full bg-leaf animate-ping"></span><span class="text-[11px] text-leaf font-bold">Kuyankhula... (Speaking)</span>';
+
+        msg.onend = () => {
+          audioBtn.innerHTML = '<i data-lucide="volume-2" class="w-4 h-4 text-leaf"></i><span class="text-[11px]">Chichewa Audio</span>';
+          if (window.lucide) lucide.createIcons();
+        };
+
+        window.speechSynthesis.speak(msg);
+      });
+    }
+
+    // =========================================================================
+    // Intersection Observer for Smooth Entrance Reveals
+    // =========================================================================
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fp-reveal').forEach(el => observer.observe(el));
+  </script>
+
+</body>
 </html>
