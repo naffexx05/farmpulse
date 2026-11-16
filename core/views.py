@@ -94,7 +94,17 @@ def home(request):
     # 7. Crop Plan Comparison / Active Portfolio
     plan_items = list(active_plan.items.select_related('crop').all()) if active_plan else []
 
+    # Dynamic time-of-day greeting (Africa/Blantyre local time)
+    current_hour = timezone.localtime().hour
+    if 5 <= current_hour < 12:
+        greeting = "Good morning"
+    elif 12 <= current_hour < 17:
+        greeting = "Good afternoon"
+    else:
+        greeting = "Good evening"
+
     context = {
+        'greeting': greeting,
         'farm': farm,
         'profile': profile,
         'district': district_obj,

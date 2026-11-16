@@ -35,7 +35,7 @@
         </div>
 
         <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-cream tracking-tight leading-tight">
-          Good morning, {{ request.user.first_name|default:request.user.username }}.
+          <span id="overview-greeting">{{ greeting|default:"Good day" }}</span>, {{ request.user.first_name|default:request.user.username }}.
         </h1>
 
         <p class="text-sm sm:text-base text-cream/75 leading-relaxed">
@@ -726,6 +726,16 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    // Dynamic time-of-day greeting
+    const greetingEl = document.getElementById('overview-greeting');
+    if (greetingEl) {
+      const hr = new Date().getHours();
+      let g = 'Good evening';
+      if (hr >= 5 && hr < 12) g = 'Good morning';
+      else if (hr >= 12 && hr < 17) g = 'Good afternoon';
+      greetingEl.textContent = g;
+    }
+
     renderRainfallChart();
     if (window.initFarmPulseMap) {
       homeMapInstance = window.initFarmPulseMap('home-national-map', {
