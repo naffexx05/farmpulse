@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FarmPulse Malawi — The National Agricultural Operating System</title>
+  <title>FarmPulse Malawi — The Sovereign Agricultural Operating System</title>
 
   <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,15 +33,16 @@
       --fp-dark-800: #0B2613;
       --mouse-x: 50%;
       --mouse-y: 30%;
+      --split-pos: 50%;
     }
 
     /* Ambient Spotlight Background */
     .fp-cosmic-bg {
       background-color: var(--fp-dark-950);
       background-image: 
-        radial-gradient(circle 800px at var(--mouse-x) var(--mouse-y), rgba(143, 203, 98, 0.08), transparent 70%),
-        radial-gradient(circle 600px at 85% 20%, rgba(245, 184, 0, 0.06), transparent 60%),
-        radial-gradient(circle 700px at 15% 75%, rgba(56, 189, 248, 0.05), transparent 65%),
+        radial-gradient(circle 800px at var(--mouse-x) var(--mouse-y), rgba(143, 203, 98, 0.09), transparent 70%),
+        radial-gradient(circle 650px at 85% 20%, rgba(245, 184, 0, 0.07), transparent 60%),
+        radial-gradient(circle 750px at 15% 75%, rgba(56, 189, 248, 0.06), transparent 65%),
         linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
       background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
@@ -49,11 +50,11 @@
 
     /* Shimmer Gold Champion Badge */
     .fp-gold-glow {
-      background: linear-gradient(90deg, rgba(245, 184, 0, 0.12) 0%, rgba(245, 184, 0, 0.3) 50%, rgba(245, 184, 0, 0.12) 100%);
+      background: linear-gradient(90deg, rgba(245, 184, 0, 0.15) 0%, rgba(245, 184, 0, 0.4) 50%, rgba(245, 184, 0, 0.15) 100%);
       background-size: 200% 100%;
       animation: goldWave 4s infinite linear;
-      border: 1px solid rgba(245, 184, 0, 0.4);
-      box-shadow: 0 0 25px rgba(245, 184, 0, 0.15);
+      border: 1px solid rgba(245, 184, 0, 0.5);
+      box-shadow: 0 0 30px rgba(245, 184, 0, 0.2);
     }
     @keyframes goldWave {
       0% { background-position: 200% 0; }
@@ -62,14 +63,14 @@
 
     /* Glass Cockpit Console */
     .fp-cockpit-frame {
-      background: rgba(5, 18, 9, 0.85);
-      backdrop-filter: blur(28px);
-      -webkit-backdrop-filter: blur(28px);
-      border: 1px solid rgba(143, 203, 98, 0.22);
+      background: rgba(5, 18, 9, 0.88);
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+      border: 1px solid rgba(143, 203, 98, 0.25);
       box-shadow: 
-        0 30px 100px -15px rgba(0, 0, 0, 0.9),
-        0 0 50px rgba(16, 185, 129, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        0 30px 100px -15px rgba(0, 0, 0, 0.95),
+        0 0 60px rgba(16, 185, 129, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
 
     /* Radar Scanning Ray */
@@ -82,16 +83,7 @@
       transform-origin: center center;
     }
 
-    /* Glowing Pulse */
-    @keyframes pulseAura {
-      0%, 100% { transform: scale(1); opacity: 0.4; }
-      50% { transform: scale(1.08); opacity: 0.8; }
-    }
-    .fp-pulse-glow {
-      animation: pulseAura 3s infinite ease-in-out;
-    }
-
-    /* Ticker scroll */
+    /* Ticker animation */
     @keyframes liveTicker {
       0% { transform: translateX(0); }
       100% { transform: translateX(-50%); }
@@ -105,17 +97,11 @@
       animation-play-state: paused;
     }
 
-    /* Hologram Grid Effect */
-    .fp-holo-grid {
-      background-image: radial-gradient(rgba(143, 203, 98, 0.2) 1px, transparent 1px);
-      background-size: 20px 20px;
-    }
-
     /* Range slider custom styling */
     input[type=range].fp-cockpit-slider {
       -webkit-appearance: none;
       appearance: none;
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.12);
       height: 8px;
       border-radius: 9999px;
       outline: none;
@@ -123,30 +109,66 @@
     input[type=range].fp-cockpit-slider::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       background: #8FCB62;
-      box-shadow: 0 0 16px #8FCB62, inset 0 0 4px #041007;
+      box-shadow: 0 0 20px #8FCB62, inset 0 0 6px #041007;
       cursor: pointer;
       border: 3px solid #041007;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
     input[type=range].fp-cockpit-slider::-webkit-slider-thumb:hover {
-      transform: scale(1.2);
-      box-shadow: 0 0 24px #8FCB62;
+      transform: scale(1.25);
+      box-shadow: 0 0 30px #8FCB62;
     }
 
-    /* Subtle Scanline Overlay */
-    .fp-scanlines {
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
-      background-size: 100% 4px;
+    /* Interactive Comparison Splitter */
+    .fp-split-container {
+      position: relative;
+      overflow: hidden;
+      user-select: none;
+    }
+    .fp-split-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      clip-path: polygon(0 0, var(--split-pos) 0, var(--split-pos) 100%, 0 100%);
+    }
+    .fp-split-handle {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: var(--split-pos);
+      width: 4px;
+      background: #8FCB62;
+      box-shadow: 0 0 16px rgba(143, 203, 98, 0.9);
+      cursor: ew-resize;
+      transform: translateX(-50%);
+    }
+
+    /* Hologram Grid Effect */
+    .fp-holo-grid {
+      background-image: radial-gradient(rgba(143, 203, 98, 0.25) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+
+    /* Confetti Canvas */
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
       pointer-events: none;
+      z-index: 100;
     }
   </style>
 </head>
 
 <body class="min-h-full font-sans fp-cosmic-bg text-cream selection:bg-leaf/40 selection:text-white relative overflow-x-hidden">
+
+  <!-- Confetti Canvas for Milestone Celebrations -->
+  <canvas id="confetti-canvas"></canvas>
 
   <!-- Floating Canvas for Golden Spores & Bio-particles -->
   <canvas id="spore-canvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
@@ -159,7 +181,7 @@
       
       <!-- Sequence A -->
       <div class="inline-flex items-center gap-2.5">
-        <span class="w-2.5 h-2.5 rounded-full bg-leaf shadow-[0_0_8px_#8FCB62] animate-ping"></span>
+        <span class="w-2.5 h-2.5 rounded-full bg-leaf shadow-[0_0_10px_#8FCB62] animate-ping"></span>
         <span class="font-bold text-cream">MZUZU UNIVERSITY ICT EXHIBITION 2026:</span>
         <span class="text-amber-300 font-bold px-2 py-0.5 rounded bg-amber-400/15 border border-amber-400/30">1ST PLACE WINNER</span>
       </div>
@@ -177,7 +199,7 @@
       <span class="text-white/20">&bull;</span>
       <div class="inline-flex items-center gap-2">
         <i data-lucide="cloud-rain" class="w-3.5 h-3.5 text-sky-300"></i>
-        <span>DCCMS STATION #DCCMS-MZ-BOMA: <strong>Rain Probability 82% &bull; 44mm Expected</strong></span>
+        <span>DCCMS STATION #DCCMS-MZ-BOMA: <strong>Rain Probability 84% &bull; 44mm Expected</strong></span>
       </div>
       <span class="text-white/20">&bull;</span>
       <div class="inline-flex items-center gap-2">
@@ -193,7 +215,7 @@
 
       <!-- Sequence B (Looping) -->
       <div class="inline-flex items-center gap-2.5">
-        <span class="w-2.5 h-2.5 rounded-full bg-leaf shadow-[0_0_8px_#8FCB62] animate-ping"></span>
+        <span class="w-2.5 h-2.5 rounded-full bg-leaf shadow-[0_0_10px_#8FCB62] animate-ping"></span>
         <span class="font-bold text-cream">MZUZU UNIVERSITY ICT EXHIBITION 2026:</span>
         <span class="text-amber-300 font-bold px-2 py-0.5 rounded bg-amber-400/15 border border-amber-400/30">1ST PLACE WINNER</span>
       </div>
@@ -221,12 +243,12 @@
       <!-- Logo & Sovereign Identity -->
       <a href="/" class="flex items-center gap-3.5 group">
         <div class="relative">
-          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-leaf via-emerald-500 to-forest-950 p-0.5 shadow-[0_0_25px_rgba(143,203,98,0.35)] group-hover:shadow-[0_0_35px_rgba(143,203,98,0.6)] transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-leaf via-emerald-500 to-forest-950 p-0.5 shadow-[0_0_25px_rgba(143,203,98,0.35)] group-hover:shadow-[0_0_40px_rgba(143,203,98,0.65)] transition-all">
             <div class="w-full h-full bg-forest-950 rounded-[14px] flex items-center justify-center text-leaf group-hover:scale-105 transition-transform">
               <i data-lucide="sprout" class="w-6 h-6 stroke-[2.3]"></i>
             </div>
           </div>
-          <span class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-amber-400 border-2 border-forest-950 shadow-sm"></span>
+          <span class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-amber-400 border-2 border-forest-950 shadow-sm animate-pulse"></span>
         </div>
 
         <div>
@@ -244,31 +266,31 @@
       <!-- Quick Desk Navigation -->
       <nav class="hidden lg:flex items-center gap-8 text-xs font-bold text-cream/75 tracking-wide">
         <a href="#cockpit" class="hover:text-leaf transition-colors flex items-center gap-1.5 py-1">
-          <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-leaf"></i> Interactive Cockpit
+          <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-leaf"></i> Command Cockpit
         </a>
-        <a href="#district-map" class="hover:text-leaf transition-colors flex items-center gap-1.5 py-1">
-          <i data-lucide="map-pin" class="w-3.5 h-3.5 text-sky-400"></i> District Mesh
+        <a href="#time-machine" class="hover:text-leaf transition-colors flex items-center gap-1.5 py-1">
+          <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i> 120-Day Simulator
+        </a>
+        <a href="#interactive-split" class="hover:text-leaf transition-colors flex items-center gap-1.5 py-1">
+          <i data-lucide="split" class="w-3.5 h-3.5 text-sky-400"></i> The Shift
         </a>
         <a href="#mlimi-ai" class="hover:text-leaf transition-colors flex items-center gap-1.5 py-1">
           <i data-lucide="bot" class="w-3.5 h-3.5 text-purple-400"></i> Mlimi Neural AI
-        </a>
-        <a href="#matrix-proof" class="hover:text-leaf transition-colors flex items-center gap-1.5 py-1">
-          <i data-lucide="award" class="w-3.5 h-3.5 text-amber-400"></i> Validation &amp; ROI
         </a>
       </nav>
 
       <!-- Instant Gateway Launchers -->
       <div class="flex items-center gap-3">
-        <!-- Interactive Acoustic Chime Toggle -->
-        <button id="synth-sound-toggle"
+        <!-- Ambient Atmospheric Sound Toggle -->
+        <button id="ambient-audio-toggle"
                 class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-forest-900/80 border border-white/10 text-xs font-semibold text-cream hover:border-leaf/50 hover:text-leaf transition-all"
-                title="Toggle Web Audio Synths">
-          <i data-lucide="volume-2" class="w-4 h-4 text-leaf"></i>
-          <span class="text-[11px] font-mono">Audio Synth</span>
+                title="Toggle Ambient Agricultural Soundscape">
+          <i data-lucide="headphones" class="w-4 h-4 text-leaf"></i>
+          <span class="text-[11px] font-mono" id="ambient-audio-label">Atmosphere: OFF</span>
         </button>
 
         <a href="{% url 'accounts:login' %}?role=farmer"
-           class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-leaf to-emerald-500 text-forest-950 font-display font-extrabold text-xs flex items-center gap-2 shadow-[0_0_20px_rgba(143,203,98,0.35)] hover:shadow-[0_0_30px_rgba(143,203,98,0.6)] hover:scale-105 active:scale-95 transition-all">
+           class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-leaf to-emerald-500 text-forest-950 font-display font-extrabold text-xs flex items-center gap-2 shadow-[0_0_20px_rgba(143,203,98,0.35)] hover:shadow-[0_0_35px_rgba(143,203,98,0.65)] hover:scale-105 active:scale-95 transition-all">
           <i data-lucide="log-in" class="w-4 h-4 text-forest-950"></i> Farmer Portal
         </a>
 
@@ -292,7 +314,7 @@
         <i data-lucide="trophy" class="w-4 h-4 text-amber-300"></i>
         <span>Mzuzu University ICT Exhibition 2026 Champion</span>
         <span class="text-white/40">&bull;</span>
-        <span class="text-cream">Architects: Brian Nankhuni &amp; Miriam Chiphaka</span>
+        <span class="text-cream">Lead Architects: Brian Nankhuni &amp; Miriam Chiphaka</span>
       </div>
 
       <!-- Core Vision Heading -->
@@ -310,7 +332,7 @@
 
       <!-- Instant Interactive Demo Prompt -->
       <div class="flex flex-wrap items-center justify-center gap-3 pt-2 text-xs font-mono">
-        <span class="text-cream/50">Instant Sandbox Passwords:</span>
+        <span class="text-cream/50">Instant Sandbox Access:</span>
         <a href="{% url 'accounts:login' %}?role=farmer" class="px-3 py-1.5 rounded-lg bg-forest-900 border border-leaf/30 text-leaf hover:bg-leaf/10 transition-colors inline-flex items-center gap-1.5">
           <i data-lucide="user" class="w-3.5 h-3.5"></i> Farmer: <strong>naffe</strong> / <strong>Password123!</strong>
         </a>
@@ -335,7 +357,7 @@
             <span class="w-3 h-3 rounded-full bg-leaf/80"></span>
             <span class="ml-3 font-mono text-xs text-cream/70 font-semibold tracking-wide flex items-center gap-2">
               <i data-lucide="terminal" class="w-3.5 h-3.5 text-leaf"></i>
-              FARMPULSE_COMMAND_DESK_v4.2 // LILONGWE-MZUZU DADO NETWORK
+              FARMPULSE_COMMAND_DESK_v4.5 // LILONGWE-MZUZU DADO NETWORK
             </span>
           </div>
 
@@ -343,7 +365,7 @@
             <span class="px-2.5 py-1 rounded-md bg-forest-900 border border-white/10 flex items-center gap-1.5 text-leaf">
               <span class="w-1.5 h-1.5 rounded-full bg-leaf animate-ping"></span> LIVE TELEMETRY
             </span>
-            <span id="cockpit-clock" class="text-cream font-bold">15:42:00 CAT</span>
+            <span id="cockpit-clock" class="text-cream font-bold">15:52:00 CAT</span>
           </div>
         </div>
 
@@ -525,7 +547,7 @@
 
               <!-- Layer Toggles -->
               <div class="space-y-2 pt-2">
-                <span class="text-xs font-mono text-cream/60 block">Select Spectral Spectral Layer:</span>
+                <span class="text-xs font-mono text-cream/60 block">Select Spectral Layer:</span>
                 <div class="flex gap-2">
                   <button onclick="setSatLayer('ndvi', this)" class="sat-layer-btn active px-3 py-2 rounded-xl border border-leaf bg-leaf/20 text-leaf text-xs font-bold font-mono">
                     NDVI Chlorophyll
@@ -911,7 +933,195 @@
   </section>
 
   <!-- ========================================================================= -->
-  <!-- 4. INTERACTIVE DISTRICT MESH MAP OF MALAWI                                -->
+  <!-- 4. NEW WOW FEATURE: THE 120-DAY CROP SEASON SIMULATOR TIME MACHINE       -->
+  <!-- ========================================================================= -->
+  <section id="time-machine" class="py-24 px-4 sm:px-6 lg:px-8 border-t border-white/5 relative bg-forest-900/40">
+    <div class="max-w-6xl mx-auto space-y-10">
+
+      <div class="text-center space-y-3 max-w-3xl mx-auto">
+        <span class="px-3.5 py-1 rounded-full text-xs font-mono font-bold bg-amber-400/15 border border-amber-400/30 text-amber-300 uppercase">
+          Dynamic Chronology Engine
+        </span>
+        <h2 class="text-3xl sm:text-5xl font-display font-black text-cream">
+          Scrub Through an Entire 120-Day Crop Season
+        </h2>
+        <p class="text-sm sm:text-base text-cream/70">
+          Drag the time slider below. Watch how FarmPulse guides a farmer from seedbed preparation to harvest celebration with real-time financial tracking and AI interventions.
+        </p>
+      </div>
+
+      <!-- Time Scrubber Box -->
+      <div class="fp-cockpit-frame rounded-3xl p-6 sm:p-10 space-y-8">
+        
+        <!-- Scrubber Header -->
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-white/10">
+          <div>
+            <span class="text-xs font-mono text-leaf font-bold uppercase tracking-wider">Active Season Timeline: 2025/2026 Cycle</span>
+            <div class="text-2xl sm:text-3xl font-display font-black text-cream mt-0.5" id="tm-stage-title">
+              Day 45: Vegetative Knee-Height &bull; Top-Dress Intervention
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-mono text-cream/50 uppercase block">Selected Horizon</span>
+            <span class="text-3xl font-display font-black text-amber-300 font-mono" id="tm-day-counter">DAY 45 / 120</span>
+          </div>
+        </div>
+
+        <!-- The Interactive Range Scrubber -->
+        <div class="space-y-3">
+          <input type="range" min="1" max="120" step="1" value="45" id="tm-slider" class="w-full fp-cockpit-slider">
+          <div class="flex justify-between text-[11px] font-mono text-cream/50">
+            <span>Day 1 (Land Prep)</span>
+            <span>Day 30 (Germination)</span>
+            <span>Day 60 (Flowering)</span>
+            <span>Day 90 (Grain Fill)</span>
+            <span class="text-leaf font-bold">Day 120 (Harvest!)</span>
+          </div>
+        </div>
+
+        <!-- Dynamic Time Machine Output Panel -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+          
+          <!-- State 1: Field Condition -->
+          <div class="p-5 rounded-2xl bg-forest-950/80 border border-white/10 space-y-2">
+            <div class="flex items-center gap-2 text-xs font-mono text-sky-400 font-bold uppercase">
+              <i data-lucide="sprout" class="w-4 h-4"></i>
+              <span>Canopy Status</span>
+            </div>
+            <div class="text-lg font-bold text-cream" id="tm-canopy-state">Rapid Vegetative Spurt</div>
+            <p class="text-xs text-cream/70 leading-relaxed" id="tm-canopy-desc">
+              Canopy ground cover reaches 65%. Roots tap deeper into subsoil moisture. Stand count confirmed at 48,000 plants/ha.
+            </p>
+          </div>
+
+          <!-- State 2: Automated AI Advisory -->
+          <div class="p-5 rounded-2xl bg-forest-950/80 border border-purple-400/30 space-y-2">
+            <div class="flex items-center gap-2 text-xs font-mono text-purple-300 font-bold uppercase">
+              <i data-lucide="bot" class="w-4 h-4"></i>
+              <span>Mlimi AI Action Prompt</span>
+            </div>
+            <div class="text-lg font-bold text-cream" id="tm-advisory-title">Apply Top-Dress Urea Now</div>
+            <p class="text-xs text-cream/70 leading-relaxed" id="tm-advisory-desc">
+              DCCMS forecasts 28mm incoming rain in 36 hours. Apply 50kg Urea per acre ahead of rainfall for maximum nitrogen absorption.
+            </p>
+          </div>
+
+          <!-- State 3: Financial & Profit Ledger -->
+          <div class="p-5 rounded-2xl bg-leaf/10 border border-leaf/40 space-y-2">
+            <div class="flex items-center gap-2 text-xs font-mono text-leaf font-bold uppercase">
+              <i data-lucide="wallet" class="w-4 h-4"></i>
+              <span>Financial Ledger Balance</span>
+            </div>
+            <div class="text-2xl font-display font-black text-leaf" id="tm-finance-val">Cost: -MWK 380,000</div>
+            <div class="text-xs text-leaf/80 font-mono" id="tm-finance-note">
+              Inputs deployed: D-Compound, SC403 seed, weeding labour.
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 5. NEW WOW FEATURE: INTERACTIVE BEFORE VS AFTER SPLIT SCREEN SLIDER      -->
+  <!-- ========================================================================= -->
+  <section id="interactive-split" class="py-24 px-4 sm:px-6 lg:px-8 border-t border-white/5 relative">
+    <div class="max-w-6xl mx-auto space-y-12">
+      
+      <div class="text-center space-y-3 max-w-3xl mx-auto">
+        <span class="px-3.5 py-1 rounded-full text-xs font-mono font-bold bg-sky-400/15 border border-sky-400/30 text-sky-400 uppercase">
+          Interactive Reality Contrast
+        </span>
+        <h2 class="text-3xl sm:text-5xl font-display font-black text-cream">
+          Drag the Slider: The Agricultural Transformation
+        </h2>
+        <p class="text-sm sm:text-base text-cream/70">
+          Slide left and right to reveal the stark contrast between traditional guesswork and the sovereign FarmPulse engineered ecosystem.
+        </p>
+      </div>
+
+      <!-- Draggable Split Container -->
+      <div class="fp-split-container fp-cockpit-frame rounded-3xl min-h-[420px] relative border border-white/20 shadow-2xl" id="split-box">
+        
+        <!-- Right Background Layer: "ENGINEERED WITH FARMPULSE" -->
+        <div class="p-8 sm:p-12 bg-gradient-to-br from-forest-950 via-forest-900 to-forest-850 h-full flex flex-col justify-between">
+          <div class="max-w-md ml-auto text-right space-y-4">
+            <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-leaf/20 border border-leaf text-leaf">
+              ENGINEERED BY FARMPULSE
+            </span>
+            <h3 class="text-2xl sm:text-3xl font-display font-black text-leaf">Data-Driven Commercial Enterprise</h3>
+            <ul class="space-y-3 text-xs sm:text-sm text-cream/90 font-medium">
+              <li class="flex items-center justify-end gap-2">
+                <span>DCCMS calibrated planting moisture windows</span>
+                <i data-lucide="check" class="w-4 h-4 text-leaf"></i>
+              </li>
+              <li class="flex items-center justify-end gap-2">
+                <span>Optimized NPK fertilizer ratios per crop root-zone</span>
+                <i data-lucide="check" class="w-4 h-4 text-leaf"></i>
+              </li>
+              <li class="flex items-center justify-end gap-2">
+                <span>Direct WFP &amp; central market arbitrage (+24% profit)</span>
+                <i data-lucide="check" class="w-4 h-4 text-leaf"></i>
+              </li>
+              <li class="flex items-center justify-end gap-2">
+                <span>Instant automated mobile money drought insurance</span>
+                <i data-lucide="check" class="w-4 h-4 text-leaf"></i>
+              </li>
+            </ul>
+            <div class="pt-4 font-mono text-xl sm:text-2xl font-black text-leaf">
+              NET HARVEST PROFIT: MWK 4,308,000
+            </div>
+          </div>
+        </div>
+
+        <!-- Left Overlay Layer: "TRADITIONAL GUESSWORK" (Clipped) -->
+        <div class="fp-split-overlay p-8 sm:p-12 bg-gradient-to-br from-[#1c0808] via-[#120404] to-[#0a0202] flex flex-col justify-between">
+          <div class="max-w-md space-y-4">
+            <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-rose-500/20 border border-rose-500 text-rose-400">
+              TRADITIONAL SUBSISTENCE GUESSWORK
+            </span>
+            <h3 class="text-2xl sm:text-3xl font-display font-black text-rose-400">Unpredictable Climate Gambling</h3>
+            <ul class="space-y-3 text-xs sm:text-sm text-rose-200/80 font-medium">
+              <li class="flex items-center gap-2">
+                <i data-lucide="x" class="w-4 h-4 text-rose-400"></i>
+                <span>Planting on fixed calendar dates into dry soil</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="x" class="w-4 h-4 text-rose-400"></i>
+                <span>Wasting limited cash on incorrect fertilizer blends</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="x" class="w-4 h-4 text-rose-400"></i>
+                <span>Exploited at farmgate by predatory middlemen</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="x" class="w-4 h-4 text-rose-400"></i>
+                <span>100% total financial wipeout when dry spells hit</span>
+              </li>
+            </ul>
+            <div class="pt-4 font-mono text-xl sm:text-2xl font-black text-rose-400">
+              NET HARVEST PROFIT: MWK 380,000 (Or Loss)
+            </div>
+          </div>
+        </div>
+
+        <!-- Draggable Handle -->
+        <div class="fp-split-handle flex items-center justify-center" id="split-drag-bar">
+          <div class="w-9 h-9 rounded-full bg-leaf text-forest-950 flex items-center justify-center font-bold text-xs shadow-xl shadow-leaf/50">
+            <i data-lucide="chevrons-left-right" class="w-4 h-4"></i>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 6. INTERACTIVE DISTRICT MESH MAP OF MALAWI                                -->
   <!-- ========================================================================= -->
   <section id="district-map" class="py-20 px-4 sm:px-6 lg:px-8 relative border-t border-white/5">
     <div class="max-w-6xl mx-auto space-y-10">
@@ -981,16 +1191,16 @@
   </section>
 
   <!-- ========================================================================= -->
-  <!-- 5. MLIMI AI NEURAL ADVISORY ENGINE (LIVE INTERACTIVE TEST)                 -->
+  <!-- 7. MLIMI AI NEURAL ADVISORY ENGINE (LIVE INTERACTIVE TEST & CUSTOM PROMPT)-->
   <!-- ========================================================================= -->
   <section id="mlimi-ai" class="py-20 px-4 sm:px-6 lg:px-8 border-t border-white/5 bg-forest-900/30">
     <div class="max-w-4xl mx-auto space-y-8">
       
       <div class="text-center space-y-3">
-        <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-purple-400/15 border border-purple-400/30 text-purple-300 uppercase">
+        <span class="px-3.5 py-1 rounded-full text-xs font-mono font-bold bg-purple-400/15 border border-purple-400/30 text-purple-300 uppercase">
           Mlimi AI Agronomic Neural Model
         </span>
-        <h2 class="text-3xl sm:text-4xl font-display font-black text-cream">
+        <h2 class="text-3xl sm:text-5xl font-display font-black text-cream">
           Ask Mlimi AI Any Malawian Farming Question
         </h2>
         <p class="text-xs sm:text-sm text-cream/70">
@@ -1011,14 +1221,31 @@
         </button>
       </div>
 
-      <!-- Live AI Output Box -->
+      <!-- Live AI Output Box with Custom Input -->
       <div class="fp-cockpit-frame rounded-2xl p-6 space-y-4">
-        <div class="flex items-center gap-2.5 pb-3 border-b border-white/10 text-xs font-mono text-purple-300 font-bold">
-          <i data-lucide="bot" class="w-4 h-4"></i>
-          <span>MLIMI AGRI-AGENT RESPONSE // CHICHEWA &amp; ENGLISH SYNC</span>
+        <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs font-mono text-purple-300 font-bold">
+          <div class="flex items-center gap-2">
+            <i data-lucide="bot" class="w-4 h-4"></i>
+            <span>MLIMI AGRI-AGENT // CHICHEWA &amp; ENGLISH SYNC</span>
+          </div>
+          <button onclick="speakMlimiResponse()" id="mlimi-speech-btn" class="text-[11px] text-cream/60 hover:text-leaf flex items-center gap-1">
+            <i data-lucide="volume-2" class="w-3.5 h-3.5 text-leaf"></i> Read Aloud
+          </button>
         </div>
-        <div id="mlimi-output-text" class="text-sm font-mono text-cream/90 leading-relaxed min-h-[90px]">
-          Click one of the questions above to test Mlimi AI's real-time agronomic guidance engine...
+
+        <div id="mlimi-output-text" class="text-sm font-mono text-cream/90 leading-relaxed min-h-[90px] whitespace-pre-line">
+          Click one of the questions above or type your own question below to test Mlimi AI's real-time agronomic guidance engine...
+        </div>
+
+        <!-- Custom Typing Box -->
+        <div class="flex items-center gap-2 pt-2 border-t border-white/10">
+          <input type="text" id="mlimi-custom-input" 
+                 class="flex-1 bg-forest-950/80 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-cream outline-none focus:border-purple-400 transition-colors font-mono" 
+                 placeholder="Type custom question (e.g. 'How much seed per ha for groundnuts?')">
+          <button onclick="askCustomMlimi()" 
+                  class="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs font-mono flex items-center gap-1.5">
+            <i data-lucide="send" class="w-3.5 h-3.5"></i> Ask
+          </button>
         </div>
       </div>
 
@@ -1026,87 +1253,7 @@
   </section>
 
   <!-- ========================================================================= -->
-  <!-- 6. THE REVOLUTIONARY CONTRAST: BEFORE VS AFTER FARMPULSE                  -->
-  <!-- ========================================================================= -->
-  <section id="matrix-proof" class="py-24 px-4 sm:px-6 lg:px-8 border-t border-white/5">
-    <div class="max-w-6xl mx-auto space-y-12">
-      
-      <div class="text-center space-y-3">
-        <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-leaf/15 border border-leaf/30 text-leaf uppercase">
-          The Paradigm Shift
-        </span>
-        <h2 class="text-3xl sm:text-5xl font-display font-black text-cream">
-          Traditional Guesswork vs The FarmPulse Era
-        </h2>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        
-        <!-- Left: The Old Way -->
-        <div class="p-8 rounded-3xl bg-rose-950/20 border border-rose-500/30 space-y-6">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold">
-              <i data-lucide="x" class="w-5 h-5"></i>
-            </div>
-            <h3 class="text-xl font-display font-bold text-rose-300">Traditional Malawian Farming</h3>
-          </div>
-
-          <ul class="space-y-4 text-xs sm:text-sm text-cream/70">
-            <li class="flex items-start gap-3">
-              <i data-lucide="x-circle" class="w-4 h-4 text-rose-400 shrink-0 mt-1"></i>
-              <span><strong>Calendar Guesswork:</strong> Planting on fixed calendar dates regardless of soil moisture, leading to seed burn and replanting expenses.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <i data-lucide="x-circle" class="w-4 h-4 text-rose-400 shrink-0 mt-1"></i>
-              <span><strong>Fertilizer Waste:</strong> Spending limited cash on wrong NPK ratios without matching crop nutrient uptake curves.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <i data-lucide="x-circle" class="w-4 h-4 text-rose-400 shrink-0 mt-1"></i>
-              <span><strong>Middleman Exploitation:</strong> Forced to sell at rock-bottom farmgate rates due to zero market visibility.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <i data-lucide="x-circle" class="w-4 h-4 text-rose-400 shrink-0 mt-1"></i>
-              <span><strong>Zero Safety Net:</strong> When severe droughts strike (e.g. El Niño), the farmer loses 100% of their investment with no insurance.</span>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Right: The FarmPulse Way -->
-        <div class="p-8 rounded-3xl bg-leaf/10 border border-leaf/40 space-y-6 shadow-[0_0_50px_rgba(143,203,98,0.15)]">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-leaf text-forest-950 flex items-center justify-center font-bold">
-              <i data-lucide="check" class="w-5 h-5"></i>
-            </div>
-            <h3 class="text-xl font-display font-bold text-leaf">Engineered with FarmPulse OS</h3>
-          </div>
-
-          <ul class="space-y-4 text-xs sm:text-sm text-cream/90">
-            <li class="flex items-start gap-3">
-              <i data-lucide="check-circle-2" class="w-4 h-4 text-leaf shrink-0 mt-1"></i>
-              <span><strong>DCCMS Satellite Calibration:</strong> Planting only when cumulative rainfall passes the 35mm threshold with 80%+ forecast assurance.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <i data-lucide="check-circle-2" class="w-4 h-4 text-leaf shrink-0 mt-1"></i>
-              <span><strong>Optimized Input Dollars:</strong> Precise acreage allocations balancing food security maize and high-margin cash legumes.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <i data-lucide="check-circle-2" class="w-4 h-4 text-leaf shrink-0 mt-1"></i>
-              <span><strong>Transport Arbitrage:</strong> Calculating shipping profits so farmers capture 20% to 35% higher prices in central market hubs.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <i data-lucide="check-circle-2" class="w-4 h-4 text-leaf shrink-0 mt-1"></i>
-              <span><strong>Instant Mobile Payouts:</strong> Automated drought payouts triggered by satellite indices directly to Airtel Money &amp; Mpamba.</span>
-            </li>
-          </ul>
-        </div>
-
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ========================================================================= -->
-  <!-- 7. INSTITUTIONAL ACCREDITATION FOOTER                                      -->
+  <!-- 8. INSTITUTIONAL ACCREDITATION FOOTER                                      -->
   <!-- ========================================================================= -->
   <footer class="bg-forest-950 border-t border-white/10 py-12 px-4 sm:px-6 lg:px-8 text-xs text-cream/60">
     <div class="max-w-7xl mx-auto space-y-8">
@@ -1143,7 +1290,7 @@
   </footer>
 
   <!-- ========================================================================= -->
-  <!-- 8. HIGH-IMPACT SCRIPTS & SYNTHESIZERS                                     -->
+  <!-- 9. HIGH-IMPACT SCRIPTS, SYNTHESIZERS & CONFETTI                           -->
   <!-- ========================================================================= -->
   <script>
     // Initialize Lucide Icons
@@ -1168,10 +1315,11 @@
     updateClock();
 
     // =========================================================================
-    // Web Audio Synthesizer (Zero External Audio Files)
+    // Web Audio Synthesizer & Ambient Agricultural Soundscape
     // =========================================================================
     let audioCtx = null;
-    let audioEnabled = true;
+    let ambientDrone = null;
+    let isAmbientPlaying = false;
 
     function getAudioContext() {
       if (!audioCtx) {
@@ -1181,7 +1329,6 @@
     }
 
     function playBeep(freq = 800, type = 'sine', duration = 0.08) {
-      if (!audioEnabled) return;
       try {
         const ctx = getAudioContext();
         if (ctx.state === 'suspended') ctx.resume();
@@ -1189,7 +1336,7 @@
         const gain = ctx.createGain();
         osc.type = type;
         osc.frequency.setValueAtTime(freq, ctx.currentTime);
-        gain.gain.setValueAtTime(0.04, ctx.currentTime);
+        gain.gain.setValueAtTime(0.035, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
         osc.connect(gain);
         gain.connect(ctx.destination);
@@ -1199,7 +1346,6 @@
     }
 
     function playSuccessChime() {
-      if (!audioEnabled) return;
       try {
         const ctx = getAudioContext();
         if (ctx.state === 'suspended') ctx.resume();
@@ -1209,7 +1355,7 @@
             const gain = ctx.createGain();
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(freq, ctx.currentTime);
-            gain.gain.setValueAtTime(0.06, ctx.currentTime);
+            gain.gain.setValueAtTime(0.05, ctx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.35);
             osc.connect(gain);
             gain.connect(ctx.destination);
@@ -1220,12 +1366,244 @@
       } catch(e) {}
     }
 
-    document.getElementById('synth-sound-toggle')?.addEventListener('click', function() {
-      audioEnabled = !audioEnabled;
-      this.classList.toggle('text-leaf', audioEnabled);
-      this.classList.toggle('text-rose-400', !audioEnabled);
-      if (audioEnabled) playSuccessChime();
-    });
+    // Toggle Ambient Drone Audio
+    const ambientBtn = document.getElementById('ambient-audio-toggle');
+    const ambientLabel = document.getElementById('ambient-audio-label');
+
+    if (ambientBtn) {
+      ambientBtn.addEventListener('click', () => {
+        const ctx = getAudioContext();
+        if (ctx.state === 'suspended') ctx.resume();
+
+        if (isAmbientPlaying) {
+          if (ambientDrone) {
+            ambientDrone.osc1.stop();
+            ambientDrone.osc2.stop();
+          }
+          isAmbientPlaying = false;
+          ambientLabel.textContent = 'Atmosphere: OFF';
+          ambientBtn.classList.remove('border-leaf', 'text-leaf');
+        } else {
+          // Warm harmonic African dawn drone (110Hz + 164.8Hz + lowpass filter)
+          const osc1 = ctx.createOscillator();
+          const osc2 = ctx.createOscillator();
+          const filter = ctx.createBiquadFilter();
+          const gain = ctx.createGain();
+
+          osc1.type = 'sine';
+          osc1.frequency.setValueAtTime(110, ctx.currentTime); // A2
+          osc2.type = 'triangle';
+          osc2.frequency.setValueAtTime(164.81, ctx.currentTime); // E3
+
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(350, ctx.currentTime);
+
+          gain.gain.setValueAtTime(0.025, ctx.currentTime);
+
+          osc1.connect(filter);
+          osc2.connect(filter);
+          filter.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc1.start();
+          osc2.start();
+
+          ambientDrone = { osc1, osc2, gain };
+          isAmbientPlaying = true;
+          ambientLabel.textContent = 'Atmosphere: LIVE';
+          ambientBtn.classList.add('border-leaf', 'text-leaf');
+          playSuccessChime();
+        }
+      });
+    }
+
+    // =========================================================================
+    // Confetti Engine for Milestones
+    // =========================================================================
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    let confettiCtx = confettiCanvas ? confettiCanvas.getContext('2d') : null;
+    let confettiPieces = [];
+
+    function triggerConfetti() {
+      if (!confettiCanvas || !confettiCtx) return;
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+
+      const colors = ['#8FCB62', '#F5B800', '#38BDF8', '#10B981', '#FFFFFF'];
+      confettiPieces = [];
+      for (let i = 0; i < 90; i++) {
+        confettiPieces.push({
+          x: confettiCanvas.width / 2,
+          y: confettiCanvas.height / 2,
+          vx: (Math.random() - 0.5) * 16,
+          vy: (Math.random() - 0.7) * 16,
+          r: Math.random() * 6 + 3,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          gravity: 0.28,
+          alpha: 1
+        });
+      }
+
+      function renderConfetti() {
+        confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        confettiPieces.forEach((p, idx) => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += p.gravity;
+          p.alpha -= 0.012;
+
+          confettiCtx.fillStyle = p.color;
+          confettiCtx.globalAlpha = Math.max(0, p.alpha);
+          confettiCtx.beginPath();
+          confettiCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          confettiCtx.fill();
+        });
+
+        confettiPieces = confettiPieces.filter(p => p.alpha > 0);
+        if (confettiPieces.length > 0) {
+          requestAnimationFrame(renderConfetti);
+        } else {
+          confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        }
+      }
+      renderConfetti();
+    }
+
+    // =========================================================================
+    // Time Machine 120-Day Simulator Logic
+    // =========================================================================
+    const tmSlider = document.getElementById('tm-slider');
+    const tmDayCounter = document.getElementById('tm-day-counter');
+    const tmStageTitle = document.getElementById('tm-stage-title');
+    const tmCanopyState = document.getElementById('tm-canopy-state');
+    const tmCanopyDesc = document.getElementById('tm-canopy-desc');
+    const tmAdvisoryTitle = document.getElementById('tm-advisory-title');
+    const tmAdvisoryDesc = document.getElementById('tm-advisory-desc');
+    const tmFinanceVal = document.getElementById('tm-finance-val');
+    const tmFinanceNote = document.getElementById('tm-finance-note');
+
+    const seasonMilestones = [
+      {
+        day: 1,
+        title: "Day 1: Precision Soil Bedding & Basal D-Compound",
+        canopy: "Bare Soil Prepared",
+        canopyDesc: "Subsoil moisture verified at 42mm by DCCMS station. Ridges spaced at 75cm x 30cm.",
+        advisoryTitle: "Incorporate Basal Fertiliser",
+        advisoryDesc: "Apply D-Compound at 200kg/ha directly into planting furrow before dropping certified hybrid seed.",
+        finance: "Cost: -MWK 210,000",
+        financeNote: "Tractor ploughing, seed purchase, basal NPK."
+      },
+      {
+        day: 30,
+        title: "Day 30: 94% Emergence & First Weeding Alert",
+        canopy: "Early Vegetative Vigor",
+        canopyDesc: "Uniform seedling emergence across all 3 hectares. Gap filling complete.",
+        advisoryTitle: "Execute First Clean Weeding",
+        advisoryDesc: "Weeds consume 35% of available nitrogen in first 4 weeks. Deploy hired labour now.",
+        finance: "Cost: -MWK 290,000",
+        financeNote: "Hired casual labour for weeding and gap fill."
+      },
+      {
+        day: 45,
+        title: "Day 45: Knee-Height Growth & Top-Dress Urea",
+        canopy: "Rapid Vegetative Expansion",
+        canopyDesc: "Canopy reaches 65% ground coverage. Satellite flags vigorous nitrogen uptake.",
+        advisoryTitle: "Apply Top-Dress Nitrogen",
+        advisoryDesc: "DCCMS radar forecasts incoming rain in 36 hours. Apply Urea 46% N at knee height.",
+        finance: "Cost: -MWK 380,000",
+        financeNote: "Urea 46% top-dress application deployed."
+      },
+      {
+        day: 75,
+        title: "Day 75: Flowering, Tasseling & Moisture Guard",
+        canopy: "Full Silking & Flowering",
+        canopyDesc: "Tassels emerge across 92% of crop. Most moisture-critical phase of season.",
+        advisoryTitle: "Guard Against Dry-Spell Lodging",
+        advisoryDesc: "Scout for Fall Armyworm around ear husks. Parametric drought index active.",
+        finance: "Cost: -MWK 440,000",
+        financeNote: "Pest control & irrigation maintenance."
+      },
+      {
+        day: 100,
+        title: "Day 100: Physiological Black-Layer Maturity",
+        canopy: "Golden Grain Fill Phase",
+        canopyDesc: "Cob kernels reach physiological maturity. Black layer visible at grain base. Drying initiated.",
+        advisoryTitle: "Prepare Hermetic Storage",
+        advisoryDesc: "Order PICS hermetic storage bags now to eliminate post-harvest weevil losses without pesticides.",
+        finance: "Cost: -MWK 490,000",
+        financeNote: "Storage bags procured."
+      },
+      {
+        day: 120,
+        title: "Day 120: Harvest Realized & Season Report Generated!",
+        canopy: "100% Harvest Complete & Bins Filled",
+        canopyDesc: "148 Bags (50kg) weighed and graded. Verified 96% Plan Accuracy Score.",
+        advisoryTitle: "Sell Directly to Mzuzu Central Hub",
+        advisoryDesc: "Prices at Mzuzu Tsoka hit MWK 840/kg. Book regional transport for +24% net gain.",
+        finance: "PROFIT: +MWK 4,308,000",
+        financeNote: "Total harvest sales: MWK 5.2M minus MWK 900k input costs."
+      }
+    ];
+
+    if (tmSlider) {
+      tmSlider.addEventListener('input', (e) => {
+        playBeep(650 + (e.target.value * 6), 'triangle', 0.02);
+        const day = parseInt(e.target.value);
+        tmDayCounter.textContent = `DAY ${day} / 120`;
+
+        // Find closest milestone
+        let closest = seasonMilestones[0];
+        for (let m of seasonMilestones) {
+          if (day >= m.day) closest = m;
+        }
+
+        tmStageTitle.textContent = closest.title;
+        tmCanopyState.textContent = closest.canopy;
+        tmCanopyDesc.textContent = closest.canopyDesc;
+        tmAdvisoryTitle.textContent = closest.advisoryTitle;
+        tmAdvisoryDesc.textContent = closest.advisoryDesc;
+        tmFinanceVal.textContent = closest.finance;
+        tmFinanceNote.textContent = closest.financeNote;
+
+        if (day === 120) {
+          playSuccessChime();
+          triggerConfetti();
+        }
+      });
+    }
+
+    // =========================================================================
+    // Draggable Before/After Splitter
+    // =========================================================================
+    (function initSplitter() {
+      const box = document.getElementById('split-box');
+      const bar = document.getElementById('split-drag-bar');
+      if (!box || !bar) return;
+
+      let isDragging = false;
+
+      function updateSplit(clientX) {
+        const rect = box.getBoundingClientRect();
+        let pos = ((clientX - rect.left) / rect.width) * 100;
+        pos = Math.max(10, Math.min(90, pos));
+        document.documentElement.style.setProperty('--split-pos', pos + '%');
+      }
+
+      bar.addEventListener('mousedown', () => isDragging = true);
+      window.addEventListener('mouseup', () => isDragging = false);
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        updateSplit(e.clientX);
+      });
+
+      // Touch events
+      bar.addEventListener('touchstart', () => isDragging = true);
+      window.addEventListener('touchend', () => isDragging = false);
+      window.addEventListener('touchmove', (e) => {
+        if (!isDragging || !e.touches[0]) return;
+        updateSplit(e.touches[0].clientX);
+      });
+    })();
 
     // =========================================================================
     // Spore & Pollen Background Canvas
@@ -1523,7 +1901,7 @@
     }
 
     // =========================================================================
-    // Mlimi AI Typewriter Simulation
+    // Mlimi AI Typewriter & Custom Query Engine
     // =========================================================================
     const mlimiResponses = {
       fertilizer: "UPANGIRI WA FERTILISER (UREA 46% N):\nDzina la mbewu: Maize (SC403).\nNthawi: Apply CAN (23% N) kapena Urea pamene chimanga chili pa knee-height (masabata 4-6 pambuyo podzala). Thirirani 50kg pa ekala imodzi panthawi yomwe nthaka ili ndi chinyontho chokwanira.",
@@ -1532,10 +1910,35 @@
     };
 
     let typingTimer = null;
+    let currentMlimiText = "";
 
     function askMlimi(qKey) {
       playSuccessChime();
       const text = mlimiResponses[qKey];
+      typeMlimi(text);
+    }
+
+    function askCustomMlimi() {
+      const q = document.getElementById('mlimi-custom-input').value.trim();
+      if (!q) return;
+      playSuccessChime();
+
+      let reply = "";
+      const lower = q.toLowerCase();
+      if (lower.includes('seed') || lower.includes('mtedza') || lower.includes('groundnut')) {
+        reply = "KUDZALA MTEDZA (GROUNDNUTS CG7/ICGV-SM 90704):\nBoma lanu likuvomereza 80-100 kg ya mbewu pa hectare imodzi pa mtunda wa 75cm x 10cm. Pewani malo oundana ndi madzi chifukwa mtedza umafunika nthaka yopepuka.";
+      } else if (lower.includes('rain') || lower.includes('mvula') || lower.includes('weather')) {
+        reply = "DCCMS RADAR PROJECTION:\nChigawo cha Central ndi Northern Malawi chikulonjeza mvula ya pakati pa 35mm mpaka 55mm sabata ino. Yakwana nthawi yomaliza kulima ndi kukonza mipando.";
+      } else {
+        reply = `UPANGIRI WA MLIMI AI (Funso: "${q}"):\nMalingana ndi kafukufuku wa Chitedze Agricultural Research Station, zokolola zanu zidzakwera kwambiri mukatsatira njira zosungira chinyontho, kudzala mbewu zamtundu woyenera (Hybrid), ndi kuthira fetereza munthawi yake.`;
+      }
+
+      typeMlimi(reply);
+      document.getElementById('mlimi-custom-input').value = '';
+    }
+
+    function typeMlimi(text) {
+      currentMlimiText = text;
       const out = document.getElementById('mlimi-output-text');
       out.textContent = '';
       if (typingTimer) clearInterval(typingTimer);
@@ -1548,7 +1951,19 @@
         } else {
           clearInterval(typingTimer);
         }
-      }, 15);
+      }, 14);
+    }
+
+    function speakMlimiResponse() {
+      if (!('speechSynthesis' in window)) {
+        alert('Text-to-speech not supported on this browser.');
+        return;
+      }
+      if (!currentMlimiText) return;
+      window.speechSynthesis.cancel();
+      const msg = new SpeechSynthesisUtterance(currentMlimiText);
+      msg.rate = 0.92;
+      window.speechSynthesis.speak(msg);
     }
   </script>
 
