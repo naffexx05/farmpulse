@@ -331,14 +331,220 @@
       position:absolute; border-radius:50%;
       border:1px solid rgba(143,203,98,.06); pointer-events:none;
     }
+
+    /* ══ NEW CREATIVE ADDITIONS ══ */
+
+    /* Custom Cursor */
+    body { cursor: none; }
+    #custom-cursor {
+      position:fixed; width:22px; height:22px; border-radius:50%; pointer-events:none;
+      border:2px solid #8FCB62; z-index:10000; transform:translate(-50%,-50%);
+      transition:width .2s,height .2s,border-color .2s,opacity .2s,background .15s;
+      mix-blend-mode:normal;
+    }
+    #custom-cursor.hovering { width:52px;height:52px;border-color:#F5B800;background:rgba(245,184,0,.07); }
+    #cursor-dot {
+      position:fixed; width:5px;height:5px; border-radius:50%; background:#8FCB62;
+      pointer-events:none; z-index:10001; transform:translate(-50%,-50%);
+    }
+    a,button,[onclick],input,.persona-card,.feat-card,.ck-tab,.district-node,
+    .cal-seg,select { cursor:none; }
+
+    /* Constellation Canvas */
+    #constellation-canvas { position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.45; }
+
+    /* ECG Farm Vitals */
+    #ecg-strip {
+      position:fixed;bottom:0;left:0;right:0;height:52px;pointer-events:none;z-index:50;
+      background:linear-gradient(to top,rgba(2,7,4,.95),transparent);
+    }
+
+    /* Satellite HUD */
+    #sat-hud {
+      position:fixed;bottom:68px;right:20px;z-index:200;
+      background:rgba(2,10,20,.92);border:1px solid rgba(56,189,248,.35);
+      border-radius:16px;padding:14px 18px;backdrop-filter:blur(20px);
+      font-family:'JetBrains Mono',monospace;font-size:.68rem;
+      min-width:195px;transform:translateX(260px);
+      transition:transform .45s cubic-bezier(.16,1,.3,1);
+    }
+    #sat-hud.visible { transform:translateX(0); }
+    #sat-toggle {
+      position:fixed;bottom:68px;right:20px;z-index:201;
+      width:44px;height:44px;border-radius:50%;
+      background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.4);
+      display:flex;align-items:center;justify-content:center;cursor:none;
+      transition:all .2s;box-shadow:0 0 20px rgba(56,189,248,.2);
+    }
+    #sat-toggle:hover { background:rgba(56,189,248,.28);transform:scale(1.1); }
+
+    /* Glitch text */
+    @keyframes glitch1 {
+      0%,100%{clip-path:inset(0 0 95% 0);transform:translate(-2px,0)}
+      25%{clip-path:inset(30% 0 50% 0);transform:translate(2px,0)}
+      50%{clip-path:inset(70% 0 10% 0);transform:translate(-1px,0)}
+      75%{clip-path:inset(10% 0 70% 0);transform:translate(1px,0)}
+    }
+    @keyframes glitch2 {
+      0%,100%{clip-path:inset(80% 0 0 0);transform:translate(2px,0)}
+      25%{clip-path:inset(10% 0 70% 0);transform:translate(-2px,0)}
+      50%{clip-path:inset(50% 0 30% 0);transform:translate(1px,0)}
+      75%{clip-path:inset(0 0 80% 0);transform:translate(-1px,0)}
+    }
+    .glitch { position:relative; }
+    .glitch::before,.glitch::after {
+      content:attr(data-text);position:absolute;inset:0;background:transparent;opacity:0;
+      font-weight:inherit;font-size:inherit;line-height:inherit;
+    }
+    .glitch:hover::before { color:#38BDF8;opacity:.7;animation:glitch1 .4s steps(2) infinite; }
+    .glitch:hover::after  { color:#F5B800;opacity:.7;animation:glitch2 .4s steps(2) infinite; }
+
+    /* Scanline overlay */
+    @keyframes scanline { 0%{top:-4%} 100%{top:106%} }
+    .scanline-wrap { position:relative; overflow:hidden; }
+    .scanline-wrap::after {
+      content:'';position:absolute;left:0;right:0;height:3px;pointer-events:none;
+      background:linear-gradient(transparent,rgba(143,203,98,.4),transparent);
+      animation:scanline 3.5s linear infinite; z-index:5;
+    }
+
+    /* Magnetic button */
+    .magnetic { display:inline-flex; transition:transform .3s cubic-bezier(.16,1,.3,1); }
+
+    /* Typewriter quotes */
+    @keyframes twBlink { 0%,100%{opacity:1} 50%{opacity:0} }
+    .tw-cursor { animation:twBlink .6s step-end infinite;color:#8FCB62; }
+
+    /* Floating orbit badges */
+    @keyframes orbit {
+      from { transform:rotate(var(--start)) translateX(var(--r)) rotate(calc(-1*var(--start))); }
+      to   { transform:rotate(calc(var(--start) + 360deg)) translateX(var(--r)) rotate(calc(-360deg - var(--start))); }
+    }
+    .orbit-badge {
+      position:absolute;top:50%;left:50%;
+      border-radius:9999px;font-size:.58rem;font-weight:800;padding:5px 12px;
+      letter-spacing:.08em;text-transform:uppercase;pointer-events:none;white-space:nowrap;
+      animation:orbit var(--dur,20s) linear infinite;
+      transform-origin:0 0;
+    }
+
+    /* Progress rings */
+    .p-ring-bg   { fill:none; stroke:rgba(255,255,255,.07); }
+    .p-ring-fill { fill:none; stroke-linecap:round; transition:stroke-dashoffset 1.6s cubic-bezier(.16,1,.3,1); }
+
+    /* Morphing blob */
+    @keyframes blobMorph {
+      0%,100%{border-radius:60% 40% 30% 70%/60% 30% 70% 40%}
+      25%{border-radius:30% 60% 70% 40%/50% 60% 30% 60%}
+      50%{border-radius:50% 60% 30% 60%/40% 70% 60% 30%}
+      75%{border-radius:70% 30% 60% 40%/60% 40% 50% 60%}
+    }
+    .blob {
+      position:absolute;border-radius:60% 40% 30% 70%/60% 30% 70% 40%;
+      filter:blur(60px);opacity:.08;pointer-events:none;
+      animation:blobMorph 12s ease-in-out infinite;
+    }
+
+    /* Rain */
+    #rain-canvas { position:absolute;inset:0;pointer-events:none;border-radius:inherit;z-index:1; }
+
+    /* Mission control blink */
+    @keyframes missionBlink { 0%,100%{opacity:1} 50%{opacity:.3} }
+    .mission-dot { animation:missionBlink 1.5s ease-in-out infinite; }
+    .mission-dot.d2 { animation-delay:.5s; }
+    .mission-dot.d3 { animation-delay:1s; }
+
+    /* Crop calendar */
+    .cal-seg { cursor:none;transition:all .3s; }
+    .cal-seg:hover { filter:brightness(1.4); }
+
+    /* Audio visualizer */
+    #audio-viz {
+      position:fixed;bottom:52px;left:50%;transform:translateX(-50%);
+      pointer-events:none;z-index:51;display:flex;align-items:flex-end;gap:3px;
+      opacity:0;transition:opacity .4s;
+    }
+    #audio-viz.active { opacity:1; }
+    .viz-bar {
+      width:4px;border-radius:2px;
+      background:linear-gradient(to top,#8FCB62,#38BDF8);
+      animation:vizPulse var(--d,0.4s) ease-in-out infinite alternate;
+    }
+    @keyframes vizPulse { from{height:4px} to{height:var(--h,20px)} }
+
+    /* Scroll ticker quote */
+    .quote-ticker {
+      white-space:nowrap;overflow:hidden;
+      border-top:1px solid rgba(143,203,98,.1);
+      border-bottom:1px solid rgba(143,203,98,.1);
+    }
+    @keyframes quoteTicker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    .quote-track { display:inline-flex;animation:quoteTicker 55s linear infinite; }
+    .quote-track:hover { animation-play-state:paused; }
+
+    /* Particle burst on click */
+    .burst-particle {
+      position:fixed;width:8px;height:8px;border-radius:50%;pointer-events:none;z-index:9998;
+    }
+    @keyframes burstOut {
+      0%  { transform:translate(0,0) scale(1); opacity:1; }
+      100%{ transform:translate(var(--bx),var(--by)) scale(0); opacity:0; }
+    }
   </style>
 </head>
 
 <body>
+  <!-- ── CUSTOM CURSOR ── -->
+  <div id="custom-cursor"></div>
+  <div id="cursor-dot"></div>
+
+  <!-- ── CONSTELLATION CANVAS ── -->
+  <canvas id="constellation-canvas"></canvas>
+
+  <!-- ── CURSOR SPOTLIGHT ── -->
   <div id="cursor-light"></div>
   <div class="grid-overlay"></div>
   <div id="scroll-progress" style="width:0%"></div>
   <canvas id="confetti-canvas"></canvas>
+
+  <!-- ── ECG FARM VITALS ── -->
+  <div id="ecg-strip"><canvas id="ecg-canvas"></canvas></div>
+
+  <!-- ── AUDIO VISUALIZER ── -->
+  <div id="audio-viz">
+    <div class="viz-bar" style="--d:.38s;--h:28px"></div>
+    <div class="viz-bar" style="--d:.52s;--h:18px"></div>
+    <div class="viz-bar" style="--d:.44s;--h:35px"></div>
+    <div class="viz-bar" style="--d:.61s;--h:22px"></div>
+    <div class="viz-bar" style="--d:.33s;--h:40px"></div>
+    <div class="viz-bar" style="--d:.57s;--h:16px"></div>
+    <div class="viz-bar" style="--d:.42s;--h:32px"></div>
+    <div class="viz-bar" style="--d:.48s;--h:25px"></div>
+    <div class="viz-bar" style="--d:.36s;--h:38px"></div>
+    <div class="viz-bar" style="--d:.55s;--h:20px"></div>
+    <div class="viz-bar" style="--d:.40s;--h:30px"></div>
+    <div class="viz-bar" style="--d:.50s;--h:14px"></div>
+  </div>
+
+  <!-- ── SATELLITE HUD ── -->
+  <button id="sat-toggle" onclick="toggleSatHUD()" title="Satellite HUD">
+    <i data-lucide="satellite" class="w-5 h-5" style="color:#38BDF8;stroke-width:2"></i>
+  </button>
+  <div id="sat-hud">
+    <div style="color:rgba(56,189,248,.5);font-size:.6rem;font-weight:800;letter-spacing:.15em;margin-bottom:8px">ESA SENTINEL-2 HUD</div>
+    <div class="flex items-center gap-2 mb-1"><span class="mission-dot w-2 h-2 rounded-full" style="background:#8FCB62;display:inline-block"></span><span style="color:#e8f4e0">Orbit #1082 Active</span></div>
+    <div style="color:rgba(232,244,224,.5);margin-bottom:8px">Path 168 · Row 064</div>
+    <div style="color:rgba(56,189,248,.6);font-size:.62rem;margin-bottom:4px">NEXT PASS IN</div>
+    <div id="sat-countdown" style="color:#38BDF8;font-size:1.3rem;font-weight:800;letter-spacing:.05em">04:23:17</div>
+    <div style="color:rgba(232,244,224,.35);font-size:.6rem;margin-top:4px">Days 5 · 10m MSI · 13 Bands</div>
+    <div class="mt-3 pt-3" style="border-top:1px solid rgba(56,189,248,.15)">
+      <div style="color:rgba(56,189,248,.5);font-size:.6rem;margin-bottom:4px">LAST SCAN · Chikondi Farm</div>
+      <div style="color:#8FCB62;font-weight:800">NDVI 0.72 — OPTIMAL</div>
+      <div class="scanline-wrap mt-2 rounded-lg overflow-hidden" style="height:6px;background:rgba(255,255,255,.08)">
+        <div style="height:100%;width:72%;background:linear-gradient(90deg,#8FCB62,#34d399);border-radius:9999px"></div>
+      </div>
+    </div>
+  </div>
 
   <!-- ═══ LIVE TICKER ═══ -->
   <div class="sticky top-0 z-50 overflow-hidden" style="background:rgba(2,7,4,.97);border-bottom:1px solid rgba(143,203,98,.1);backdrop-filter:blur(20px)">
@@ -1118,6 +1324,252 @@ Chonde sankhani:
     </div>
   </section>
 
+  <!-- ═══ FARMER QUOTES TICKER ═══ -->
+  <div class="quote-ticker py-4" style="background:rgba(4,16,7,.6)">
+    <div class="quote-track text-sm font-medium" style="color:rgba(232,244,224,.5)">
+      <span class="mx-10">🌱 <em style="color:rgba(143,203,98,.8)">"Sentinel-2 showed me exactly which rows needed water. I saved half my irrigation cost."</em> — Brian, Mzuzu</span>
+      <span class="mx-6" style="color:rgba(255,255,255,.12)">✦</span>
+      <span class="mx-10">💰 <em style="color:rgba(245,184,0,.8)">"The market arbitrage tool told me to wait 3 weeks. I earned MWK 120k more on the same harvest."</em> — Agnes, Kasungu</span>
+      <span class="mx-6" style="color:rgba(255,255,255,.12)">✦</span>
+      <span class="mx-10">🛡 <em style="color:rgba(56,189,248,.8)">"MWK 320,000 Airtel Money appeared before I even knew there was a drought. Magic."</em> — Miriam, Kasungu</span>
+      <span class="mx-6" style="color:rgba(255,255,255,.12)">✦</span>
+      <span class="mx-10">📱 <em style="color:rgba(167,139,250,.8)">"I don't have a smartphone. *384# gives me everything I need. In Chichewa."</em> — Yankho, Ntcheu</span>
+      <span class="mx-6" style="color:rgba(255,255,255,.12)">✦</span>
+      <span class="mx-10">🤖 <em style="color:rgba(143,203,98,.8)">"Mlimi AI told me about fall armyworm 11 days before my neighbours noticed it."</em> — James, Dedza</span>
+      <span class="mx-6" style="color:rgba(255,255,255,.12)">✦</span>
+      <!-- Loop B -->
+      <span class="mx-10">🌱 <em style="color:rgba(143,203,98,.8)">"Sentinel-2 showed me exactly which rows needed water. I saved half my irrigation cost."</em> — Brian, Mzuzu</span>
+      <span class="mx-6" style="color:rgba(255,255,255,.12)">✦</span>
+      <span class="mx-10">💰 <em style="color:rgba(245,184,0,.8)">"The market arbitrage tool told me to wait 3 weeks. I earned MWK 120k more on the same harvest."</em> — Agnes, Kasungu</span>
+      <span class="mx-6" style="color:rgba(255,255,255,.12)">✦</span>
+      <span class="mx-10">🛡 <em style="color:rgba(56,189,248,.8)">"MWK 320,000 Airtel Money appeared before I even knew there was a drought. Magic."</em> — Miriam, Kasungu</span>
+      <span class="mx-6" style="color:rgba(255,255,255,.12)">✦</span>
+      <span class="mx-10">📱 <em style="color:rgba(167,139,250,.8)">"I don't have a smartphone. *384# gives me everything I need. In Chichewa."</em> — Yankho, Ntcheu</span>
+      <span class="mx-6" style="color:rgba(255,255,255,.12)">✦</span>
+      <span class="mx-10">🤖 <em style="color:rgba(143,203,98,.8)">"Mlimi AI told me about fall armyworm 11 days before my neighbours noticed it."</em> — James, Dedza</span>
+    </div>
+  </div>
+
+  <!-- ═══ CROP CALENDAR WHEEL ═══ -->
+  <section id="calendar-section" class="py-24 px-6 bg-mesh">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div class="scroll-reveal">
+          <div class="sec-label mb-3">Planting Intelligence</div>
+          <h2 class="sec-title mb-6 glitch warp-title" data-text="Malawi Crop Calendar">Malawi Crop <span style="background:linear-gradient(135deg,#8FCB62,#F5B800);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Calendar</span></h2>
+          <p style="color:rgba(232,244,224,.55);line-height:1.8;margin-bottom:28px;font-size:.95rem">FarmPulse knows exactly when to plant every crop in every district. Hover the wheel to explore Malawi's agricultural seasons — timed to Sentinel-2 satellite data and 10-year DCCMS rainfall patterns.</p>
+          <div id="calendar-info" class="glass rounded-2xl p-6">
+            <div style="font-size:.62rem;color:rgba(143,203,98,.6);font-weight:800;letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px">Hover a month to explore</div>
+            <div id="cal-month" style="font-size:1.6rem;font-weight:900;color:#e8f4e0">November</div>
+            <div id="cal-activity" style="font-size:.88rem;color:rgba(232,244,224,.65);line-height:1.75;margin-top:6px">Land preparation. Ridging and furrow-making. Apply basal compound fertiliser (D-Compound, 23:21:0+4S). First rains begin in Northern Region. Optimal window for maize planting opening.</div>
+            <div class="flex gap-3 mt-4 flex-wrap" id="cal-crops">
+              <span class="px-3 py-1 rounded-full text-xs font-bold" style="background:rgba(143,203,98,.12);border:1px solid rgba(143,203,98,.3);color:#8FCB62">🌽 Maize planting</span>
+              <span class="px-3 py-1 rounded-full text-xs font-bold" style="background:rgba(245,184,0,.08);border:1px solid rgba(245,184,0,.2);color:#F5B800">🌱 Land prep</span>
+            </div>
+          </div>
+        </div>
+        <!-- SVG Crop Calendar Wheel -->
+        <div class="scroll-reveal d2 flex justify-center">
+          <div class="relative" style="width:380px;height:380px">
+            <!-- Morphing blobs behind wheel -->
+            <div class="blob" style="width:200px;height:200px;top:30%;left:20%;background:#8FCB62;animation-duration:14s"></div>
+            <div class="blob" style="width:160px;height:160px;top:10%;left:55%;background:#38BDF8;animation-duration:18s;animation-delay:-6s"></div>
+            <svg id="crop-wheel" viewBox="0 0 380 380" width="380" height="380" style="position:relative;z-index:1;filter:drop-shadow(0 0 40px rgba(143,203,98,.2))">
+              <!-- Segments: 12 months, each 30deg -->
+              <!-- Nov=0, Dec=30, Jan=60, Feb=90, Mar=120, Apr=150, May=180, Jun=210, Jul=240, Aug=270, Sep=300, Oct=330 -->
+              <g id="wheel-segments" transform="translate(190,190)">
+                <!-- Month arc segments, generated by JS -->
+              </g>
+              <!-- Inner rings -->
+              <circle cx="190" cy="190" r="90" fill="rgba(4,16,7,.8)" stroke="rgba(143,203,98,.2)" stroke-width="1"/>
+              <circle cx="190" cy="190" r="60" fill="rgba(2,7,4,.9)" stroke="rgba(143,203,98,.12)" stroke-width="1"/>
+              <!-- Center -->
+              <circle cx="190" cy="190" r="48" fill="rgba(4,16,7,1)" stroke="rgba(143,203,98,.35)" stroke-width="1.5"/>
+              <text x="190" y="184" text-anchor="middle" fill="#8FCB62" font-size="11" font-weight="800" font-family="JetBrains Mono">FARM</text>
+              <text x="190" y="200" text-anchor="middle" fill="#8FCB62" font-size="11" font-weight="800" font-family="JetBrains Mono">PULSE</text>
+              <text x="190" y="213" text-anchor="middle" fill="rgba(232,244,224,.4)" font-size="8" font-family="JetBrains Mono">CALENDAR</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ MISSION CONTROL / SYSTEM STATUS ═══ -->
+  <section class="py-24 px-6">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-16 scroll-reveal">
+        <div class="sec-label mb-3">System Status</div>
+        <h2 class="sec-title glitch warp-title" data-text="Mission Control">Mission <span style="background:linear-gradient(135deg,#38BDF8,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Control</span></h2>
+        <p style="color:rgba(232,244,224,.5);margin-top:12px;font-size:.95rem">All FarmPulse systems nominal. Live telemetry from every node.</p>
+      </div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 scroll-reveal">
+        <!-- System rows -->
+        <div class="glass rounded-2xl p-5 scanline-wrap">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3"><span class="mission-dot w-3 h-3 rounded-full" style="background:#8FCB62;box-shadow:0 0 10px #8FCB62;display:inline-block"></span><span style="font-weight:800;font-size:.85rem;color:#e8f4e0">Sentinel-2 Feed</span></div>
+            <span class="px-2 py-0.5 rounded-lg text-xs font-bold" style="background:rgba(143,203,98,.12);color:#8FCB62">NOMINAL</span>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:rgba(232,244,224,.5);line-height:2">
+            <div>Resolution: <span style="color:#8FCB62">10m MSI</span></div>
+            <div>Last orbit:  <span style="color:#8FCB62">1082</span></div>
+            <div>Uptime:      <span id="sentinel-uptime" style="color:#8FCB62">99.97%</span></div>
+          </div>
+        </div>
+        <div class="glass rounded-2xl p-5 scanline-wrap" style="animation-delay:.3s">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3"><span class="mission-dot d2 w-3 h-3 rounded-full" style="background:#38BDF8;box-shadow:0 0 10px #38BDF8;display:inline-block"></span><span style="font-weight:800;font-size:.85rem;color:#e8f4e0">DCCMS Climate API</span></div>
+            <span class="px-2 py-0.5 rounded-lg text-xs font-bold" style="background:rgba(56,189,248,.12);color:#38BDF8">NOMINAL</span>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:rgba(232,244,224,.5);line-height:2">
+            <div>Stations:  <span style="color:#38BDF8">7 active</span></div>
+            <div>Latency:   <span style="color:#38BDF8">1.2s</span></div>
+            <div>Accuracy:  <span style="color:#38BDF8">94.1%</span></div>
+          </div>
+        </div>
+        <div class="glass rounded-2xl p-5 scanline-wrap">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3"><span class="mission-dot d3 w-3 h-3 rounded-full" style="background:#F5B800;box-shadow:0 0 10px #F5B800;display:inline-block"></span><span style="font-weight:800;font-size:.85rem;color:#e8f4e0">WFP Market API</span></div>
+            <span class="px-2 py-0.5 rounded-lg text-xs font-bold" style="background:rgba(245,184,0,.12);color:#F5B800">NOMINAL</span>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:rgba(232,244,224,.5);line-height:2">
+            <div>Markets:   <span style="color:#F5B800">12 tracked</span></div>
+            <div>Refresh:   <span style="color:#F5B800">every 6h</span></div>
+            <div>Arbitrage: <span style="color:#F5B800">ACTIVE</span></div>
+          </div>
+        </div>
+        <div class="glass rounded-2xl p-5 scanline-wrap">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3"><span class="mission-dot w-3 h-3 rounded-full" style="background:#a78bfa;box-shadow:0 0 10px #a78bfa;display:inline-block"></span><span style="font-weight:800;font-size:.85rem;color:#e8f4e0">Mlimi AI Engine</span></div>
+            <span class="px-2 py-0.5 rounded-lg text-xs font-bold" style="background:rgba(167,139,250,.12);color:#a78bfa">NOMINAL</span>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:rgba(232,244,224,.5);line-height:2">
+            <div>Sessions:  <span style="color:#a78bfa">15 active</span></div>
+            <div>Model:     <span style="color:#a78bfa">FP-Neural v2</span></div>
+            <div>Confidence:<span style="color:#a78bfa"> 94.3%</span></div>
+          </div>
+        </div>
+        <div class="glass rounded-2xl p-5 scanline-wrap">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3"><span class="mission-dot d2 w-3 h-3 rounded-full" style="background:#10B981;box-shadow:0 0 10px #10B981;display:inline-block"></span><span style="font-weight:800;font-size:.85rem;color:#e8f4e0">USSD Gateway</span></div>
+            <span class="px-2 py-0.5 rounded-lg text-xs font-bold" style="background:rgba(16,185,129,.12);color:#10B981">NOMINAL</span>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:rgba(232,244,224,.5);line-height:2">
+            <div>Networks:  <span style="color:#10B981">Airtel + TNM</span></div>
+            <div>Sessions:  <span style="color:#10B981">847 today</span></div>
+            <div>Languages: <span style="color:#10B981">EN · NY · TU</span></div>
+          </div>
+        </div>
+        <div class="glass rounded-2xl p-5 scanline-wrap">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3"><span class="mission-dot d3 w-3 h-3 rounded-full" style="background:#ef4444;box-shadow:0 0 10px #ef4444;display:inline-block"></span><span style="font-weight:800;font-size:.85rem;color:#e8f4e0">Insurance Engine</span></div>
+            <span class="px-2 py-0.5 rounded-lg text-xs font-bold" style="background:rgba(239,68,68,.12);color:#ef4444">WATCHING</span>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:rgba(232,244,224,.5);line-height:2">
+            <div>Fund:      <span style="color:#F5B800">MWK 4.8M</span></div>
+            <div>Triggers:  <span style="color:#8FCB62">0 active</span></div>
+            <div>Districts: <span style="color:#8FCB62">ALL SAFE</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live scrolling log -->
+      <div class="glass rounded-2xl mt-8 overflow-hidden scroll-reveal">
+        <div class="flex items-center gap-3 p-4" style="border-bottom:1px solid rgba(143,203,98,.1);background:rgba(143,203,98,.04)">
+          <div class="mission-dot w-2 h-2 rounded-full" style="background:#8FCB62;display:inline-block"></div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:rgba(143,203,98,.7)">FARMPULSE OS · SYSTEM LOG · LIVE</span>
+        </div>
+        <div id="sys-log" style="font-family:'JetBrains Mono',monospace;font-size:.68rem;padding:16px;line-height:2;max-height:140px;overflow:hidden;color:rgba(232,244,224,.6)">
+          <div><span style="color:rgba(143,203,98,.4)">[16:00:01]</span> Sentinel-2 orbit 1082 — 10m MSI pass complete — 847 farm pixels updated</div>
+          <div><span style="color:rgba(143,203,98,.4)">[16:00:04]</span> NDVI computed: Chikondi Farm 0.720 — STATUS: HEALTHY</div>
+          <div><span style="color:rgba(56,189,248,.4)">[16:01:12]</span> DCCMS rainfall forecast updated: 84% probability · 44mm · Wednesday</div>
+          <div><span style="color:rgba(167,139,250,.4)">[16:02:30]</span> Mlimi AI advisory sent to farmer naffe: "Top-dress CAN before Wednesday rain"</div>
+          <div><span style="color:rgba(245,184,0,.4)">[16:03:15]</span> WFP market refresh: Mzuzu MWK 840/kg maize (+5.2%) — ARBITRAGE FLAG</div>
+          <div><span style="color:rgba(16,185,129,.4)">[16:04:02]</span> USSD session *384# · Farmer ID MW-KAS-0441 · Chichewa advisory delivered</div>
+          <div><span style="color:rgba(143,203,98,.4)">[16:05:48]</span> Insurance parametric check: all 15 farms — NDVI safe — no trigger today</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ PROGRESS RINGS — PLATFORM METRICS ═══ -->
+  <section class="py-20 px-6 bg-mesh">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-16 scroll-reveal">
+        <div class="sec-label mb-3">Platform Performance</div>
+        <h2 class="sec-title">Numbers That <span style="background:linear-gradient(135deg,#8FCB62,#38BDF8);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Speak</span></h2>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 scroll-reveal" id="rings-container">
+        <!-- Ring 1: Prediction Accuracy -->
+        <div class="flex flex-col items-center gap-4">
+          <div class="relative">
+            <svg width="130" height="130" viewBox="0 0 130 130">
+              <circle class="p-ring-bg" cx="65" cy="65" r="55" stroke-width="8"/>
+              <circle class="p-ring-fill" cx="65" cy="65" r="55" stroke-width="8"
+                stroke="#8FCB62" stroke-dasharray="345.4"
+                stroke-dashoffset="345.4" id="ring-accuracy"
+                transform="rotate(-90 65 65)"/>
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:900;color:#8FCB62" id="ring-accuracy-label">0%</div>
+              <div style="font-size:.55rem;color:rgba(232,244,224,.4);text-transform:uppercase;letter-spacing:.1em">AI Accuracy</div>
+            </div>
+          </div>
+        </div>
+        <!-- Ring 2: Satellite Coverage -->
+        <div class="flex flex-col items-center gap-4">
+          <div class="relative">
+            <svg width="130" height="130" viewBox="0 0 130 130">
+              <circle class="p-ring-bg" cx="65" cy="65" r="55" stroke-width="8"/>
+              <circle class="p-ring-fill" cx="65" cy="65" r="55" stroke-width="8"
+                stroke="#38BDF8" stroke-dasharray="345.4"
+                stroke-dashoffset="345.4" id="ring-coverage"
+                transform="rotate(-90 65 65)"/>
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:900;color:#38BDF8" id="ring-coverage-label">0%</div>
+              <div style="font-size:.55rem;color:rgba(232,244,224,.4);text-transform:uppercase;letter-spacing:.1em">Sat Coverage</div>
+            </div>
+          </div>
+        </div>
+        <!-- Ring 3: Payout Speed -->
+        <div class="flex flex-col items-center gap-4">
+          <div class="relative">
+            <svg width="130" height="130" viewBox="0 0 130 130">
+              <circle class="p-ring-bg" cx="65" cy="65" r="55" stroke-width="8"/>
+              <circle class="p-ring-fill" cx="65" cy="65" r="55" stroke-width="8"
+                stroke="#F5B800" stroke-dasharray="345.4"
+                stroke-dashoffset="345.4" id="ring-payout"
+                transform="rotate(-90 65 65)"/>
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:900;color:#F5B800" id="ring-payout-label">0h</div>
+              <div style="font-size:.55rem;color:rgba(232,244,224,.4);text-transform:uppercase;letter-spacing:.1em">Payout Speed</div>
+            </div>
+          </div>
+        </div>
+        <!-- Ring 4: Farmer Satisfaction -->
+        <div class="flex flex-col items-center gap-4">
+          <div class="relative">
+            <svg width="130" height="130" viewBox="0 0 130 130">
+              <circle class="p-ring-bg" cx="65" cy="65" r="55" stroke-width="8"/>
+              <circle class="p-ring-fill" cx="65" cy="65" r="55" stroke-width="8"
+                stroke="#a78bfa" stroke-dasharray="345.4"
+                stroke-dashoffset="345.4" id="ring-satisfaction"
+                transform="rotate(-90 65 65)"/>
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:900;color:#a78bfa" id="ring-satisfaction-label">0%</div>
+              <div style="font-size:.55rem;color:rgba(232,244,224,.4);text-transform:uppercase;letter-spacing:.1em">Satisfaction</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sec-divider my-4"></div>
+
   <!-- ═══ FOOTER ═══ -->
   <footer class="py-12 px-6" style="border-top:1px solid rgba(143,203,98,.08);background:rgba(2,7,4,.85)">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
@@ -1515,6 +1967,342 @@ Chonde sankhani:
   const KONAMI=['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
   let _ki=0;
   document.addEventListener('keydown',e=>{ if(e.key===KONAMI[_ki])_ki++; else _ki=0; if(_ki===KONAMI.length){launchConfetti();_ki=0;} });
+
+  // ══════════════════════════════════════════════════
+  // NEW CREATIVE ADDITIONS
+  // ══════════════════════════════════════════════════
+
+  // ── CUSTOM CURSOR ──
+  (function() {
+    const ring = document.getElementById('custom-cursor');
+    const dot  = document.getElementById('cursor-dot');
+    let mx=0, my=0, rx=0, ry=0;
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      dot.style.left = mx+'px'; dot.style.top = my+'px';
+    });
+    function animCursor() {
+      rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+      ring.style.left = rx+'px'; ring.style.top = ry+'px';
+      requestAnimationFrame(animCursor);
+    }
+    animCursor();
+    // Hover states
+    document.querySelectorAll('a,button,[onclick],.persona-card,.feat-card,.ck-tab,.cal-seg').forEach(el => {
+      el.addEventListener('mouseenter', () => ring.classList.add('hovering'));
+      el.addEventListener('mouseleave', () => ring.classList.remove('hovering'));
+    });
+  })();
+
+  // ── CLICK BURST PARTICLES ──
+  document.addEventListener('click', e => {
+    const colors = ['#8FCB62','#F5B800','#38BDF8','#a78bfa','#fb923c'];
+    for (let i = 0; i < 10; i++) {
+      const p = document.createElement('div');
+      p.className = 'burst-particle';
+      const angle = (Math.PI * 2 / 10) * i;
+      const dist = 40 + Math.random() * 60;
+      p.style.cssText = `left:${e.clientX}px;top:${e.clientY}px;background:${colors[Math.floor(Math.random()*5)]};
+        --bx:${Math.cos(angle)*dist}px;--by:${Math.sin(angle)*dist}px;
+        animation:burstOut .6s ease forwards;`;
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 650);
+    }
+  });
+
+  // ── CONSTELLATION CANVAS ──
+  (function() {
+    const cv = document.getElementById('constellation-canvas');
+    const ctx = cv.getContext('2d');
+    let W, H, stars = [], mouse = {x:-999, y:-999};
+    function resize() {
+      W = cv.width = innerWidth; H = cv.height = innerHeight;
+      stars = Array.from({length:120}, () => ({
+        x: Math.random()*W, y: Math.random()*H,
+        vx:(Math.random()-.5)*.3, vy:(Math.random()-.5)*.3,
+        r:Math.random()*1.8+.4,
+        alpha:Math.random()*.5+.1,
+      }));
+    }
+    document.addEventListener('mousemove', e => { mouse.x=e.clientX; mouse.y=e.clientY; });
+    function draw() {
+      ctx.clearRect(0,0,W,H);
+      // Move & draw stars
+      stars.forEach(s => {
+        s.x += s.vx; s.y += s.vy;
+        if(s.x<0)s.x=W; if(s.x>W)s.x=0;
+        if(s.y<0)s.y=H; if(s.y>H)s.y=0;
+        // Attract slightly toward mouse
+        const dx=mouse.x-s.x, dy=mouse.y-s.y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<180){s.x+=dx*.001;s.y+=dy*.001;}
+        ctx.beginPath();
+        ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+        ctx.fillStyle=`rgba(143,203,98,${s.alpha+(dist<180?(.3*(1-dist/180)):0)})`;
+        ctx.fill();
+        // Connect nearby stars
+        stars.forEach(s2 => {
+          const d2=Math.sqrt((s.x-s2.x)**2+(s.y-s2.y)**2);
+          if(d2<110) {
+            ctx.beginPath(); ctx.moveTo(s.x,s.y); ctx.lineTo(s2.x,s2.y);
+            ctx.strokeStyle=`rgba(143,203,98,${.12*(1-d2/110)})`;
+            ctx.lineWidth=.6; ctx.stroke();
+          }
+        });
+      });
+      requestAnimationFrame(draw);
+    }
+    window.addEventListener('resize',resize); resize(); draw();
+  })();
+
+  // ── ECG FARM VITALS ──
+  (function() {
+    const cv = document.getElementById('ecg-canvas');
+    if(!cv) return;
+    const ctx = cv.getContext('2d');
+    let W, H, x = 0, points = [];
+    function resize() { W = cv.width = cv.offsetWidth; H = cv.height = cv.offsetHeight; }
+    window.addEventListener('resize', resize); resize();
+    // ECG wave shape
+    function ecgY(t) {
+      const cycle = t % 120;
+      if(cycle < 40)  return H/2 + Math.sin(cycle/40*Math.PI*.3)*3;
+      if(cycle < 55)  return H/2 - Math.pow(Math.sin((cycle-40)/15*Math.PI),2)*24;
+      if(cycle < 65)  return H/2 + Math.sin((cycle-55)/10*Math.PI)*16;
+      if(cycle < 80)  return H/2 + Math.sin((cycle-65)/15*Math.PI*.5)*6;
+      return H/2 + Math.sin(cycle/120*Math.PI*.2)*2;
+    }
+    let t = 0;
+    function draw() {
+      ctx.clearRect(0,0,W,H);
+      // Fade trail
+      ctx.fillStyle='rgba(2,7,4,.15)'; ctx.fillRect(0,0,W,H);
+      // Draw line
+      ctx.beginPath();
+      ctx.moveTo(0, points[0]||H/2);
+      points.forEach((p,i) => { ctx.lineTo((i/points.length)*W, p); });
+      ctx.strokeStyle='rgba(143,203,98,.7)';
+      ctx.lineWidth=1.5; ctx.stroke();
+      // Glow dot at head
+      const headX=(x/W)*W;
+      const headY=ecgY(t);
+      ctx.beginPath(); ctx.arc(headX,headY,3,0,Math.PI*2);
+      ctx.fillStyle='#8FCB62'; ctx.fill();
+      ctx.beginPath(); ctx.arc(headX,headY,8,0,Math.PI*2);
+      ctx.fillStyle='rgba(143,203,98,.2)'; ctx.fill();
+      // Advance
+      t++;
+      points.push(ecgY(t));
+      if(points.length>W) points.shift();
+      x = points.length;
+      requestAnimationFrame(draw);
+    }
+    draw();
+  })();
+
+  // ── SATELLITE COUNTDOWN ──
+  (function() {
+    let secs = 4*3600+23*60+17; // 4h 23m 17s
+    function fmt(s) {
+      const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), ss=s%60;
+      return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');
+    }
+    setInterval(() => {
+      secs = secs > 0 ? secs-1 : 5*24*3600;
+      const el = document.getElementById('sat-countdown');
+      if(el) el.textContent = fmt(secs);
+    }, 1000);
+  })();
+  window.toggleSatHUD = function() {
+    const hud = document.getElementById('sat-hud');
+    hud.classList.toggle('visible');
+  };
+  // Show HUD after 3 seconds
+  setTimeout(() => {
+    const hud = document.getElementById('sat-hud');
+    if(hud){ hud.classList.add('visible'); setTimeout(()=>hud.classList.remove('visible'),5000); }
+  }, 3000);
+
+  // ── CROP CALENDAR WHEEL ──
+  (function() {
+    const calData = [
+      {month:'November', emoji:'🌱', color:'#8FCB62', r:.82, activity:'Land preparation & ridging. First rains in Northern Region. Begin maize planting window.', crops:['🌽 Maize planting','🌱 Land prep','💧 Pre-planting irrigation']},
+      {month:'December', emoji:'🌧', color:'#38BDF8', r:.90, activity:'Peak planting season. Maize and soya goes in. DCCMS reports highest rainfall probability.', crops:['🌽 Maize planting','🫘 Soya planting','🌧 Peak rains']},
+      {month:'January',  emoji:'💧', color:'#38BDF8', r:.95, activity:'Crop establishment. Germination check. Scout for fall armyworm. Weed control.', crops:['🔍 Pest scouting','🌿 Weed control','💧 Top watering']},
+      {month:'February', emoji:'🌿', color:'#10B981', r:.88, activity:'Vegetative growth. Apply top-dress nitrogen. NDVI rises fast. Canopy development.', crops:['🧪 Top-dress N','🌿 Vegetative','📡 NDVI rising']},
+      {month:'March',    emoji:'🌳', color:'#F5B800', r:.85, activity:'Canopy closure. Critical moisture period. Tasseling begins in maize. Sentinel-2 high-frequency scans.', crops:['🌳 Canopy closure','🌾 Tasseling','🛰 SAT scans']},
+      {month:'April',    emoji:'🌾', color:'#F5B800', r:.78, activity:'Grain fill. Silking and pollination. Reduce stress. Parametric insurance watchful.', crops:['🌾 Grain fill','🛡 Insurance watch','💛 Silking']},
+      {month:'May',      emoji:'🏆', color:'#fb923c', r:.70, activity:'Maturity and harvest. Husk-peel test. Sun-dry to 12.5% moisture. Prepare for market.', crops:['🏆 Harvest!','☀️ Sun drying','📦 Storage prep']},
+      {month:'June',     emoji:'📦', color:'#a78bfa', r:.50, activity:'Post-harvest. Bag and store. FarmPulse market timing advisory active. Arbitrage analysis.', crops:['📦 Bag & store','💰 Market timing','📊 Price watch']},
+      {month:'July',     emoji:'💰', color:'#a78bfa', r:.42, activity:'Selling season. WFP arbitrage matrix identifies best buyer. Transport cost modelling.', crops:['💰 Sell at peak','🚛 Transport','📈 Arbitrage']},
+      {month:'August',   emoji:'🌵', color:'#9ca3af', r:.30, activity:'Dry season. Minimal activity. Insurance fund monitoring. Next season soil analysis.', crops:['🌵 Dry season','🔬 Soil tests','📋 Planning']},
+      {month:'September',emoji:'📋', color:'#9ca3af', r:.28, activity:'Season planning. FarmPulse AI generates crop mix recommendation for next season.', crops:['📋 Season plan','🤖 AI advisory','🌱 Seed selection']},
+      {month:'October',  emoji:'🧪', color:'#8FCB62', r:.55, activity:'Pre-planting prep. Soil amendments. Fertiliser procurement. Land clearing.', crops:['🧪 Soil amend.','🌱 Prep land','📦 Buy inputs']},
+    ];
+
+    const svg = document.getElementById('wheel-segments');
+    if(!svg) return;
+    const R_OUTER=170, R_INNER=95;
+    const calInfoEl = document.getElementById('calendar-info');
+    const calMonthEl = document.getElementById('cal-month');
+    const calActivityEl = document.getElementById('cal-activity');
+    const calCropsEl = document.getElementById('cal-crops');
+
+    calData.forEach((d,i) => {
+      const startAngle = (i*30-90) * Math.PI/180;
+      const endAngle   = ((i+1)*30-90) * Math.PI/180;
+      const r  = R_OUTER * d.r;
+      const x1 = Math.cos(startAngle)*r, y1 = Math.sin(startAngle)*r;
+      const x2 = Math.cos(endAngle)*r,   y2 = Math.sin(endAngle)*r;
+      const xi1= Math.cos(startAngle)*R_INNER, yi1=Math.sin(startAngle)*R_INNER;
+      const xi2= Math.cos(endAngle)*R_INNER,   yi2=Math.sin(endAngle)*R_INNER;
+      const path=`M${xi1},${yi1} L${x1},${y1} A${r},${r} 0 0,1 ${x2},${y2} L${xi2},${yi2} A${R_INNER},${R_INNER} 0 0,0 ${xi1},${yi1} Z`;
+      const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+      g.setAttribute('class','cal-seg');
+      const pathEl = document.createElementNS('http://www.w3.org/2000/svg','path');
+      pathEl.setAttribute('d',path);
+      pathEl.setAttribute('fill',d.color+'22');
+      pathEl.setAttribute('stroke',d.color+'66');
+      pathEl.setAttribute('stroke-width','1');
+      // Label
+      const midAngle = (startAngle+endAngle)/2;
+      const lr=r*.7+R_INNER*.3;
+      const lx=Math.cos(midAngle)*lr, ly=Math.sin(midAngle)*lr;
+      const text=document.createElementNS('http://www.w3.org/2000/svg','text');
+      text.setAttribute('x',lx); text.setAttribute('y',ly);
+      text.setAttribute('text-anchor','middle'); text.setAttribute('dominant-baseline','middle');
+      text.setAttribute('font-size','11'); text.setAttribute('fill',d.color);
+      text.setAttribute('font-weight','700'); text.setAttribute('font-family','JetBrains Mono');
+      text.textContent=d.month.slice(0,3).toUpperCase();
+      // Hover
+      g.addEventListener('mouseenter', () => {
+        pathEl.setAttribute('fill',d.color+'44');
+        if(calMonthEl)calMonthEl.textContent=d.month;
+        if(calActivityEl)calActivityEl.textContent=d.activity;
+        if(calCropsEl){
+          calCropsEl.innerHTML=d.crops.map(c=>`<span class="px-3 py-1 rounded-full text-xs font-bold" style="background:${d.color}18;border:1px solid ${d.color}44;color:${d.color}">${c}</span>`).join('');
+        }
+      });
+      g.addEventListener('mouseleave', () => { pathEl.setAttribute('fill',d.color+'22'); });
+      g.appendChild(pathEl); g.appendChild(text);
+      svg.appendChild(g);
+    });
+    // Spinning indicator line
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1','0');line.setAttribute('y1','0');
+    line.setAttribute('x2','0');line.setAttribute('y2','-162');
+    line.setAttribute('stroke','rgba(143,203,98,.4)');line.setAttribute('stroke-width','1.5');
+    line.setAttribute('stroke-dasharray','4,4');
+    // Current month indicator (November = segment 0)
+    const curAngle = -90 * Math.PI/180;
+    const indX=Math.cos(curAngle)*155, indY=Math.sin(curAngle)*155;
+    const dot=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    dot.setAttribute('cx',indX);dot.setAttribute('cy',indY);
+    dot.setAttribute('r','5');dot.setAttribute('fill','#F5B800');
+    dot.setAttribute('filter','drop-shadow(0 0 6px #F5B800)');
+    svg.appendChild(dot);
+  })();
+
+  // ── PROGRESS RINGS ANIMATION ──
+  (function() {
+    const rings = [
+      {id:'ring-accuracy',    target:94.3, label:'ring-accuracy-label',    suffix:'%',  color:'#8FCB62', circ:345.4},
+      {id:'ring-coverage',    target:98,   label:'ring-coverage-label',    suffix:'%',  color:'#38BDF8', circ:345.4},
+      {id:'ring-payout',      target:48,   label:'ring-payout-label',      suffix:'h',  color:'#F5B800', circ:345.4},
+      {id:'ring-satisfaction',target:97,   label:'ring-satisfaction-label',suffix:'%',  color:'#a78bfa', circ:345.4},
+    ];
+    // payout is 48h, so out of 72h (3 days) = 67% of ring, but display as 48h
+    const payoutFill = 67; // visual percentage for payout ring
+
+    const obs = new IntersectionObserver(entries => {
+      if(!entries[0].isIntersecting) return;
+      obs.disconnect();
+      rings.forEach((r,i) => {
+        const el=document.getElementById(r.id), lel=document.getElementById(r.label);
+        if(!el||!lel) return;
+        const pct = r.id==='ring-payout' ? payoutFill/100 : r.target/100;
+        const offset = r.circ * (1-pct);
+        setTimeout(() => {
+          el.style.strokeDashoffset = offset;
+          let frame=0, frames=90;
+          const stepFn = () => {
+            if(frame>=frames) return;
+            const p=frame/frames;
+            const ease=1-Math.pow(1-p,4);
+            const val = r.id==='ring-payout' ? Math.round(ease*r.target) : (ease*r.target).toFixed(1);
+            lel.textContent = val+r.suffix;
+            frame++; requestAnimationFrame(stepFn);
+          };
+          stepFn();
+        }, i*180);
+      });
+    }, {threshold:0.3});
+    const container = document.getElementById('rings-container');
+    if(container) obs.observe(container);
+  })();
+
+  // ── MAGNETIC BUTTONS ──
+  document.querySelectorAll('.btn-primary,.btn-ghost').forEach(btn => {
+    btn.classList.add('magnetic');
+    btn.addEventListener('mousemove', e => {
+      const r = btn.getBoundingClientRect();
+      const cx=r.left+r.width/2, cy=r.top+r.height/2;
+      const dx=(e.clientX-cx)*.35, dy=(e.clientY-cy)*.35;
+      btn.style.transform=`translate(${dx}px,${dy}px)`;
+    });
+    btn.addEventListener('mouseleave', () => { btn.style.transform=''; });
+  });
+
+  // ── SYSTEM LOG AUTO-SCROLL ──
+  (function() {
+    const logEl = document.getElementById('sys-log');
+    if(!logEl) return;
+    const newLogs=[
+      {c:'rgba(143,203,98,.4)',t:'Sentinel-2 NDVI update: Kasungu district — moisture deficit detected in NW quadrant'},
+      {c:'rgba(167,139,250,.4)',t:'Mlimi AI: Kasungu alert dispatched to 3 farmers — irrigate within 48h'},
+      {c:'rgba(56,189,248,.4)',t:'DCCMS forecast refresh: La Niña signal detected — below-average November rainfall possible'},
+      {c:'rgba(245,184,0,.4)',t:'WFP market: Soya price spike detected — Lilongwe MWK 1,340/kg → ARBITRAGE WINDOW'},
+      {c:'rgba(16,185,129,.4)',t:'USSD session complete: farmer MW-RUP-0812 received Tumbuka drought advisory'},
+      {c:'rgba(143,203,98,.4)',t:'Season Journey: 3 farmers advanced to Stage 5 (Tasseling) — congratulations!'},
+    ];
+    let li=0;
+    setInterval(() => {
+      const now = new Date();
+      const time=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+      const entry=newLogs[li%newLogs.length];
+      const div=document.createElement('div');
+      div.innerHTML=`<span style="color:${entry.c}">[${time}]</span> ${entry.t}`;
+      div.style.opacity='0'; div.style.transition='opacity .5s';
+      logEl.appendChild(div);
+      requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ div.style.opacity='1'; }); });
+      // Remove oldest if too many
+      if(logEl.children.length>12) logEl.removeChild(logEl.firstChild);
+      li++;
+    }, 4000);
+  })();
+
+  // ── AUDIO VISUALIZER ──
+  const _origLaunchAudio = window.launchAudio;
+  window.launchAudio = function() {
+    _origLaunchAudio();
+    const viz=document.getElementById('audio-viz');
+    if(viz) viz.classList.toggle('active');
+  };
+
+  // ── GLITCH HEADINGS AUTO-TRIGGER ──
+  document.querySelectorAll('.glitch').forEach(el => {
+    setInterval(() => {
+      el.style.animation='none';
+      setTimeout(()=>el.style.animation='',50);
+    }, 8000+Math.random()*6000);
+  });
+
+  // ── PARALLAX SCROLL ──
+  window.addEventListener('scroll', () => {
+    const sy=window.scrollY;
+    document.querySelectorAll('.parallax-fast').forEach(el=>{ el.style.transform=`translateY(${sy*.15}px)`; });
+    document.querySelectorAll('.parallax-slow').forEach(el=>{ el.style.transform=`translateY(${sy*.05}px)`; });
+  });
   </script>
 </body>
 </html>
